@@ -1,0 +1,25 @@
+{
+  "id": "3f7b5fbc",
+  "phase": "agent_error",
+  "pageUrl": "/matches",
+  "sourceFile": null,
+  "expectedVariants": 2,
+  "arrivedVariants": 0,
+  "visibleVariant": 0,
+  "paramValues": {},
+  "pendingEventSeq": null,
+  "pendingEvent": null,
+  "deliveryLease": null,
+  "checkpointRevision": 1,
+  "activeOwner": "ac4a63ec",
+  "sourceMarkers": {},
+  "fallbackMode": null,
+  "annotationArtifacts": [],
+  "diagnostics": [
+    {
+      "error": "agent_error",
+      "message": "Picked element is inside Flux's vendored sidebar.item stub (not project source). Fixing as a global CSS override in app.css instead. Reload to see it."
+    }
+  ],
+  "updatedAt": "2026-05-31T18:17:51.459Z"
+}

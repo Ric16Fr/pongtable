@@ -1,0 +1,558 @@
+@import 'tailwindcss';
+@import '../../vendor/livewire/flux/dist/flux.css';
+
+@source '../views';
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../vendor/livewire/flux-pro/stubs/**/*.blade.php';
+@source '../../vendor/livewire/flux/stubs/**/*.blade.php';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ────────────────────────────────────────────────────────────────────
+   The Brewery Broadcast — design tokens.
+   Four-role palette: red-corner, blue-corner, trophy-gold, stage-black.
+   Warm-tinted neutrals (chroma anchored on hue 80) so Flux internals
+   inherit the taproom tint without separate theming.
+   ──────────────────────────────────────────────────────────────────── */
+
+@theme {
+    /* Fonts. Inter Variable + JetBrains Mono Variable loaded in head.blade.php. */
+    --font-sans: 'Inter Variable', 'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
+    --font-mono: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+
+    /* Warm-tinted zinc override. Flux components inherit the taproom warmth automatically. */
+    --color-zinc-50:  oklch(98% 0.006 80);
+    --color-zinc-100: oklch(95% 0.007 80);
+    --color-zinc-200: oklch(90% 0.008 80);
+    --color-zinc-300: oklch(82% 0.011 80);
+    --color-zinc-400: oklch(70% 0.014 80);
+    --color-zinc-500: oklch(55% 0.016 80);
+    --color-zinc-600: oklch(42% 0.018 80);
+    --color-zinc-700: oklch(33% 0.018 80);
+    --color-zinc-800: oklch(22% 0.015 80);
+    --color-zinc-900: oklch(16% 0.013 80);
+    --color-zinc-950: oklch(11% 0.011 80);
+
+    /* Stage: the dark canvas and its tonal ladder.
+       Text scale tuned for WCAG AA against bg/surface/surface-2 with real
+       hierarchy between -text (primary), -muted (secondary), -dim (tertiary). */
+    --color-stage-bg:           oklch(11% 0.011 80);
+    --color-stage-surface:      oklch(16% 0.013 80);
+    --color-stage-surface-2:    oklch(22% 0.015 80);
+    --color-stage-line:         oklch(32% 0.017 80);  /* decorative dividers */
+    --color-stage-line-strong:  oklch(48% 0.020 80);  /* form inputs, button outlines, focus rings */
+    --color-stage-text:         oklch(96% 0.011 80);  /* primary body, ~11:1 on bg */
+    --color-stage-text-muted:   oklch(78% 0.022 80);  /* secondary, AA on every surface */
+    --color-stage-text-dim:     oklch(66% 0.024 80);  /* tertiary labels & captions, AA on bg/surface */
+
+    /* Red corner: home team identity. Broadcast-saturated, slight orange shift. */
+    --color-red-corner:         oklch(62% 0.220 26);
+    --color-red-corner-bright:  oklch(72% 0.210 28);
+    --color-red-corner-soft:    oklch(30% 0.080 26);
+
+    /* Blue corner: away team identity. Symmetric counterpart to red. */
+    --color-blue-corner:        oklch(62% 0.180 240);
+    --color-blue-corner-bright: oklch(72% 0.170 240);
+    --color-blue-corner-soft:   oklch(30% 0.075 240);
+
+    /* Trophy gold: reserved for winners, the live-warning timer, the #1 chip,
+       and the live-match glow. Never on default buttons. The rarity is the point. */
+    --color-trophy-gold:        oklch(82% 0.160 78);
+    --color-trophy-gold-deep:   oklch(72% 0.180 75);
+    --color-trophy-gold-soft:   oklch(34% 0.070 75);
+
+    /* Semantic states. */
+    --color-status-success:      oklch(72% 0.180 150);
+    --color-status-success-soft: oklch(32% 0.075 150);
+    --color-status-danger:       oklch(64% 0.210 28);
+    --color-status-danger-soft:  oklch(30% 0.080 28);
+    --color-status-info:         oklch(72% 0.140 230);
+    --color-status-info-soft:    oklch(30% 0.060 230);
+
+    /* Flux accent: cream-on-stage. Primary buttons are confident and warm,
+       not gold. Gold is reserved for actual moments of glory. */
+    --color-accent:             oklch(96% 0.011 80);
+    --color-accent-content:     oklch(96% 0.011 80);
+    --color-accent-foreground:  oklch(11% 0.011 80);
+}
+
+@layer theme {
+    .dark {
+        --color-accent:            oklch(96% 0.011 80);
+        --color-accent-content:    oklch(96% 0.011 80);
+        --color-accent-foreground: oklch(11% 0.011 80);
+    }
+}
+
+@layer base {
+    *, ::after, ::before, ::backdrop, ::file-selector-button {
+        border-color: var(--color-stage-line, currentColor);
+    }
+
+    html.dark {
+        background-color: var(--color-stage-bg);
+        color: var(--color-stage-text);
+    }
+
+    body {
+        font-feature-settings: 'cv11', 'ss03', 'cv02', 'cv03';
+    }
+
+    /* Tabular numerics on every mono surface. Timers and scores never reflow. */
+    .font-mono, [class*="font-mono"] {
+        font-variant-numeric: tabular-nums;
+        font-feature-settings: 'tnum' 1, 'zero' 1, 'ss01' 1;
+    }
+}
+
+/* ────────────────────────────────────────────────────────────────────
+   Utilities
+   ──────────────────────────────────────────────────────────────────── */
+
+/* The Tabular-Numeric Rule made into a class. */
+@utility font-numeric {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1, 'zero' 1, 'ss01' 1;
+}
+
+/* Heavyweight display lockup. Apply on team names, the bracket champion,
+   tale-of-the-tape moments. Never on body text. */
+@utility font-display {
+    font-family: var(--font-sans);
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    line-height: 0.95;
+}
+
+/* Label vocabulary. Uppercase, letter-spaced, weighted. */
+@utility font-label {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+/* ────────────────────────────────────────────────────────────────────
+   Flux form internals
+   ──────────────────────────────────────────────────────────────────── */
+
+[data-flux-field]:not(ui-radio, ui-checkbox) {
+    @apply grid gap-2;
+}
+
+[data-flux-label] {
+    @apply !mb-0 !leading-tight;
+}
+
+input:focus[data-flux-control],
+textarea:focus[data-flux-control],
+select:focus[data-flux-control] {
+    outline: 0;
+    box-shadow:
+        0 0 0 2px var(--color-stage-bg),
+        0 0 0 4px var(--color-trophy-gold);
+}
+
+/* ────────────────────────────────────────────────────────────────────
+   Status badges. Pre-game/scoring use the warm pre-glory tone;
+   live uses success-green with a pulsing dot; finished uses cool info.
+   ──────────────────────────────────────────────────────────────────── */
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.25rem 0.625rem;
+    border-radius: 9999px;
+    font-family: var(--font-sans);
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.badge::before {
+    content: '';
+    display: inline-block;
+    width: 0.375rem;
+    height: 0.375rem;
+    border-radius: 9999px;
+    background-color: currentColor;
+}
+
+.badge-pending   { color: var(--color-stage-text-muted);  background-color: var(--color-stage-surface-2); }
+.badge-pre-entry { color: var(--color-trophy-gold);       background-color: var(--color-trophy-gold-soft); }
+.badge-active    { color: var(--color-status-success);    background-color: var(--color-status-success-soft); }
+.badge-active::before { animation: stage-pulse 1.4s ease-out infinite; }
+.badge-scoring   { color: var(--color-status-info);       background-color: var(--color-status-info-soft); }
+.badge-finished  { color: var(--color-stage-text-muted);  background-color: var(--color-stage-surface-2); }
+
+/* ────────────────────────────────────────────────────────────────────
+   Timer states (active match)
+   ──────────────────────────────────────────────────────────────────── */
+
+@keyframes stage-pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%      { opacity: 0.5; transform: scale(1.6); }
+}
+
+@keyframes stage-overtime {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.55; }
+}
+
+.timer-ok       { color: var(--color-status-success); }
+.timer-warning  { color: var(--color-trophy-gold); }
+.timer-overtime {
+    color: var(--color-status-danger);
+    animation: stage-overtime 0.9s ease-out infinite;
+}
+
+/* ────────────────────────────────────────────────────────────────────
+   Live-match glow. Gold trim on the broadcast bracket signals what's live.
+   The rarity rule: this is "something is being won right now".
+   ──────────────────────────────────────────────────────────────────── */
+
+.live-glow {
+    box-shadow:
+        inset 0 0 0 1px var(--color-trophy-gold),
+        0 0 24px -2px oklch(82% 0.160 78 / 0.18),
+        0 18px 38px -18px oklch(82% 0.160 78 / 0.14);
+}
+
+.live-marker {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--font-sans);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-trophy-gold);
+}
+
+.live-marker::before {
+    content: '';
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 9999px;
+    background-color: var(--color-trophy-gold);
+    animation: stage-pulse 1.4s ease-out infinite;
+}
+
+/* ────────────────────────────────────────────────────────────────────
+   Two-corner framing: the active match canvas.
+   A subtle red-side / blue-side gradient backdrop, no side-stripe borders.
+   ──────────────────────────────────────────────────────────────────── */
+
+.face-off-bg {
+    background:
+        radial-gradient(ellipse 80% 60% at 0% 50%,
+            oklch(30% 0.080 26 / 0.55) 0%,
+            transparent 60%),
+        radial-gradient(ellipse 80% 60% at 100% 50%,
+            oklch(30% 0.075 240 / 0.55) 0%,
+            transparent 60%),
+        var(--color-stage-surface);
+}
+
+.face-off-divider {
+    background: linear-gradient(180deg,
+        transparent 0%,
+        var(--color-stage-line-strong) 15%,
+        var(--color-stage-line-strong) 85%,
+        transparent 100%);
+}
+
+/* ────────────────────────────────────────────────────────────────────
+   Rank chips (leaderboard ranking; podium goes gold/silver/bronze).
+   ──────────────────────────────────────────────────────────────────── */
+
+.rank-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 0.5rem;
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    font-size: 0.875rem;
+    background-color: var(--color-stage-surface-2);
+    color: var(--color-stage-text-muted);
+    flex-shrink: 0;
+}
+.rank-chip[data-rank="1"] {
+    background-color: var(--color-trophy-gold);
+    color: var(--color-stage-bg);
+}
+.rank-chip[data-rank="2"] {
+    background-color: oklch(80% 0.020 80);
+    color: var(--color-stage-bg);
+}
+.rank-chip[data-rank="3"] {
+    background-color: oklch(68% 0.110 50);
+    color: var(--color-stage-bg);
+}
+
+/* ────────────────────────────────────────────────────────────────────
+   Team color stripe: a thin, deliberate band on the leading edge of a
+   team row, using the team's stored color. Not a side-stripe accent
+   on a card (that's banned); a thin identity bar inside the row.
+   ──────────────────────────────────────────────────────────────────── */
+
+.team-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.625rem;
+}
+
+.team-dot {
+    display: inline-block;
+    width: 0.625rem;
+    height: 0.625rem;
+    border-radius: 9999px;
+    flex-shrink: 0;
+    background-color: var(--color-stage-text-dim);
+}
+
+/* ────────────────────────────────────────────────────────────────────
+   Flux nav items (sidebar.item and navlist.item).
+   Both stubs put `data-flux-sidebar-item` or `data-flux-navlist-item`
+   on the rendered <a>. Flux ships zinc/white defaults that read poorly
+   on the brewery canvas, so override every state explicitly.
+   Specificity (0,4,1) beats Tailwind's :where()-wrapped utilities (0,2,0)
+   without using !important.
+   ──────────────────────────────────────────────────────────────────── */
+
+/* Resting */
+html.dark a[data-flux-sidebar-item],
+html.dark a[data-flux-navlist-item] {
+    color: var(--color-stage-text-muted);
+    background-color: transparent;
+    border-color: transparent;
+}
+
+/* Hover (non-active) */
+html.dark a[data-flux-sidebar-item]:not([data-current]):hover,
+html.dark a[data-flux-navlist-item]:not([data-current]):hover {
+    color: var(--color-stage-text);
+    background-color: var(--color-stage-surface-2);
+}
+
+/* Active (current route) */
+html.dark a[data-flux-sidebar-item][data-current],
+html.dark a[data-flux-navlist-item][data-current] {
+    color: var(--color-stage-text);
+    background-color: var(--color-stage-surface-2);
+    border-color: var(--color-stage-line);
+    font-weight: 600;
+}
+
+/* Active + hover keeps the same surface; weight stays at 600 so the
+   user keeps a clear "you are here" cue without a third bg tone. */
+html.dark a[data-flux-sidebar-item][data-current]:hover,
+html.dark a[data-flux-navlist-item][data-current]:hover {
+    color: var(--color-stage-text);
+    background-color: var(--color-stage-surface-2);
+}
+
+/* Same discipline for the group disclosure heading button. */
+html.dark [data-flux-sidebar] [data-flux-disclosure-button],
+html.dark [data-flux-navlist] [data-flux-disclosure-button] {
+    color: var(--color-stage-text-muted);
+}
+html.dark [data-flux-sidebar] [data-flux-disclosure-button]:hover,
+html.dark [data-flux-navlist] [data-flux-disclosure-button]:hover {
+    color: var(--color-stage-text);
+    background-color: var(--color-stage-surface-2);
+}
+
+/* ────────────────────────────────────────────────────────────────────
+   KO Bracket. Calc-based vertical alignment so a match in round N
+   sits at the midpoint between its two source matches in round N-1.
+   Powers-of-two layouts are pixel-aligned; bye cases tolerate drift.
+   ──────────────────────────────────────────────────────────────────── */
+
+.ko-grid {
+    --ko-match-h: 5.5rem;
+    --ko-gap: 1rem;
+    display: flex;
+    gap: 2rem;
+    align-items: flex-start;
+    overflow-x: auto;
+    padding-bottom: 1rem;
+}
+
+.ko-round {
+    display: flex;
+    flex-direction: column;
+    min-width: 240px;
+}
+
+.ko-round-label {
+    font-family: var(--font-sans);
+    font-weight: 700;
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-stage-text-muted);
+    text-align: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.625rem;
+    border-bottom: 1px solid var(--color-stage-line);
+}
+
+.ko-round-label[data-round="1"] { color: var(--color-trophy-gold); }
+
+.ko-matches {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Each subsequent round doubles the gap, and pads its top so the first
+   match's center aligns with the midpoint of its source pair. */
+.ko-round[data-round-index="0"] .ko-matches { gap: var(--ko-gap); }
+.ko-round[data-round-index="1"] .ko-matches { gap: calc(2 * var(--ko-gap) + var(--ko-match-h)); padding-top: calc(0.5 * var(--ko-match-h) + 0.5 * var(--ko-gap)); }
+.ko-round[data-round-index="2"] .ko-matches { gap: calc(4 * var(--ko-gap) + 3 * var(--ko-match-h)); padding-top: calc(1.5 * var(--ko-match-h) + 1.5 * var(--ko-gap)); }
+.ko-round[data-round-index="3"] .ko-matches { gap: calc(8 * var(--ko-gap) + 7 * var(--ko-match-h)); padding-top: calc(3.5 * var(--ko-match-h) + 3.5 * var(--ko-gap)); }
+.ko-round[data-round-index="4"] .ko-matches { gap: calc(16 * var(--ko-gap) + 15 * var(--ko-match-h)); padding-top: calc(7.5 * var(--ko-match-h) + 7.5 * var(--ko-gap)); }
+
+.ko-match {
+    position: relative;
+    height: var(--ko-match-h);
+    background: var(--color-stage-surface);
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.375rem;
+    transition: background 200ms ease-out;
+}
+
+.ko-match[data-status="finished"] { background: var(--color-stage-surface); }
+.ko-match[data-live="true"] {
+    box-shadow:
+        inset 0 0 0 1px var(--color-trophy-gold),
+        0 0 24px -2px oklch(82% 0.160 78 / 0.18);
+}
+
+/* Bracket connectors. Each match in a non-final round gets a right tail.
+   Vertical connector spans from odd match down to even match. */
+.ko-round:not(:last-child) .ko-match::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 100%;
+    width: 1rem;
+    height: 1px;
+    background: var(--color-stage-line-strong);
+}
+
+.ko-round:not(:last-child) .ko-match:nth-child(odd)::before,
+.ko-round:not(:last-child) .ko-match:nth-child(even)::before {
+    content: '';
+    position: absolute;
+    left: calc(100% + 1rem);
+    width: 1px;
+    background: var(--color-stage-line-strong);
+}
+
+.ko-round[data-round-index="0"]:not(:last-child) .ko-match:nth-child(odd)::before {
+    top: 50%;
+    height: calc(50% + var(--ko-gap) / 2);
+}
+.ko-round[data-round-index="0"]:not(:last-child) .ko-match:nth-child(even)::before {
+    bottom: 50%;
+    height: calc(50% + var(--ko-gap) / 2);
+}
+
+.ko-round[data-round-index="1"]:not(:last-child) .ko-match:nth-child(odd)::before {
+    top: 50%;
+    height: calc(0.5 * var(--ko-match-h) + 1.5 * var(--ko-gap) + 50%);
+}
+.ko-round[data-round-index="1"]:not(:last-child) .ko-match:nth-child(even)::before {
+    bottom: 50%;
+    height: calc(0.5 * var(--ko-match-h) + 1.5 * var(--ko-gap) + 50%);
+}
+
+.ko-round[data-round-index="2"]:not(:last-child) .ko-match:nth-child(odd)::before {
+    top: 50%;
+    height: calc(1.5 * var(--ko-match-h) + 2.5 * var(--ko-gap) + 50%);
+}
+.ko-round[data-round-index="2"]:not(:last-child) .ko-match:nth-child(even)::before {
+    bottom: 50%;
+    height: calc(1.5 * var(--ko-match-h) + 2.5 * var(--ko-gap) + 50%);
+}
+
+.ko-team {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+}
+
+.ko-team-name {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+}
+
+.ko-team-name > span:last-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.ko-team[data-winner="true"] .ko-team-name { color: var(--color-trophy-gold); font-weight: 700; }
+.ko-team[data-winner="false"] .ko-team-name { color: var(--color-stage-text-dim); }
+
+.ko-team-score {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    color: var(--color-stage-text-muted);
+    flex-shrink: 0;
+}
+
+.ko-team[data-winner="true"] .ko-team-score { color: var(--color-trophy-gold); }
+
+.ko-match-meta {
+    position: absolute;
+    top: -1.5rem;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.65rem;
+    color: var(--color-stage-text-dim);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+/* ────────────────────────────────────────────────────────────────────
+   Wordmark
+   ──────────────────────────────────────────────────────────────────── */
+
+.wordmark {
+    font-family: var(--font-sans);
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: lowercase;
+    line-height: 1;
+}
+
+.wordmark-display {
+    font-weight: 900;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+}

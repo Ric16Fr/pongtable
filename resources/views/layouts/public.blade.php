@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
+    <head>
+        @include('partials.head')
+    </head>
+    <body class="min-h-screen bg-stage-bg text-stage-text antialiased">
+        @php
+            $phaseLabels = [
+                'setup' => 'Vorbereitung',
+                'group' => 'Gruppenphase',
+                'ko' => 'KO-Phase',
+                'finished' => 'Beendet',
+            ];
+            $publicTournament = $tournament ?? null;
+        @endphp
+
+        <header class="sticky top-0 z-20 border-b border-stage-line bg-stage-bg">
+            <div class="mx-auto flex max-w-7xl items-center justify-between gap-6 px-6 py-4 lg:px-10">
+                <a href="{{ route('home') }}" class="flex items-baseline gap-3">
+                    <span class="wordmark text-lg">pongtable</span>
+                    @if ($publicTournament)
+                        <span class="hidden text-stage-text-dim sm:inline">/</span>
+                        <span class="hidden truncate text-sm font-medium text-stage-text-muted sm:inline-block sm:max-w-[40ch]">{{ $publicTournament->name }}</span>
+                    @endif
+                </a>
+
+                <div class="flex items-center gap-4">
+                    @if ($publicTournament)
+                        <span class="font-label hidden text-stage-text-dim md:inline">
+                            {{ $phaseLabels[$publicTournament->status] ?? $publicTournament->status }}
+                        </span>
+                    @endif
+                    @auth
+                        <a href="{{ route('dashboard') }}"
+                           class="rounded-md border border-stage-line-strong px-3 py-1.5 text-sm font-medium text-stage-text hover:bg-stage-surface transition">
+                            {{ __('Dashboard') }}
+                        </a>
+                    @else
+                        <a href="{{ route('login') }}"
+                           class="rounded-md px-3 py-1.5 text-sm font-medium text-stage-text-muted hover:text-stage-text hover:bg-stage-surface transition">
+                            {{ __('Schiri-Login') }}
+                        </a>
+                    @endauth
+                </div>
+            </div>
+        </header>
+
+        <main class="mx-auto w-full max-w-7xl px-6 py-8 lg:px-10 lg:py-12">
+            {{ $slot }}
+        </main>
+
+        <footer class="mt-12 border-t border-stage-line">
+            <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-5 text-xs text-stage-text-dim lg:px-10">
+                <span class="wordmark">pongtable</span>
+                <span class="hidden sm:inline">live · self-hosted · made for the Bierpong-WM</span>
+            </div>
+        </footer>
+
+        @fluxScripts
+    </body>
+</html>
