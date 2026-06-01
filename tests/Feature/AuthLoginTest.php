@@ -10,19 +10,19 @@ it('shows the login screen at /login', function () {
 });
 
 it('logs a user in by name + password', function () {
-    User::create(['name' => 'admin', 'password' => Hash::make('secret'), 'role' => 'admin']);
+    User::create(['name' => 'tester', 'password' => Hash::make('secret'), 'role' => 'admin']);
 
-    $this->post('/login', ['name' => 'admin', 'password' => 'secret'])
+    $this->post('/login', ['name' => 'tester', 'password' => 'secret'])
         ->assertRedirect('/dashboard');
 
     expect(auth()->check())->toBeTrue()
-        ->and(auth()->user()->name)->toBe('admin');
+        ->and(auth()->user()->name)->toBe('tester');
 });
 
 it('rejects invalid credentials', function () {
-    User::create(['name' => 'admin', 'password' => Hash::make('secret'), 'role' => 'admin']);
+    User::create(['name' => 'tester', 'password' => Hash::make('secret'), 'role' => 'admin']);
 
-    $this->post('/login', ['name' => 'admin', 'password' => 'wrong'])
+    $this->post('/login', ['name' => 'tester', 'password' => 'wrong'])
         ->assertSessionHasErrors();
 
     expect(auth()->check())->toBeFalse();

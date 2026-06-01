@@ -7,7 +7,7 @@ use App\Models\Tournament;
 use App\Models\User;
 
 it('shows the dashboard with tournament data after authentication', function () {
-    $this->actingAs(User::factory()->admin()->create(['name' => 'admin']));
+    $this->actingAs(User::factory()->admin()->create());
     Tournament::factory()->create(['name' => 'Happy Cup']);
 
     visit('/dashboard')
@@ -17,7 +17,7 @@ it('shows the dashboard with tournament data after authentication', function () 
 });
 
 it('walks through a complete match from pre_entry to finished', function () {
-    $this->actingAs(User::factory()->admin()->create(['name' => 'admin']));
+    $this->actingAs(User::factory()->admin()->create());
 
     $tournament = Tournament::factory()->create(['status' => 'group']);
     $table = Table::factory()->create(['tournament_id' => $tournament->id, 'name' => 'Tisch 1']);
@@ -35,20 +35,23 @@ it('walks through a complete match from pre_entry to finished', function () {
 
     $page = visit('/match/'.$match->id);
 
+    // Auto-accept wire:confirm dialogs (Playwright auto-dismisses by default).
+    $page->script('window.confirm = () => true');
+
     $page->assertSee('Vor dem Spiel eintragen')
         ->assertSee('Team Home')
         ->assertSee('Team Away')
-        ->press('🍺 Spiel starten');
+        ->press('Spiel starten');
 
     $page->assertSee('Verbleibende Zeit')
-        ->press('⏹ Runde beenden');
+        ->press('Runde beenden');
 
     $page->assertSee('Getroffene Becher eintragen')
         ->fill('homeCups', '6')
         ->fill('awayCups', '4')
-        ->press('✅ Ergebnis speichern');
+        ->press('Ergebnis speichern');
 
-    $page->assertSee('gewinnt')
+    $page->assertSee('Sieger')
         ->assertSee('6 : 4')
         ->assertNoJavascriptErrors();
 

@@ -3,7 +3,7 @@
 use App\Models\User;
 
 it('redirects guests to login for auth-required routes', function () {
-    foreach (['/dashboard', '/matches', '/setup', '/statistics'] as $path) {
+    foreach (['/dashboard', '/matches', '/setup', '/statistics', '/settings'] as $path) {
         $this->get($path)->assertRedirect('/login');
     }
 });
@@ -14,6 +14,7 @@ it('allows referees on shared routes but blocks admin-only routes', function () 
 
     $this->get('/dashboard')->assertOk();
     $this->get('/matches')->assertOk();
+    $this->get('/settings')->assertOk();
 
     $this->get('/setup')->assertForbidden();
     $this->get('/statistics')->assertForbidden();
@@ -27,4 +28,5 @@ it('allows admins on every route', function () {
     $this->get('/matches')->assertOk();
     $this->get('/setup')->assertOk();
     $this->get('/statistics')->assertOk();
+    $this->get('/settings')->assertOk();
 });

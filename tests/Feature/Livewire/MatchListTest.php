@@ -62,5 +62,5 @@ it('shows only finished matches when filter = finished', function () {
 
 it('shows the empty state when there are no matches', function () {
     Livewire::test('pages::match-list')
-        ->assertSee('Keine Matches gefunden');
+        ->assertSee('Keine Matches in dieser Ansicht');
 });

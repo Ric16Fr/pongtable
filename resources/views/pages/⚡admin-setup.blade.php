@@ -32,6 +32,10 @@ new #[Title('Setup')] class extends Component {
     #[Validate('nullable|string|max:9')]
     public ?string $newTeamColor = '#f59e0b';
 
+    public bool $addingTable = false;
+
+    public bool $addingTeam = false;
+
     public bool $showGroupPreview = false;
 
     public function mount(): void
@@ -73,6 +77,20 @@ new #[Title('Setup')] class extends Component {
         Flux::toast(variant: 'success', text: __('Einstellungen gespeichert.'));
     }
 
+    public function startAddingTable(): void
+    {
+        $this->addingTable = true;
+        $this->newTableName = '';
+        $this->resetErrorBag('newTableName');
+    }
+
+    public function cancelAddingTable(): void
+    {
+        $this->addingTable = false;
+        $this->newTableName = '';
+        $this->resetErrorBag('newTableName');
+    }
+
     public function addTable(): void
     {
         $this->validateOnly('newTableName');
@@ -94,6 +112,22 @@ new #[Title('Setup')] class extends Component {
 
         Table::where('tournament_id', $this->tournamentId)->where('id', $tableId)->delete();
         unset($this->tournament);
+    }
+
+    public function startAddingTeam(): void
+    {
+        $this->addingTeam = true;
+        $this->newTeamName = '';
+        $this->newTeamColor = '#f59e0b';
+        $this->resetErrorBag('newTeamName');
+    }
+
+    public function cancelAddingTeam(): void
+    {
+        $this->addingTeam = false;
+        $this->newTeamName = '';
+        $this->newTeamColor = '#f59e0b';
+        $this->resetErrorBag('newTeamName');
     }
 
     public function addTeam(): void
@@ -231,29 +265,52 @@ new #[Title('Setup')] class extends Component {
                 <span class="font-numeric text-2xl font-bold text-stage-text">{{ $t->tables->count() }}</span>
             </div>
 
-            @if ($t->isSetup())
-                <form wire:submit="addTable" class="flex flex-wrap items-end gap-3">
-                    <div class="min-w-[240px] flex-1">
-                        <flux:input wire:model="newTableName" label="Tisch-Name" placeholder="z.B. Tisch Kellerbar" />
-                    </div>
-                    <flux:button type="submit" variant="primary">Hinzufügen</flux:button>
-                </form>
-            @endif
-
-            @if ($t->tables->isEmpty())
+            @if ($t->tables->isEmpty() && ! $addingTable)
                 <p class="text-sm text-stage-text-dim">Noch keine Tische angelegt.</p>
             @else
                 <ul class="grid grid-cols-1 gap-2 md:grid-cols-2">
                     @foreach ($t->tables as $table)
-                        <li class="flex items-center justify-between rounded-md bg-stage-surface px-4 py-3">
+                        <li class="group flex items-center justify-between rounded-md bg-stage-surface px-4 py-3">
                             <span class="font-medium text-stage-text">{{ $table->name }}</span>
                             @if ($t->isSetup())
                                 <button wire:click="removeTable({{ $table->id }})" wire:confirm="Tisch wirklich löschen?"
-                                        class="text-xs font-semibold text-status-danger hover:underline">Entfernen</button>
+                                        type="button"
+                                        aria-label="Tisch entfernen"
+                                        class="rounded-md p-1 text-stage-text-muted opacity-0 transition group-hover:opacity-100 hover:bg-stage-surface-2 hover:text-status-danger focus:opacity-100 focus:outline-none">
+                                    <flux:icon.x-mark class="size-4" />
+                                </button>
                             @endif
                         </li>
                     @endforeach
                 </ul>
+            @endif
+
+            @if ($t->isSetup())
+                @if ($addingTable)
+                    <form wire:submit="addTable"
+                          x-data
+                          x-init="$nextTick(() => $refs.tableInput.focus())"
+                          class="flex flex-wrap items-end gap-3 rounded-md border border-dashed border-stage-line-strong bg-stage-surface px-4 py-3">
+                        <div class="min-w-[240px] flex-1">
+                            <flux:input wire:model="newTableName"
+                                        placeholder="z.B. Tisch Kellerbar"
+                                        x-ref="tableInput"
+                                        x-on:keydown.escape.prevent="$wire.cancelAddingTable()" />
+                        </div>
+                        <flux:button type="submit" variant="primary">Speichern</flux:button>
+                        <button type="button" wire:click="cancelAddingTable"
+                                aria-label="Abbrechen"
+                                class="rounded-md p-2 text-stage-text-muted hover:bg-stage-surface-2 hover:text-stage-text focus:outline-none">
+                            <flux:icon.x-mark class="size-5" />
+                        </button>
+                    </form>
+                @else
+                    <button wire:click="startAddingTable" type="button"
+                            class="inline-flex items-center gap-2 rounded-md border border-dashed border-stage-line-strong px-4 py-2 text-sm font-medium text-stage-text-muted hover:border-stage-text hover:text-stage-text transition">
+                        <flux:icon.plus class="size-4" />
+                        Tisch hinzufügen
+                    </button>
+                @endif
             @endif
         </section>
 
@@ -264,35 +321,58 @@ new #[Title('Setup')] class extends Component {
                 <span class="font-numeric text-2xl font-bold text-stage-text">{{ $t->teams->count() }}</span>
             </div>
 
-            @if ($t->isSetup())
-                <form wire:submit="addTeam" class="flex flex-wrap items-end gap-3">
-                    <div class="min-w-[240px] flex-1">
-                        <flux:input wire:model="newTeamName" label="Team-Name" placeholder="z.B. Team Shotgun" />
-                    </div>
-                    <div class="w-32">
-                        <flux:input wire:model="newTeamColor" type="color" label="Farbe" />
-                    </div>
-                    <flux:button type="submit" variant="primary">Hinzufügen</flux:button>
-                </form>
-            @endif
-
-            @if ($t->teams->isEmpty())
+            @if ($t->teams->isEmpty() && ! $addingTeam)
                 <p class="text-sm text-stage-text-dim">Noch keine Teams angelegt.</p>
             @else
                 <ul class="grid grid-cols-1 gap-2 md:grid-cols-2">
                     @foreach ($t->teams as $team)
-                        <li class="flex items-center justify-between rounded-md bg-stage-surface px-4 py-3">
+                        <li class="group flex items-center justify-between rounded-md bg-stage-surface px-4 py-3">
                             <span class="team-tag">
                                 <span class="team-dot" @if($team->color) style="background-color: {{ $team->color }}" @endif></span>
                                 <span class="font-medium text-stage-text">{{ $team->name }}</span>
                             </span>
                             @if ($t->isSetup())
                                 <button wire:click="removeTeam({{ $team->id }})" wire:confirm="Team wirklich löschen?"
-                                        class="text-xs font-semibold text-status-danger hover:underline">Entfernen</button>
+                                        type="button"
+                                        aria-label="Team entfernen"
+                                        class="rounded-md p-1 text-stage-text-muted opacity-0 transition group-hover:opacity-100 hover:bg-stage-surface-2 hover:text-status-danger focus:opacity-100 focus:outline-none">
+                                    <flux:icon.x-mark class="size-4" />
+                                </button>
                             @endif
                         </li>
                     @endforeach
                 </ul>
+            @endif
+
+            @if ($t->isSetup())
+                @if ($addingTeam)
+                    <form wire:submit="addTeam"
+                          x-data
+                          x-init="$nextTick(() => $refs.teamInput.focus())"
+                          class="flex flex-wrap items-end gap-3 rounded-md border border-dashed border-stage-line-strong bg-stage-surface px-4 py-3">
+                        <div class="min-w-[240px] flex-1">
+                            <flux:input wire:model="newTeamName"
+                                        placeholder="z.B. Team Shotgun"
+                                        x-ref="teamInput"
+                                        x-on:keydown.escape.prevent="$wire.cancelAddingTeam()" />
+                        </div>
+                        <div class="w-24">
+                            <flux:input wire:model="newTeamColor" type="color" />
+                        </div>
+                        <flux:button type="submit" variant="primary">Speichern</flux:button>
+                        <button type="button" wire:click="cancelAddingTeam"
+                                aria-label="Abbrechen"
+                                class="rounded-md p-2 text-stage-text-muted hover:bg-stage-surface-2 hover:text-stage-text focus:outline-none">
+                            <flux:icon.x-mark class="size-5" />
+                        </button>
+                    </form>
+                @else
+                    <button wire:click="startAddingTeam" type="button"
+                            class="inline-flex items-center gap-2 rounded-md border border-dashed border-stage-line-strong px-4 py-2 text-sm font-medium text-stage-text-muted hover:border-stage-text hover:text-stage-text transition">
+                        <flux:icon.plus class="size-4" />
+                        Team hinzufügen
+                    </button>
+                @endif
             @endif
         </section>
 

@@ -46,6 +46,15 @@
                         {{ auth()->user()->isAdmin() ? __('Administrator') : __('Schiedsrichter') }}
                     </div>
                     <flux:menu.separator />
+                    <flux:menu.item
+                        :href="route('settings')"
+                        icon="cog-6-tooth"
+                        wire:navigate
+                        data-test="settings-link"
+                    >
+                        {{ __('Einstellungen') }}
+                    </flux:menu.item>
+                    <flux:menu.separator />
                     <form method="POST" action="{{ route('logout') }}" class="w-full">
                         @csrf
                         <flux:menu.item
@@ -90,6 +99,16 @@
                             </div>
                         </div>
                     </flux:menu.radio.group>
+
+                    <flux:menu.separator />
+
+                    <flux:menu.item
+                        :href="route('settings')"
+                        icon="cog-6-tooth"
+                        wire:navigate
+                    >
+                        {{ __('Einstellungen') }}
+                    </flux:menu.item>
 
                     <flux:menu.separator />
 

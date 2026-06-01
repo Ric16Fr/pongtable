@@ -10,7 +10,7 @@ it('shows the empty state when no groups exist', function () {
     $tournament = Tournament::factory()->create();
 
     Livewire::test('pages::leaderboard', ['tournamentId' => $tournament->id])
-        ->assertSee('Noch keine Daten');
+        ->assertSee('Noch ruhig hier');
 });
 
 it('orders teams by points first, then by cup difference, then by cups scored', function () {

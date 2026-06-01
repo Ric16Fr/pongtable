@@ -5,38 +5,24 @@ namespace Database\Seeders;
 use App\Models\Table;
 use App\Models\Team;
 use App\Models\Tournament;
-use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        User::firstOrCreate(
-            ['name' => 'admin'],
-            ['password' => Hash::make('password'), 'role' => 'admin'],
-        );
-
-        foreach (['ref1', 'ref2'] as $name) {
-            User::firstOrCreate(
-                ['name' => $name],
-                ['password' => Hash::make('password'), 'role' => 'referee'],
-            );
-        }
-
         $tournament = Tournament::firstOrCreate(
-            ['name' => 'Hackerspace Cup '.now()->year],
+            ['name' => 'Bierpong WM '.now()->year],
             [
-                'group_match_duration_minutes' => 10,
-                'ko_match_duration_minutes' => 15,
+                'group_match_duration_minutes' => 20,
+                'ko_match_duration_minutes' => 20,
                 'status' => 'setup',
             ],
         );
 
         if ($tournament->tables()->doesntExist()) {
-            Table::create(['tournament_id' => $tournament->id, 'name' => 'Tisch 1']);
-            Table::create(['tournament_id' => $tournament->id, 'name' => 'Tisch 2']);
+            Table::create(['tournament_id' => $tournament->id, 'name' => 'Tisch Rot']);
+            Table::create(['tournament_id' => $tournament->id, 'name' => 'Tisch Blau']);
         }
 
         $teams = [

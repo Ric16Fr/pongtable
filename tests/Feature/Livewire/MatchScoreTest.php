@@ -137,6 +137,6 @@ it('renders the finished view for a completed match', function () {
         ->call('endTimer')
         ->set('homeCups', 6)->set('awayCups', 4)
         ->call('saveResult')
-        ->assertSee('gewinnt')
-        ->assertSee('6 : 4');
+        ->assertSee('Sieger')
+        ->assertSeeInOrder(['>6<', '>4<']);
 });

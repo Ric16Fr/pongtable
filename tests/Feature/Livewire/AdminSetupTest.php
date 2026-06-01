@@ -42,6 +42,28 @@ it('adds a new table during setup phase', function () {
     expect(Table::where('name', 'Tisch Kellerbar')->exists())->toBeTrue();
 });
 
+it('toggles the inline add-table form open and shut', function () {
+    Livewire::test('pages::admin-setup')
+        ->assertSet('addingTable', false)
+        ->call('startAddingTable')
+        ->assertSet('addingTable', true)
+        ->set('newTableName', 'wird verworfen')
+        ->call('cancelAddingTable')
+        ->assertSet('addingTable', false)
+        ->assertSet('newTableName', '');
+});
+
+it('toggles the inline add-team form open and shut', function () {
+    Livewire::test('pages::admin-setup')
+        ->assertSet('addingTeam', false)
+        ->call('startAddingTeam')
+        ->assertSet('addingTeam', true)
+        ->set('newTeamName', 'wird verworfen')
+        ->call('cancelAddingTeam')
+        ->assertSet('addingTeam', false)
+        ->assertSet('newTeamName', '');
+});
+
 it('removes a table during setup phase', function () {
     $tournament = Tournament::factory()->create();
     $table = Table::factory()->create(['tournament_id' => $tournament->id]);

@@ -34,30 +34,30 @@ $stats = $this->stats;
 $tiles = [];
 if ($stats) {
     if ($stats['sharpest_shooter'] ?? null) {
-        $tiles[] = ['key' => 'shooter', 'label' => 'Schärfste Schützen', 'value' => $stats['sharpest_shooter']['team'], 'sub' => $stats['sharpest_shooter']['rate'].'% Quote · '.$stats['sharpest_shooter']['scored'].'/'.$stats['sharpest_shooter']['throws']];
+        $tiles[] = ['key' => 'shooter', 'label' => 'Schärfste Schützen', 'info' => 'Höchste Trefferquote über alle Matches — getroffene Becher pro Wurf.', 'value' => $stats['sharpest_shooter']['team'], 'sub' => $stats['sharpest_shooter']['rate'].'% Quote · '.$stats['sharpest_shooter']['scored'].'/'.$stats['sharpest_shooter']['throws']];
     }
     if ($stats['water_spitter'] ?? null) {
-        $tiles[] = ['key' => 'spitter', 'label' => 'Wasserspeier', 'value' => $stats['water_spitter']['team'], 'sub' => $stats['water_spitter']['rate'].'% Trefferquote'];
+        $tiles[] = ['key' => 'spitter', 'label' => 'Wasserspeier', 'info' => 'Niedrigste Trefferquote — viele Würfe, wenig Becher.', 'value' => $stats['water_spitter']['team'], 'sub' => $stats['water_spitter']['rate'].'% Trefferquote'];
     }
     if ($stats['blitz_win'] ?? null) {
         $d = $stats['blitz_win']['duration'];
-        $tiles[] = ['key' => 'blitz', 'label' => 'Blitzsieg', 'value' => $stats['blitz_win']['team'], 'sub' => sprintf('%02d:%02d gegen %s', intdiv($d, 60), $d % 60, $stats['blitz_win']['opponent'])];
+        $tiles[] = ['key' => 'blitz', 'label' => 'Blitzsieg', 'info' => 'Schnellster Sieg in der Gruppenphase, gemessen an der Spieldauer.', 'value' => $stats['blitz_win']['team'], 'sub' => sprintf('%02d:%02d gegen %s', intdiv($d, 60), $d % 60, $stats['blitz_win']['opponent'])];
     }
     if ($stats['marathon'] ?? null) {
         $d = $stats['marathon']['duration'];
-        $tiles[] = ['key' => 'marathon', 'label' => 'Marathonspieler', 'value' => implode(' vs ', $stats['marathon']['teams']), 'sub' => sprintf('%02d:%02d', intdiv($d, 60), $d % 60)];
+        $tiles[] = ['key' => 'marathon', 'label' => 'Marathonspieler', 'info' => 'Längstes Match nach Dauer — die zwei Teams haben sich am längsten duelliert.', 'value' => implode(' vs ', $stats['marathon']['teams']), 'sub' => sprintf('%02d:%02d', intdiv($d, 60), $d % 60)];
     }
     if ($stats['cup_emperor'] ?? null) {
-        $tiles[] = ['key' => 'emperor', 'label' => 'Becherkaiser', 'value' => $stats['cup_emperor']['team'], 'sub' => $stats['cup_emperor']['cups'].' Becher gegen '.$stats['cup_emperor']['opponent']];
+        $tiles[] = ['key' => 'emperor', 'label' => 'Becherkaiser', 'info' => 'Meiste getroffene Becher eines Teams in einem einzelnen Match.', 'value' => $stats['cup_emperor']['team'], 'sub' => $stats['cup_emperor']['cups'].' Becher gegen '.$stats['cup_emperor']['opponent']];
     }
     if ($stats['penalty_magnet'] ?? null) {
-        $tiles[] = ['key' => 'penalty', 'label' => 'Strafbechermagnet', 'value' => $stats['penalty_magnet']['team'], 'sub' => $stats['penalty_magnet']['penalty_cups'].' Strafbecher'];
+        $tiles[] = ['key' => 'penalty', 'label' => 'Strafbechermagnet', 'info' => 'Team mit den meisten Strafbechern über das gesamte Turnier.', 'value' => $stats['penalty_magnet']['team'], 'sub' => $stats['penalty_magnet']['penalty_cups'].' Strafbecher'];
     }
     if ($stats['efficiency'] ?? null) {
-        $tiles[] = ['key' => 'efficiency', 'label' => 'Effizienzrate', 'value' => $stats['efficiency']['team'], 'sub' => $stats['efficiency']['rate'].'%'];
+        $tiles[] = ['key' => 'efficiency', 'label' => 'Effizienzrate', 'info' => 'Beste Wurf-Bilanz: (Treffer − Strafbecher) pro Wurf, als Prozentwert.', 'value' => $stats['efficiency']['team'], 'sub' => $stats['efficiency']['rate'].'%'];
     }
     if ($stats['most_played'] ?? null) {
-        $tiles[] = ['key' => 'played', 'label' => 'Heiß gespielt', 'value' => $stats['most_played']['team'], 'sub' => $stats['most_played']['matches'].' Matches'];
+        $tiles[] = ['key' => 'played', 'label' => 'Heiß gespielt', 'info' => 'Team mit den meisten gespielten Matches im Turnier.', 'value' => $stats['most_played']['team'], 'sub' => $stats['most_played']['matches'].' Matches'];
     }
 }
 @endphp
@@ -113,7 +113,17 @@ if ($stats) {
                             };
                         @endphp
                         <div class="{{ $span }} flex flex-col justify-between gap-3 rounded-lg bg-stage-surface px-5 py-5 lg:px-6 lg:py-6">
-                            <span class="font-label text-stage-text-dim">{{ $tile['label'] }}</span>
+                            <div class="flex items-start justify-between gap-3">
+                                <span class="font-label text-stage-text-dim">{{ $tile['label'] }}</span>
+                                @if (! empty($tile['info']))
+                                    <flux:tooltip :content="$tile['info']" toggleable>
+                                        <button type="button" aria-label="Was bedeutet das?"
+                                                class="-mr-1 -mt-1 shrink-0 rounded-full p-1 text-stage-text-dim hover:text-stage-text-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-stage-line-strong transition">
+                                            <flux:icon.information-circle class="size-4" />
+                                        </button>
+                                    </flux:tooltip>
+                                @endif
+                            </div>
                             <div class="flex flex-col gap-1">
                                 <span class="font-display text-stage-text text-2xl leading-tight lg:text-3xl">{{ $tile['value'] }}</span>
                                 @if ($tile['sub'])

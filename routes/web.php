@@ -13,6 +13,7 @@ Route::middleware('auth')->group(function () {
     Route::livewire('/dashboard', 'pages::dashboard')->name('dashboard');
     Route::livewire('/matches', 'pages::match-list')->name('matches.index');
     Route::livewire('/match/{match}', 'pages::match-score')->name('match.score');
+    Route::livewire('/settings', 'pages::settings')->name('settings');
 
     Route::middleware('role:admin')->group(function () {
         Route::livewire('/setup', 'pages::admin-setup')->name('tournament.setup');

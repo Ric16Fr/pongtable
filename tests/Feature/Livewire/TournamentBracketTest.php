@@ -67,5 +67,5 @@ it('marks the live matches', function () {
     ]);
 
     Livewire::test('pages::tournament-bracket', ['tournamentId' => $this->tournament->id])
-        ->assertSeeInOrder(['🔴 Live', 'Active Home', 'Active Away']);
+        ->assertSeeInOrder(['Live', 'Active Home', 'Active Away']);
 });

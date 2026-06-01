@@ -11,6 +11,7 @@ Eine Turniersoftware für unsere Bierpong WM, OpenSource und selbst hostbar übe
 
 ## Was aktuell nicht geht
 - mehrere getrennte Accounts, dies ist primär ein Tool für den eigenen Gebrauch
+- mehrere verschiedene Turniere zeitgleich, da mein Fokus auf einem Turnier lag
 - Docker-Unterstützung, bei Bedarf gerne schreiben
 - QR-Codes für das Leaderboard, bei Interesse einfach mit der eigenen URL erstellen
 
@@ -25,4 +26,8 @@ cp .env.example .env
 php artisan key:generate
 php artisan migrate:fresh --seed
 ```
-aufgerufen werden
+aufgerufen werden.
+
+Dann hat man automatisch den Adminaccount mit dem Nutzernamen _admin_ und dem Passwort _password_ (dieses sollte man unten links über 
+Account->Einstellungen dann natürlich ändern) und kann dort in den Einstellungen auch beliebig viele Schiedsrichter-Accounts anlegen. 
+Diese Accounts können (anders als der Admin) die Turniereinstellungen nicht ändern, sondern nur Ergebnisse eintragen.

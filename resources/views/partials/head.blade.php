@@ -5,9 +5,7 @@
     {{ filled($title ?? null) ? $title.' · '.config('app.name', 'pongtable') : config('app.name', 'pongtable') }}
 </title>
 
-<link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="icon" href="/favicon.ico" sizes="any">
-<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" sizes="any">
 
 <link rel="preconnect" href="https://fonts.bunny.net" crossorigin>
 <link rel="stylesheet" href="https://fonts.bunny.net/css?family=inter:400,500,600,700,800,900|jetbrains-mono:400,500,700&display=swap">
