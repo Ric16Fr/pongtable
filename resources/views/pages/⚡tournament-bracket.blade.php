@@ -148,6 +148,59 @@ new class extends Component {
             </section >
         @endif
 
+        {{-- KO BRACKET: calc-aligned columns with connectors --}}
+        @if (! empty($this->koRounds))
+            <section class="space-y-6" >
+                <h2 class="font-label text-stage-text-muted" >KO-Bracket</h2 >
+                <div class="ko-grid" >
+                    @foreach ($this->koRounds as $i => $round)
+                        <div class="ko-round" data-round-index="{{ $i }}" >
+                            <div class="ko-round-label" data-round="{{ $round['round'] }}" >{{ $round['label'] }}</div >
+                            <div class="ko-matches" >
+                                @foreach ($round['matches'] as $match)
+                                    @php
+                                        $home = $match->stats->firstWhere('team_id', $match->home_team_id);
+                                        $away = $match->stats->firstWhere('team_id', $match->away_team_id);
+                                        $isLive = in_array($match->status, ['active', 'pre_entry', 'scoring'], true);
+                                        $homeWin = $match->winner_team_id === $match->home_team_id;
+                                        $awayWin = $match->winner_team_id === $match->away_team_id;
+                                    @endphp
+                                    <div class="ko-match" data-status="{{ $match->status }}" data-live="{{ $isLive ? 'true' : 'false' }}" >
+                                        @if ($isLive)
+                                            <div class="ko-match-meta" >
+                                                <span class="live-marker" >Live</span >
+                                                <span >{{ $match->table?->name }}</span >
+                                            </div >
+                                        @endif
+
+                                        <div class="ko-team"
+                                             @if($match->winner_team_id) data-winner="{{ $homeWin ? 'true' : 'false' }}" @endif>
+                                            <span class="ko-team-name" >
+                                                <span class="team-dot"
+                                                      @if($match->homeTeam?->color) style="background-color: {{ $match->homeTeam->color }}" @endif></span >
+                                                <span >{{ $match->homeTeam?->name ?? '—' }}</span >
+                                            </span >
+                                            <span class="ko-team-score" >{{ $home?->cups_scored ?? '–' }}</span >
+                                        </div >
+
+                                        <div class="ko-team"
+                                             @if($match->winner_team_id) data-winner="{{ $awayWin ? 'true' : 'false' }}" @endif>
+                                            <span class="ko-team-name" >
+                                                <span class="team-dot"
+                                                      @if($match->awayTeam?->color) style="background-color: {{ $match->awayTeam->color }}" @endif></span >
+                                                <span >{{ $match->awayTeam?->name ?? '—' }}</span >
+                                            </span >
+                                            <span class="ko-team-score" >{{ $away?->cups_scored ?? '–' }}</span >
+                                        </div >
+                                    </div >
+                                @endforeach
+                            </div >
+                        </div >
+                    @endforeach
+                </div >
+            </section >
+        @endif
+
         {{-- GROUP STANDINGS: typographic blocks, no card grid --}}
         @if ($t->groups->isNotEmpty())
             <section class="space-y-6" >
@@ -204,59 +257,6 @@ new class extends Component {
                                 @endforeach
                                 </tbody >
                             </table >
-                        </div >
-                    @endforeach
-                </div >
-            </section >
-        @endif
-
-        {{-- KO BRACKET: calc-aligned columns with connectors --}}
-        @if (! empty($this->koRounds))
-            <section class="space-y-6" >
-                <h2 class="font-label text-stage-text-muted" >KO-Bracket</h2 >
-                <div class="ko-grid" >
-                    @foreach ($this->koRounds as $i => $round)
-                        <div class="ko-round" data-round-index="{{ $i }}" >
-                            <div class="ko-round-label" data-round="{{ $round['round'] }}" >{{ $round['label'] }}</div >
-                            <div class="ko-matches" >
-                                @foreach ($round['matches'] as $match)
-                                    @php
-                                        $home = $match->stats->firstWhere('team_id', $match->home_team_id);
-                                        $away = $match->stats->firstWhere('team_id', $match->away_team_id);
-                                        $isLive = in_array($match->status, ['active', 'pre_entry', 'scoring'], true);
-                                        $homeWin = $match->winner_team_id === $match->home_team_id;
-                                        $awayWin = $match->winner_team_id === $match->away_team_id;
-                                    @endphp
-                                    <div class="ko-match" data-status="{{ $match->status }}" data-live="{{ $isLive ? 'true' : 'false' }}" >
-                                        @if ($isLive)
-                                            <div class="ko-match-meta" >
-                                                <span class="live-marker" >Live</span >
-                                                <span >{{ $match->table?->name }}</span >
-                                            </div >
-                                        @endif
-
-                                        <div class="ko-team"
-                                             @if($match->winner_team_id) data-winner="{{ $homeWin ? 'true' : 'false' }}" @endif>
-                                            <span class="ko-team-name" >
-                                                <span class="team-dot"
-                                                      @if($match->homeTeam?->color) style="background-color: {{ $match->homeTeam->color }}" @endif></span >
-                                                <span >{{ $match->homeTeam?->name ?? '—' }}</span >
-                                            </span >
-                                            <span class="ko-team-score" >{{ $home?->cups_scored ?? '–' }}</span >
-                                        </div >
-
-                                        <div class="ko-team"
-                                             @if($match->winner_team_id) data-winner="{{ $awayWin ? 'true' : 'false' }}" @endif>
-                                            <span class="ko-team-name" >
-                                                <span class="team-dot"
-                                                      @if($match->awayTeam?->color) style="background-color: {{ $match->awayTeam->color }}" @endif></span >
-                                                <span >{{ $match->awayTeam?->name ?? '—' }}</span >
-                                            </span >
-                                            <span class="ko-team-score" >{{ $away?->cups_scored ?? '–' }}</span >
-                                        </div >
-                                    </div >
-                                @endforeach
-                            </div >
                         </div >
                     @endforeach
                 </div >
