@@ -1,0 +1,255 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-06-01T19:30:00Z",
+  "title": "Design System: pongtable",
+  "extensions": {
+    "colorMeta": {
+      "stage-bg": {
+        "role": "neutral",
+        "displayName": "Stage Bg",
+        "canonical": "oklch(11% 0.011 80)",
+        "tonalRamp": [
+          "oklch(11% 0.011 80)",
+          "oklch(16% 0.013 80)",
+          "oklch(22% 0.015 80)",
+          "oklch(32% 0.017 80)",
+          "oklch(48% 0.020 80)",
+          "oklch(66% 0.024 80)",
+          "oklch(78% 0.022 80)",
+          "oklch(96% 0.011 80)"
+        ]
+      },
+      "stage-surface": {
+        "role": "neutral",
+        "displayName": "Stage Surface",
+        "canonical": "oklch(16% 0.013 80)"
+      },
+      "stage-surface-2": {
+        "role": "neutral",
+        "displayName": "Stage Surface 2",
+        "canonical": "oklch(22% 0.015 80)"
+      },
+      "stage-text": {
+        "role": "neutral",
+        "displayName": "Stage Text",
+        "canonical": "oklch(96% 0.011 80)"
+      },
+      "red-corner": {
+        "role": "primary",
+        "displayName": "Red Corner",
+        "canonical": "oklch(62% 0.220 26)",
+        "tonalRamp": [
+          "oklch(20% 0.060 26)",
+          "oklch(30% 0.080 26)",
+          "oklch(40% 0.140 26)",
+          "oklch(50% 0.190 26)",
+          "oklch(56% 0.220 26)",
+          "oklch(62% 0.220 26)",
+          "oklch(72% 0.210 28)",
+          "oklch(88% 0.080 26)"
+        ]
+      },
+      "blue-corner": {
+        "role": "secondary",
+        "displayName": "Blue Corner",
+        "canonical": "oklch(62% 0.180 240)",
+        "tonalRamp": [
+          "oklch(20% 0.055 240)",
+          "oklch(30% 0.075 240)",
+          "oklch(40% 0.120 240)",
+          "oklch(50% 0.160 240)",
+          "oklch(54% 0.180 240)",
+          "oklch(62% 0.180 240)",
+          "oklch(72% 0.170 240)",
+          "oklch(88% 0.060 240)"
+        ]
+      },
+      "trophy-gold": {
+        "role": "tertiary",
+        "displayName": "Trophy Gold",
+        "canonical": "oklch(82% 0.160 78)",
+        "tonalRamp": [
+          "oklch(20% 0.050 75)",
+          "oklch(34% 0.070 75)",
+          "oklch(45% 0.110 75)",
+          "oklch(58% 0.180 70)",
+          "oklch(70% 0.170 75)",
+          "oklch(72% 0.180 75)",
+          "oklch(82% 0.160 78)",
+          "oklch(94% 0.070 78)"
+        ]
+      },
+      "status-success": {
+        "role": "semantic",
+        "displayName": "Status Success",
+        "canonical": "oklch(72% 0.180 150)"
+      },
+      "status-danger": {
+        "role": "semantic",
+        "displayName": "Status Danger",
+        "canonical": "oklch(64% 0.210 28)"
+      },
+      "status-info": {
+        "role": "semantic",
+        "displayName": "Status Info",
+        "canonical": "oklch(72% 0.140 230)"
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Team names on the active match screen, tournament titles, projected bracket champions. The tale-of-the-tape moment. Never on body." },
+      "headline": { "displayName": "Headline", "purpose": "Page titles, group names, KO round labels." },
+      "title": { "displayName": "Title", "purpose": "Card titles, match-list rows, modal headings." },
+      "body": { "displayName": "Body", "purpose": "Admin descriptions, microcopy, public-surface body content. Cap line length at 65 to 75ch." },
+      "label": { "displayName": "Label", "purpose": "Status badges, table headers, metadata, corner labels. Uppercase, letter-spaced." },
+      "numeric": { "displayName": "Numeric", "purpose": "Timer, scores, points, cup counts, ranks. Tabular figures with slashed zero (ss01); always mono." }
+    },
+    "shadows": [
+      {
+        "name": "live-match-glow",
+        "value": "inset 0 0 0 1px oklch(82% 0.160 78), 0 0 24px -2px color-mix(in oklch, oklch(82% 0.160 78) 22%, transparent), 0 18px 38px -18px color-mix(in oklch, oklch(82% 0.160 78) 16%, transparent)",
+        "purpose": "Trophy-gold ambient glow plus 1px gold inset ring on actively-running match containers and live KO bracket nodes. The only ambient shadow in the system."
+      },
+      {
+        "name": "focus-ring",
+        "value": "0 0 0 2px var(--color-stage-bg), 0 0 0 4px oklch(72% 0.180 75)",
+        "purpose": "Two-layer focus ring on form inputs. Deep-gold outer ring against stage-bg inner ring; readable on every surface."
+      }
+    ],
+    "motion": [
+      {
+        "name": "stage-pulse",
+        "value": "1.4s ease-out infinite",
+        "purpose": "Badge-active leading-dot pulse and live-marker dot. Scale 1 to 1.6, opacity 1 to 0.5, alternates."
+      },
+      {
+        "name": "stage-overtime",
+        "value": "0.9s ease-out infinite",
+        "purpose": "Timer-overtime opacity pulse (1 to 0.55). Signals the timer has crossed zero."
+      },
+      {
+        "name": "live-glow-transition",
+        "value": "200ms ease-out",
+        "purpose": "KO match background transition when a node becomes live (status change response)."
+      }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Cream-on-stage inversion. Spiel starten, Ergebnis speichern, Zum Turnier.",
+      "html": "<button class=\"ds-btn-primary\">Spiel starten</button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; gap: 0.5rem; padding: 1.25rem 1.5rem; min-height: 3.5rem; border: 0; border-radius: 0.5rem; background: oklch(96% 0.011 80); color: oklch(11% 0.011 80); font-family: 'Inter Variable', Inter, ui-sans-serif, system-ui, sans-serif; font-size: 1.125rem; font-weight: 700; letter-spacing: 0.01em; cursor: pointer; transition: opacity 150ms ease-out, transform 150ms ease-out; } .ds-btn-primary:hover { opacity: 0.9; } .ds-btn-primary:active { transform: scale(0.99); } .ds-btn-primary:focus-visible { outline: 0; box-shadow: 0 0 0 2px oklch(11% 0.011 80), 0 0 0 4px oklch(72% 0.180 75); }"
+    },
+    {
+      "name": "Danger Button (Modal Trigger)",
+      "kind": "button",
+      "refersTo": "button-danger",
+      "description": "Used only for Runde beenden. Opens a Flux confirmation modal rather than firing the destructive action directly.",
+      "html": "<button class=\"ds-btn-danger\">Runde beenden</button>",
+      "css": ".ds-btn-danger { display: block; width: 100%; padding: 1.25rem; border: 1px solid oklch(64% 0.210 28); border-radius: 0.5rem; background: oklch(30% 0.080 28); color: oklch(64% 0.210 28); font-family: 'Inter Variable', Inter, ui-sans-serif, system-ui, sans-serif; font-size: 1.125rem; font-weight: 700; letter-spacing: 0.02em; cursor: pointer; transition: background 150ms ease-out, transform 150ms ease-out; } .ds-btn-danger:hover { background: oklch(22% 0.015 80); } .ds-btn-danger:active { transform: scale(0.99); }"
+    },
+    {
+      "name": "Score Control (+/-)",
+      "kind": "input",
+      "refersTo": "score-control",
+      "description": "Signature primitive. Oversized +/- triad for sticky-finger referee scoring. 56px tap targets, font-numeric input, gold focus ring.",
+      "html": "<div class=\"ds-score-control\"><button class=\"ds-score-btn\" aria-label=\"Decrease\">&minus;</button><input class=\"ds-score-input\" type=\"number\" inputmode=\"numeric\" min=\"0\" value=\"6\" /><button class=\"ds-score-btn\" aria-label=\"Increase\">+</button></div>",
+      "css": ".ds-score-control { display: inline-flex; align-items: center; gap: 0.75rem; } .ds-score-btn { height: 3.5rem; width: 3.5rem; border: 0; border-radius: 0.375rem; background: oklch(11% 0.011 80); color: oklch(96% 0.011 80); font-family: 'Inter Variable', Inter, ui-sans-serif, system-ui, sans-serif; font-size: 1.75rem; font-weight: 600; cursor: pointer; transition: background 150ms ease-out, transform 100ms ease-out; } .ds-score-btn:hover { background: oklch(22% 0.015 80); } .ds-score-btn:active { transform: scale(0.95); } .ds-score-input { height: 3.5rem; width: 5rem; padding: 0; border: 1px solid oklch(32% 0.017 80); border-radius: 0.375rem; background: oklch(11% 0.011 80); color: oklch(96% 0.011 80); font-family: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, monospace; font-size: 1.25rem; font-weight: 600; text-align: center; font-variant-numeric: tabular-nums; font-feature-settings: 'tnum' 1, 'zero' 1, 'ss01' 1; } .ds-score-input:focus { outline: 0; border-color: oklch(48% 0.020 80); box-shadow: 0 0 0 2px oklch(11% 0.011 80), 0 0 0 4px oklch(72% 0.180 75); }"
+    },
+    {
+      "name": "Status Badge (Active)",
+      "kind": "chip",
+      "refersTo": "badge-active",
+      "description": "Pill-shaped uppercase label with a pulsing leading dot. The .badge-active variant for live matches.",
+      "html": "<span class=\"ds-badge ds-badge-active\">active</span>",
+      "css": "@keyframes ds-stage-pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.6); } } .ds-badge { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.25rem 0.625rem; border-radius: 9999px; font-family: 'Inter Variable', Inter, ui-sans-serif, system-ui, sans-serif; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap; } .ds-badge::before { content: ''; display: inline-block; width: 0.375rem; height: 0.375rem; border-radius: 9999px; background: currentColor; } .ds-badge-active { color: oklch(72% 0.180 150); background: oklch(32% 0.075 150); } .ds-badge-active::before { animation: ds-stage-pulse 1.4s ease-out infinite; }"
+    },
+    {
+      "name": "Rank Chip (Podium)",
+      "kind": "chip",
+      "refersTo": "rank-chip",
+      "description": "2rem square with centered tabular-mono digit. Rank 1 takes trophy gold; ranks 2 and 3 a desaturated warm silver and bronze. The podium variants invert to dark text on saturated background.",
+      "html": "<span class=\"ds-rank ds-rank-1\">1</span>",
+      "css": ".ds-rank { display: inline-flex; align-items: center; justify-content: center; width: 2rem; height: 2rem; border-radius: 0.5rem; font-family: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, monospace; font-variant-numeric: tabular-nums; font-weight: 700; font-size: 0.875rem; background: oklch(22% 0.015 80); color: oklch(78% 0.022 80); flex-shrink: 0; } .ds-rank-1 { background: oklch(82% 0.160 78); color: oklch(11% 0.011 80); } .ds-rank-2 { background: oklch(72% 0.020 80); color: oklch(11% 0.011 80); } .ds-rank-3 { background: oklch(60% 0.110 50); color: oklch(96% 0.011 80); }"
+    },
+    {
+      "name": "Two-Corner Face-Off",
+      "kind": "card",
+      "refersTo": "surface-card",
+      "description": "Signature framing for every match surface: home (red corner) left, away (blue corner) right, soft radial washes meeting at a 1px gradient divider, all over stage-surface.",
+      "html": "<section class=\"ds-faceoff\"><div class=\"ds-faceoff-side ds-faceoff-home\"><span class=\"ds-faceoff-label ds-label-red\">Red Corner</span><span class=\"ds-faceoff-team\">Team Bierherz</span></div><div class=\"ds-faceoff-divider\" aria-hidden=\"true\"></div><div class=\"ds-faceoff-side ds-faceoff-away\"><span class=\"ds-faceoff-label ds-label-blue\">Blue Corner</span><span class=\"ds-faceoff-team\">Team NullPointer</span></div></section>",
+      "css": ".ds-faceoff { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 2rem; padding: 2rem; border-radius: 0.5rem; background: radial-gradient(ellipse 80% 60% at 0% 50%, color-mix(in oklch, oklch(30% 0.080 26) 70%, transparent) 0%, transparent 60%), radial-gradient(ellipse 80% 60% at 100% 50%, color-mix(in oklch, oklch(30% 0.075 240) 70%, transparent) 0%, transparent 60%), oklch(16% 0.013 80); } .ds-faceoff-side { display: flex; flex-direction: column; gap: 0.5rem; } .ds-faceoff-away { text-align: right; } .ds-faceoff-label { font-family: 'Inter Variable', Inter, ui-sans-serif, system-ui, sans-serif; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; } .ds-label-red { color: oklch(72% 0.210 28); } .ds-label-blue { color: oklch(72% 0.170 240); } .ds-faceoff-team { font-family: 'Inter Variable', Inter, ui-sans-serif, system-ui, sans-serif; font-weight: 800; letter-spacing: -0.025em; line-height: 0.95; font-size: clamp(1.5rem, 5vw, 2.5rem); color: oklch(96% 0.011 80); } .ds-faceoff-divider { width: 1px; align-self: stretch; background: linear-gradient(180deg, transparent 0%, oklch(48% 0.020 80) 15%, oklch(48% 0.020 80) 85%, transparent 100%); }"
+    },
+    {
+      "name": "Live Timer Display",
+      "kind": "custom",
+      "refersTo": "timer-display",
+      "description": "Hero number on the active match screen. Color tracks state (ok/warning/overtime). Tabular mono so digits never reflow.",
+      "html": "<div class=\"ds-timer ds-timer-warning\"><span class=\"ds-live-marker\">Live</span><span class=\"ds-timer-num\">02:14</span><span class=\"ds-timer-label\">Verbleibende Zeit</span></div>",
+      "css": "@keyframes ds-stage-pulse-marker { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.6); } } .ds-timer { display: flex; flex-direction: column; align-items: center; gap: 0.75rem; padding: 3rem 1.5rem; } .ds-live-marker { display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Inter Variable', Inter, ui-sans-serif, system-ui, sans-serif; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: oklch(82% 0.160 78); } .ds-live-marker::before { content: ''; width: 0.5rem; height: 0.5rem; border-radius: 9999px; background: oklch(82% 0.160 78); animation: ds-stage-pulse-marker 1.4s ease-out infinite; } .ds-timer-num { font-family: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, monospace; font-variant-numeric: tabular-nums; font-feature-settings: 'tnum' 1, 'zero' 1, 'ss01' 1; font-size: clamp(5rem, 18vw, 9rem); font-weight: 700; line-height: 1; letter-spacing: -0.02em; } .ds-timer-warning .ds-timer-num { color: oklch(82% 0.160 78); } .ds-timer-label { font-family: 'Inter Variable', Inter, ui-sans-serif, system-ui, sans-serif; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: oklch(66% 0.024 80); }"
+    },
+    {
+      "name": "Appearance Toggle",
+      "kind": "button",
+      "refersTo": "button-subtle",
+      "description": "Sun-when-dark / moon-when-light toggle in the header. Inline SVG icons, no Lucide/Heroicons reference.",
+      "html": "<button class=\"ds-toggle\" aria-label=\"Toggle appearance\"><svg class=\"ds-toggle-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"4\"></circle><path d=\"M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41\"></path></svg></button>",
+      "css": ".ds-toggle { display: inline-flex; align-items: center; justify-content: center; height: 2.5rem; width: 2.5rem; padding: 0; border: 0; border-radius: 0.375rem; background: transparent; color: oklch(78% 0.022 80); cursor: pointer; transition: background 150ms ease-out, color 150ms ease-out; } .ds-toggle:hover { background: oklch(22% 0.015 80); color: oklch(96% 0.011 80); } .ds-toggle:focus-visible { outline: 0; box-shadow: 0 0 0 2px oklch(11% 0.011 80), 0 0 0 4px oklch(72% 0.180 75); } .ds-toggle-icon { width: 1.25rem; height: 1.25rem; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Brewery Broadcast",
+    "overview": "pongtable sits at the intersection of three traditions. The heavyweight industrial typography of craft-brewery merch (BrewDog, Mikkeller, Stone). The HUD energy of esports broadcast overlays (LoL Worlds, Valorant Champions). The two-corner face-off drama of a UFC fight-night card. The result is an interface that takes beerpong as seriously as Premier League, and reads as a tournament instead of a SaaS dashboard. Every neutral is warm-tinted on hue 80 so the canvas evokes a taproom under low light, not a sterile workspace. The referee-on-a-phone is the primary surface, but the design language is calibrated to the projected bracket. The system runs dark by default and ships a light counterpart for projector-on-a-bright-wall scenarios.",
+    "keyCharacteristics": [
+      "Four-role committed palette: red corner, blue corner, trophy gold, warm-tinted stage neutrals on hue 80.",
+      "Single-family typography (Inter Variable for sans, JetBrains Mono Variable for numerics), with the broadcast energy living in scale and weight rather than decoration.",
+      "Flat-by-default surfaces. Depth is tonal step, not shadow.",
+      "Two-corner framing on every match surface; home and away are visually opposed and equal.",
+      "Mobile-first referee surface; desktop-dense admin surface; broadcast-first public surface.",
+      "Responsive motion only: timer pulse, badge dot, gold glow on live elements. No choreographed entrances."
+    ],
+    "rules": [
+      { "name": "The Two-Corner Rule", "body": "Red Corner and Blue Corner carry equal visual weight on every match screen. Never adjust saturation, size, or position to favor one side. The face-off is symmetric or it is broken.", "section": "colors" },
+      { "name": "The Gold-For-Glory Rule", "body": "Trophy Gold is reserved. Live-match glow, active timer warning, podium 1 chip, champion banner, KO-bracket live trim. Never on default buttons. If gold is showing, something is being won.", "section": "colors" },
+      { "name": "The Tinted-Black Rule", "body": "No pure black, no pure white. Every neutral carries a small warm chroma on hue 80 so the canvas reads taproom-warm rather than sterile.", "section": "colors" },
+      { "name": "The OKLCH-Only Rule", "body": "All color tokens are authored in OKLCH. Chroma is reduced as lightness approaches the extremes.", "section": "colors" },
+      { "name": "The Tabular-Numeric Rule", "body": "Every number is set in font-numeric (JetBrains Mono Variable, tabular figures, ss01). Sans numerics are prohibited; digit reflow during live update is unacceptable on the broadcast surface.", "section": "typography" },
+      { "name": "The Scale-Hierarchy Rule", "body": "Minimum 1.25x step between adjacent hierarchy levels. Display headlines clamp up to 5.5rem on the public surface and 9rem on the live timer.", "section": "typography" },
+      { "name": "The Single-Family Rule", "body": "No display/body font pairing. Inter Variable carries every text role; numerics step out to JetBrains Mono. Two faces in the system, no more.", "section": "typography" },
+      { "name": "The Flat-By-Default Rule", "body": "Cards and surfaces are flat at rest. Depth is tonal step, not shadow. Shadows are a state response (live, focus), not a baseline.", "section": "elevation" },
+      { "name": "The Gold-Glow Rule", "body": "The only ambient shadow in the system is the trophy-gold live-match glow. Other colors do not earn glow; the rarity is what makes the live match read as alive.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do commit to the four-role palette. Red Corner and Blue Corner stay symmetric; Trophy Gold stays reserved; warm-tinted near-black is the canvas.",
+      "Do set every number in font-numeric (JetBrains Mono Variable, tabular figures, ss01). Timers, scores, ranks, points, cups. Sans numerics for numbers are prohibited.",
+      "Do make tap targets oversized on referee scoring: +/- at 3.5rem (56px) on entry surfaces, primary action buttons at 3rem (48px) minimum.",
+      "Do design the projected bracket and leaderboard for 5+ meter readability first. Calibrate referee and admin surfaces down from that bar.",
+      "Do use font-display (weight 800, letter-spacing -0.025em, line-height 0.95) on team names and active-match surfaces.",
+      "Do route motion to state changes: timer color shift, badge dot pulse, live-glow ramp, status transitions.",
+      "Do author every color in OKLCH. Reduce chroma toward the lightness extremes.",
+      "Do keep dark as the default. Light is the projector-on-a-bright-wall scheme; the broadcast canvas is the home."
+    ],
+    "donts": [
+      "Don't build a generic SaaS dashboard. No navy sidebar, no three-stat-cards along the top, no indigo accents.",
+      "Don't evoke a corporate sports betting site. No DraftKings or FanDuel green-and-gold-on-black, no casino-adjacent CTAs.",
+      "Don't introduce frat-house clipart. No cartoon beer mugs, no red Solo cups as decoration, no comic-sans energy.",
+      "Don't Linear-clean the system. Restraint and whitespace are not the answer; the personality is loud, communal, alive.",
+      "Don't use pure black or pure white. Tint every neutral toward hue 80 with chroma 0.011 to 0.024.",
+      "Don't put Trophy Gold on a default button. The rarity is the point.",
+      "Don't animate CSS layout properties. Pulse and ripple with transform and opacity only.",
+      "Don't introduce a fifth color role. The four roles carry the system.",
+      "Don't use side-stripe borders as a colored accent on cards, list items, or alerts.",
+      "Don't stack nested cards. If a section needs containment, use a tonal step.",
+      "Don't choreograph entrance animations or scroll-driven sequences. Motion is responsive only.",
+      "Don't introduce a display font for body, labels, or buttons. Inter Variable carries every sans role.",
+      "Don't show modals as a first thought. The system has exactly one confirmation modal (end-of-round)."
+    ]
+  }
+}
