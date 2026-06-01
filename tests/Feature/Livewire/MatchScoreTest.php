@@ -45,6 +45,30 @@ it('mounting a pending match advances it to pre_entry', function () {
     expect($match->fresh()->status)->toBe('pre_entry');
 });
 
+it('defaults cup inputs to 10:10 for non-finished matches', function () {
+    $match = freshMatch('pre_entry');
+
+    Livewire::test('pages::match-score', ['match' => $match])
+        ->assertSet('homeCups', 10)
+        ->assertSet('awayCups', 10);
+});
+
+it('keeps actual cup values for finished matches', function () {
+    $match = freshMatch('finished');
+    $match->stats()->create([
+        'team_id' => $match->home_team_id,
+        'cups_scored' => 6, 'throws' => 5, 'penalty_cups' => 0,
+    ]);
+    $match->stats()->create([
+        'team_id' => $match->away_team_id,
+        'cups_scored' => 4, 'throws' => 7, 'penalty_cups' => 1,
+    ]);
+
+    Livewire::test('pages::match-score', ['match' => $match])
+        ->assertSet('homeCups', 6)
+        ->assertSet('awayCups', 4);
+});
+
 it('initializes form fields from existing stats', function () {
     $match = freshMatch('pre_entry');
     $match->stats()->create([
@@ -66,14 +90,10 @@ it('adjust() never goes below zero', function () {
         ->assertSet('homeThrows', 0);
 });
 
-it('startMatch persists stats and activates the match', function () {
+it('startMatch activates the match with empty stats (counts happen live)', function () {
     $match = freshMatch('pre_entry');
 
     Livewire::test('pages::match-score', ['match' => $match])
-        ->set('homeThrows', 6)
-        ->set('homePenalty', 1)
-        ->set('awayThrows', 5)
-        ->set('awayPenalty', 0)
         ->call('startMatch');
 
     $match->refresh();
@@ -81,16 +101,90 @@ it('startMatch persists stats and activates the match', function () {
         ->and($match->started_at)->not->toBeNull();
 
     $homeStat = $match->stats->firstWhere('team_id', $match->home_team_id);
+    expect($homeStat->throws)->toBe(0)
+        ->and($homeStat->penalty_cups)->toBe(0);
+});
+
+it('persists throws and penalties entered during the active phase', function () {
+    $match = freshMatch('pre_entry');
+
+    Livewire::test('pages::match-score', ['match' => $match])
+        ->call('startMatch')
+        ->set('homeThrows', 6)
+        ->set('homePenalty', 1)
+        ->set('awayThrows', 5)
+        ->set('awayPenalty', 2);
+
+    $match->refresh();
+    $homeStat = $match->stats->firstWhere('team_id', $match->home_team_id);
+    $awayStat = $match->stats->firstWhere('team_id', $match->away_team_id);
     expect($homeStat->throws)->toBe(6)
-        ->and($homeStat->penalty_cups)->toBe(1);
+        ->and($homeStat->penalty_cups)->toBe(1)
+        ->and($awayStat->throws)->toBe(5)
+        ->and($awayStat->penalty_cups)->toBe(2);
+});
+
+it('persists throws and penalties when adjusted via +/- during active phase', function () {
+    // Regression: Livewire `updated*` hooks only fire for client-driven changes
+    // (wire:model). The +/- buttons go through `adjust()` which mutates state
+    // server-side, so persistence must happen there too.
+    $match = freshMatch('pre_entry');
+
+    Livewire::test('pages::match-score', ['match' => $match])
+        ->call('startMatch')
+        ->call('adjust', 'homeThrows', 1)
+        ->call('adjust', 'homeThrows', 1)
+        ->call('adjust', 'homeThrows', 1)
+        ->call('adjust', 'homePenalty', 1)
+        ->call('adjust', 'awayPenalty', 1)
+        ->call('adjust', 'awayPenalty', 1);
+
+    $homeStat = $match->fresh()->stats->firstWhere('team_id', $match->home_team_id);
+    $awayStat = $match->fresh()->stats->firstWhere('team_id', $match->away_team_id);
+
+    expect($homeStat->throws)->toBe(3)
+        ->and($homeStat->penalty_cups)->toBe(1)
+        ->and($awayStat->penalty_cups)->toBe(2);
+});
+
+it('does not auto-advance KO matches with an unresolved opponent', function () {
+    $match = freshMatch('pending');
+    $match->update(['away_team_id' => null, 'phase' => 'ko', 'ko_round' => 2]);
+
+    Livewire::test('pages::match-score', ['match' => $match])
+        ->assertSee('Wartet auf Vorrunde')
+        ->assertDontSee('Spiel starten');
+
+    expect($match->fresh()->status)->toBe('pending');
+});
+
+it('startMatch is a no-op when an opponent is missing', function () {
+    $match = freshMatch('pre_entry');
+    $match->update(['away_team_id' => null, 'phase' => 'ko', 'ko_round' => 2]);
+
+    Livewire::test('pages::match-score', ['match' => $match])
+        ->call('startMatch');
+
+    expect($match->fresh()->status)->toBe('pre_entry')
+        ->and($match->stats()->count())->toBe(0);
+});
+
+it('does not persist throw edits while still in pre_entry', function () {
+    $match = freshMatch('pre_entry');
+
+    Livewire::test('pages::match-score', ['match' => $match])
+        ->set('homeThrows', 99);
+
+    $homeStat = $match->fresh()->stats->firstWhere('team_id', $match->home_team_id);
+    expect($homeStat?->throws ?? 0)->toBe(0);
 });
 
 it('endTimer transitions active → scoring', function () {
     $match = freshMatch('pre_entry');
 
-    $component = Livewire::test('pages::match-score', ['match' => $match])
-        ->set('homeThrows', 5)->set('awayThrows', 5)
+    Livewire::test('pages::match-score', ['match' => $match])
         ->call('startMatch')
+        ->set('homeThrows', 5)->set('awayThrows', 5)
         ->call('endTimer');
 
     expect($match->fresh()->status)->toBe('scoring');
@@ -100,8 +194,8 @@ it('saveResult writes cups, picks the winner, and finishes the match', function 
     $match = freshMatch('pre_entry');
 
     Livewire::test('pages::match-score', ['match' => $match])
-        ->set('homeThrows', 5)->set('awayThrows', 5)
         ->call('startMatch')
+        ->set('homeThrows', 5)->set('awayThrows', 5)
         ->call('endTimer')
         ->set('homeCups', 6)
         ->set('awayCups', 4)
@@ -119,8 +213,8 @@ it('rejects cup values outside 0-30', function () {
     $match = freshMatch('pre_entry');
 
     Livewire::test('pages::match-score', ['match' => $match])
-        ->set('homeThrows', 5)->set('awayThrows', 5)
         ->call('startMatch')
+        ->set('homeThrows', 5)->set('awayThrows', 5)
         ->call('endTimer')
         ->set('homeCups', 999)
         ->set('awayCups', 4)
@@ -132,8 +226,8 @@ it('renders the finished view for a completed match', function () {
     $match = freshMatch('pre_entry');
 
     Livewire::test('pages::match-score', ['match' => $match])
-        ->set('homeThrows', 5)->set('awayThrows', 5)
         ->call('startMatch')
+        ->set('homeThrows', 5)->set('awayThrows', 5)
         ->call('endTimer')
         ->set('homeCups', 6)->set('awayCups', 4)
         ->call('saveResult')

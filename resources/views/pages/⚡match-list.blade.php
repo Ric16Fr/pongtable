@@ -87,7 +87,8 @@ new #[Title('Matches')] class extends Component {
         <div class="-mx-2 divide-y divide-stage-line">
             @foreach ($this->matches as $match)
                 @php
-                    $clickable = $match->status !== 'finished';
+                    $teamsReady = $match->home_team_id !== null && $match->away_team_id !== null;
+                    $clickable = $match->status !== 'finished' && $teamsReady;
                     $isLive = in_array($match->status, ['active', 'scoring'], true);
                     $homeStat = $match->stats->firstWhere('team_id', $match->home_team_id);
                     $awayStat = $match->stats->firstWhere('team_id', $match->away_team_id);
@@ -116,7 +117,9 @@ new #[Title('Matches')] class extends Component {
                     <div class="grid grid-cols-[1fr_auto_1fr] items-center gap-3 min-w-0 lg:gap-5">
                         <div class="flex items-center justify-start gap-2 min-w-0">
                             <span class="team-dot" @if($match->homeTeam?->color) style="background-color: {{ $match->homeTeam->color }}" @endif></span>
-                            <span class="truncate font-display text-base lg:text-lg @if($match->status === 'finished' && $homeWin) text-trophy-gold @elseif($match->status === 'finished') text-stage-text-dim @endif">{{ $match->homeTeam?->name }}</span>
+                            <span class="truncate font-display text-base lg:text-lg @if($match->status === 'finished' && $homeWin) text-trophy-gold @elseif($match->status === 'finished') text-stage-text-dim @elseif(! $match->homeTeam) text-stage-text-dim italic @endif">
+                                {{ $match->homeTeam?->name ?? 'Sieger Vorrunde' }}
+                            </span>
                         </div>
 
                         @if ($match->status === 'finished')
@@ -130,7 +133,9 @@ new #[Title('Matches')] class extends Component {
                         @endif
 
                         <div class="flex items-center justify-end gap-2 min-w-0">
-                            <span class="truncate font-display text-base lg:text-lg @if($match->status === 'finished' && $awayWin) text-trophy-gold @elseif($match->status === 'finished') text-stage-text-dim @endif">{{ $match->awayTeam?->name }}</span>
+                            <span class="truncate font-display text-base lg:text-lg @if($match->status === 'finished' && $awayWin) text-trophy-gold @elseif($match->status === 'finished') text-stage-text-dim @elseif(! $match->awayTeam) text-stage-text-dim italic @endif">
+                                {{ $match->awayTeam?->name ?? 'Sieger Vorrunde' }}
+                            </span>
                             <span class="team-dot" @if($match->awayTeam?->color) style="background-color: {{ $match->awayTeam->color }}" @endif></span>
                         </div>
                     </div>
@@ -139,6 +144,8 @@ new #[Title('Matches')] class extends Component {
                     <div class="flex items-center justify-end">
                         @if ($clickable)
                             <flux:icon.chevron-right class="size-5 text-stage-text-dim group-hover:text-stage-text transition" />
+                        @elseif (! $teamsReady && $match->status !== 'finished')
+                            <span class="font-label text-stage-text-dim">wartet</span>
                         @endif
                     </div>
                 </a>

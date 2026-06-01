@@ -11,4 +11,12 @@
 <link rel="stylesheet" href="https://fonts.bunny.net/css?family=inter:400,500,600,700,800,900|jetbrains-mono:400,500,700&display=swap">
 
 @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+{{-- Default appearance: dark (broadcast canvas). Honors any user choice
+     already stored by @fluxAppearance; only seeds 'dark' on first visit. --}}
+<script>
+    if (!window.localStorage.getItem('flux.appearance')) {
+        window.localStorage.setItem('flux.appearance', 'dark');
+    }
+</script>
 @fluxAppearance

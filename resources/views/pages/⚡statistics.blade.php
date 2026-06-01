@@ -47,8 +47,9 @@ if ($stats) {
         $d = $stats['marathon']['duration'];
         $tiles[] = ['key' => 'marathon', 'label' => 'Marathonspieler', 'info' => 'Längstes Match nach Dauer — die zwei Teams haben sich am längsten duelliert.', 'value' => implode(' vs ', $stats['marathon']['teams']), 'sub' => sprintf('%02d:%02d', intdiv($d, 60), $d % 60)];
     }
-    if ($stats['cup_emperor'] ?? null) {
-        $tiles[] = ['key' => 'emperor', 'label' => 'Becherkaiser', 'info' => 'Meiste getroffene Becher eines Teams in einem einzelnen Match.', 'value' => $stats['cup_emperor']['team'], 'sub' => $stats['cup_emperor']['cups'].' Becher gegen '.$stats['cup_emperor']['opponent']];
+    if ($stats['nail_biter'] ?? null) {
+        $diffLabel = $stats['nail_biter']['diff'] === 0 ? 'Patt' : ($stats['nail_biter']['diff'].' Becher Differenz');
+        $tiles[] = ['key' => 'nail_biter', 'label' => 'Knapper Krimi', 'info' => 'Engster Match-Ausgang im Turnier — geringste Becher-Differenz, bei Gleichstand das Match mit den meisten Bechern.', 'value' => implode(' vs ', $stats['nail_biter']['teams']), 'sub' => $stats['nail_biter']['score'].' · '.$diffLabel];
     }
     if ($stats['penalty_magnet'] ?? null) {
         $tiles[] = ['key' => 'penalty', 'label' => 'Strafbechermagnet', 'info' => 'Team mit den meisten Strafbechern über das gesamte Turnier.', 'value' => $stats['penalty_magnet']['team'], 'sub' => $stats['penalty_magnet']['penalty_cups'].' Strafbecher'];
@@ -56,8 +57,8 @@ if ($stats) {
     if ($stats['efficiency'] ?? null) {
         $tiles[] = ['key' => 'efficiency', 'label' => 'Effizienzrate', 'info' => 'Beste Wurf-Bilanz: (Treffer − Strafbecher) pro Wurf, als Prozentwert.', 'value' => $stats['efficiency']['team'], 'sub' => $stats['efficiency']['rate'].'%'];
     }
-    if ($stats['most_played'] ?? null) {
-        $tiles[] = ['key' => 'played', 'label' => 'Heiß gespielt', 'info' => 'Team mit den meisten gespielten Matches im Turnier.', 'value' => $stats['most_played']['team'], 'sub' => $stats['most_played']['matches'].' Matches'];
+    if ($stats['schluck_olymp'] ?? null) {
+        $tiles[] = ['key' => 'schluck_olymp', 'label' => 'Schluck-Olymp', 'info' => 'Team, das im Turnier am meisten getrunken hat: gegnerische Treffer + eigene Strafbecher + bei Niederlagen die übrigen Becher auf der Gegnerseite (Verlierer-Strafe).', 'value' => $stats['schluck_olymp']['team'], 'sub' => $stats['schluck_olymp']['cups'].' Becher geleert'];
     }
 }
 @endphp

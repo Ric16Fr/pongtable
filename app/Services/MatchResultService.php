@@ -19,6 +19,10 @@ class MatchResultService
             return;
         }
 
+        if ($match->home_team_id === null || $match->away_team_id === null) {
+            return;
+        }
+
         $match->update(['status' => 'pre_entry']);
     }
 
@@ -30,6 +34,10 @@ class MatchResultService
     public function startMatch(GameMatch $match, array $data): void
     {
         if (! in_array($match->status, ['pending', 'pre_entry'], true)) {
+            return;
+        }
+
+        if ($match->home_team_id === null || $match->away_team_id === null) {
             return;
         }
 

@@ -15,10 +15,10 @@ class StatisticsService
      *   water_spitter: ?array{team:string, rate:float, scored:int, throws:int},
      *   blitz_win: ?array{team:string, duration:int, opponent:string},
      *   marathon: ?array{teams:array<int,string>, duration:int},
-     *   cup_emperor: ?array{team:string, cups:int, opponent:string},
+     *   nail_biter: ?array{teams:array<int,string>, score:string, diff:int},
      *   penalty_magnet: ?array{team:string, penalty_cups:int},
      *   efficiency: ?array{team:string, rate:float},
-     *   most_played: ?array{team:string, matches:int},
+     *   schluck_olymp: ?array{team:string, cups:int},
      *   total_cups: int,
      * }
      */
@@ -35,10 +35,10 @@ class StatisticsService
             'water_spitter' => $this->shooterRate($finishedMatches, false),
             'blitz_win' => $this->blitzWin($finishedMatches),
             'marathon' => $this->marathon($finishedMatches),
-            'cup_emperor' => $this->cupEmperor($finishedMatches),
+            'nail_biter' => $this->nailBiter($finishedMatches),
             'penalty_magnet' => $this->penaltyMagnet($finishedMatches),
             'efficiency' => $this->efficiency($finishedMatches),
-            'most_played' => $this->mostPlayed($finishedMatches),
+            'schluck_olymp' => $this->schluckOlymp($finishedMatches),
             'total_cups' => (int) $finishedMatches->flatMap->stats->sum('cups_scored'),
         ];
     }
@@ -141,23 +141,50 @@ class StatisticsService
         return $longest;
     }
 
-    private function cupEmperor(Collection $matches): ?array
+    /**
+     * Knapper Krimi — match with the smallest cup difference. Ties broken
+     * by total cups scored (higher = more action).
+     */
+    private function nailBiter(Collection $matches): ?array
     {
-        $best = null;
+        $closest = null;
         foreach ($matches as $match) {
-            foreach ($match->stats as $stat) {
-                if ($best === null || $stat->cups_scored > $best['cups']) {
-                    $other = $stat->team_id === $match->home_team_id ? $match->awayTeam : $match->homeTeam;
-                    $best = [
-                        'team' => $stat->team?->name ?? '—',
-                        'cups' => (int) $stat->cups_scored,
-                        'opponent' => $other?->name ?? '—',
-                    ];
-                }
+            $home = $match->stats->firstWhere('team_id', $match->home_team_id);
+            $away = $match->stats->firstWhere('team_id', $match->away_team_id);
+            if (! $home || ! $away) {
+                continue;
+            }
+
+            $diff = abs($home->cups_scored - $away->cups_scored);
+            $total = $home->cups_scored + $away->cups_scored;
+
+            $isCloser = $closest === null
+                || $diff < $closest['diff']
+                || ($diff === $closest['diff'] && $total > $closest['total']);
+
+            if ($isCloser) {
+                $winnerIsHome = $match->winner_team_id === $match->home_team_id;
+                $closest = [
+                    'teams' => array_filter([
+                        $winnerIsHome ? $match->homeTeam?->name : $match->awayTeam?->name,
+                        $winnerIsHome ? $match->awayTeam?->name : $match->homeTeam?->name,
+                    ]),
+                    'score' => $winnerIsHome
+                        ? "{$home->cups_scored}:{$away->cups_scored}"
+                        : "{$away->cups_scored}:{$home->cups_scored}",
+                    'diff' => $diff,
+                    'total' => $total,
+                ];
             }
         }
 
-        return $best;
+        if ($closest === null) {
+            return null;
+        }
+
+        unset($closest['total']);
+
+        return $closest;
     }
 
     private function penaltyMagnet(Collection $matches): ?array
@@ -173,7 +200,7 @@ class StatisticsService
         }
 
         $row = collect($totals)->sortByDesc('penalty_cups')->first();
-        if (! $row) {
+        if (! $row || (int) $row['penalty_cups'] === 0) {
             return null;
         }
 
@@ -213,29 +240,61 @@ class StatisticsService
         ];
     }
 
-    private function mostPlayed(Collection $matches): ?array
+    /**
+     * Schluck-Olymp — team that "drank" the most cups across the tournament.
+     *
+     * Per match a team drinks:
+     *   • the opponent's cups_scored (= own cups that got drunk during play)
+     *   • own penalty cups
+     *   • if losing: the winner's remaining cups (= absolute cup difference),
+     *     since per Bierpong tradition the loser empties what's still standing
+     *     on the winner's side.
+     *
+     * We derive "cups per side" implicitly from the winner's score (a winner
+     * by definition has cleared all the opponent's cups), so this works for
+     * any custom cup count without an explicit setting.
+     */
+    private function schluckOlymp(Collection $matches): ?array
     {
-        $counts = [];
+        $drinks = [];
+
         foreach ($matches as $match) {
-            foreach ([$match->homeTeam, $match->awayTeam] as $team) {
-                if (! $team) {
-                    continue;
-                }
-                $counts[$team->id] = [
-                    'name' => $team->name,
-                    'matches' => ($counts[$team->id]['matches'] ?? 0) + 1,
-                ];
+            $home = $match->stats->firstWhere('team_id', $match->home_team_id);
+            $away = $match->stats->firstWhere('team_id', $match->away_team_id);
+            if (! $home || ! $away) {
+                continue;
             }
+
+            $diff = abs($home->cups_scored - $away->cups_scored);
+            $homeLost = $match->winner_team_id === $away->team_id;
+            $awayLost = $match->winner_team_id === $home->team_id;
+
+            // Home drinks: away cups (during play) + own penalty + remaining if lost.
+            $drinks[$home->team_id] = [
+                'name' => $home->team?->name,
+                'cups' => ($drinks[$home->team_id]['cups'] ?? 0)
+                    + $away->cups_scored
+                    + $home->penalty_cups
+                    + ($homeLost ? $diff : 0),
+            ];
+            // Away drinks: home cups (during play) + own penalty + remaining if lost.
+            $drinks[$away->team_id] = [
+                'name' => $away->team?->name,
+                'cups' => ($drinks[$away->team_id]['cups'] ?? 0)
+                    + $home->cups_scored
+                    + $away->penalty_cups
+                    + ($awayLost ? $diff : 0),
+            ];
         }
 
-        $row = collect($counts)->sortByDesc('matches')->first();
-        if (! $row) {
+        $row = collect($drinks)->sortByDesc('cups')->first();
+        if (! $row || (int) $row['cups'] === 0) {
             return null;
         }
 
         return [
             'team' => $row['name'] ?? '—',
-            'matches' => (int) $row['matches'],
+            'cups' => (int) $row['cups'],
         ];
     }
 }

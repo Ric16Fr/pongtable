@@ -1,16 +1,21 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
         @include('partials.head')
     </head>
     <body class="min-h-screen bg-stage-bg text-stage-text">
         <flux:sidebar sticky collapsible="mobile" class="border-e border-stage-line bg-stage-surface">
             <flux:sidebar.header>
-                <a href="{{ route('dashboard') }}" wire:navigate class="flex flex-col items-start gap-0.5 px-2 py-4">
-                    <span class="wordmark text-lg">pongtable</span>
-                    <span class="font-label text-stage-text-dim">{{ __('Schiri-Verwaltung') }}</span>
-                </a>
-                <flux:sidebar.collapse class="lg:hidden" />
+                <div class="flex w-full items-start justify-between gap-2">
+                    <a href="{{ route('dashboard') }}" wire:navigate class="flex flex-col items-start gap-0.5 px-2 py-4">
+                        <span class="wordmark text-lg">pongtable</span>
+                        <span class="font-label text-stage-text-dim">{{ __('Schiri-Verwaltung') }}</span>
+                    </a>
+                    <div class="flex items-center pt-3">
+                        <x-appearance-toggle />
+                        <flux:sidebar.collapse class="lg:hidden" />
+                    </div>
+                </div>
             </flux:sidebar.header>
 
             <flux:sidebar.nav>
@@ -75,6 +80,8 @@
             <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" />
 
             <flux:spacer />
+
+            <x-appearance-toggle class="mr-1" />
 
             <flux:dropdown position="top" align="end">
                 <flux:profile

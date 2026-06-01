@@ -13,6 +13,12 @@
    Four-role palette: red-corner, blue-corner, trophy-gold, stage-black.
    Warm-tinted neutrals (chroma anchored on hue 80) so Flux internals
    inherit the taproom tint without separate theming.
+
+   Two schemes share the same token names so utilities (bg-stage-bg,
+   text-stage-text-muted, etc.) switch on the .dark class. Defaults
+   below are the LIGHT scheme (cream-on-paper, beamer-friendly);
+   `.dark` (set by @fluxAppearance, default for this app) flips
+   the lightness ladder to the dark broadcast canvas.
    ──────────────────────────────────────────────────────────────────── */
 
 @theme {
@@ -33,51 +39,80 @@
     --color-zinc-900: oklch(16% 0.013 80);
     --color-zinc-950: oklch(11% 0.011 80);
 
-    /* Stage: the dark canvas and its tonal ladder.
-       Text scale tuned for WCAG AA against bg/surface/surface-2 with real
-       hierarchy between -text (primary), -muted (secondary), -dim (tertiary). */
-    --color-stage-bg:           oklch(11% 0.011 80);
-    --color-stage-surface:      oklch(16% 0.013 80);
-    --color-stage-surface-2:    oklch(22% 0.015 80);
-    --color-stage-line:         oklch(32% 0.017 80);  /* decorative dividers */
-    --color-stage-line-strong:  oklch(48% 0.020 80);  /* form inputs, button outlines, focus rings */
-    --color-stage-text:         oklch(96% 0.011 80);  /* primary body, ~11:1 on bg */
-    --color-stage-text-muted:   oklch(78% 0.022 80);  /* secondary, AA on every surface */
-    --color-stage-text-dim:     oklch(66% 0.024 80);  /* tertiary labels & captions, AA on bg/surface */
+    /* Stage — LIGHT defaults. Cream paper canvas with deep-roast text.
+       Designed for projectors: high luminance, lifted contrast, no pure white. */
+    --color-stage-bg:           oklch(97% 0.010 80);  /* warm cream paper */
+    --color-stage-surface:      oklch(94% 0.012 80);  /* card */
+    --color-stage-surface-2:    oklch(89% 0.014 80);  /* nested card */
+    --color-stage-line:         oklch(83% 0.016 80);  /* decorative dividers */
+    --color-stage-line-strong:  oklch(64% 0.020 80);  /* form inputs, button outlines, focus rings */
+    --color-stage-text:         oklch(20% 0.014 80);  /* primary body, deep roast */
+    --color-stage-text-muted:   oklch(40% 0.020 80);  /* secondary, AA on every surface */
+    --color-stage-text-dim:     oklch(54% 0.022 80);  /* tertiary labels & captions */
 
     /* Red corner: home team identity. Broadcast-saturated, slight orange shift. */
-    --color-red-corner:         oklch(62% 0.220 26);
-    --color-red-corner-bright:  oklch(72% 0.210 28);
-    --color-red-corner-soft:    oklch(30% 0.080 26);
+    --color-red-corner:         oklch(56% 0.220 26);  /* darkened so it reads on cream */
+    --color-red-corner-bright:  oklch(48% 0.220 28);  /* "more prominent" → goes darker on light */
+    --color-red-corner-soft:    oklch(94% 0.045 26);  /* tinted background wash */
 
     /* Blue corner: away team identity. Symmetric counterpart to red. */
-    --color-blue-corner:        oklch(62% 0.180 240);
-    --color-blue-corner-bright: oklch(72% 0.170 240);
-    --color-blue-corner-soft:   oklch(30% 0.075 240);
+    --color-blue-corner:        oklch(54% 0.180 240);
+    --color-blue-corner-bright: oklch(46% 0.180 240);
+    --color-blue-corner-soft:   oklch(94% 0.040 240);
 
     /* Trophy gold: reserved for winners, the live-warning timer, the #1 chip,
        and the live-match glow. Never on default buttons. The rarity is the point. */
-    --color-trophy-gold:        oklch(82% 0.160 78);
-    --color-trophy-gold-deep:   oklch(72% 0.180 75);
-    --color-trophy-gold-soft:   oklch(34% 0.070 75);
+    --color-trophy-gold:        oklch(70% 0.170 75);  /* readable on cream */
+    --color-trophy-gold-deep:   oklch(58% 0.180 70);
+    --color-trophy-gold-soft:   oklch(94% 0.070 78);
 
     /* Semantic states. */
-    --color-status-success:      oklch(72% 0.180 150);
-    --color-status-success-soft: oklch(32% 0.075 150);
-    --color-status-danger:       oklch(64% 0.210 28);
-    --color-status-danger-soft:  oklch(30% 0.080 28);
-    --color-status-info:         oklch(72% 0.140 230);
-    --color-status-info-soft:    oklch(30% 0.060 230);
+    --color-status-success:      oklch(52% 0.170 150);
+    --color-status-success-soft: oklch(94% 0.055 150);
+    --color-status-danger:       oklch(54% 0.210 28);
+    --color-status-danger-soft:  oklch(94% 0.055 28);
+    --color-status-info:         oklch(54% 0.150 230);
+    --color-status-info-soft:    oklch(94% 0.045 230);
 
-    /* Flux accent: cream-on-stage. Primary buttons are confident and warm,
-       not gold. Gold is reserved for actual moments of glory. */
-    --color-accent:             oklch(96% 0.011 80);
-    --color-accent-content:     oklch(96% 0.011 80);
-    --color-accent-foreground:  oklch(11% 0.011 80);
+    /* Flux accent: deep roast in light, cream in dark.
+       Primary buttons are confident and warm, not gold —
+       gold is reserved for actual moments of glory. */
+    --color-accent:             oklch(20% 0.014 80);
+    --color-accent-content:     oklch(20% 0.014 80);
+    --color-accent-foreground:  oklch(97% 0.010 80);
 }
 
 @layer theme {
+    /* Dark scheme — the broadcast canvas. Default for this app. */
     .dark {
+        --color-stage-bg:           oklch(11% 0.011 80);
+        --color-stage-surface:      oklch(16% 0.013 80);
+        --color-stage-surface-2:    oklch(22% 0.015 80);
+        --color-stage-line:         oklch(32% 0.017 80);
+        --color-stage-line-strong:  oklch(48% 0.020 80);
+        --color-stage-text:         oklch(96% 0.011 80);
+        --color-stage-text-muted:   oklch(78% 0.022 80);
+        --color-stage-text-dim:     oklch(66% 0.024 80);
+
+        --color-red-corner:         oklch(62% 0.220 26);
+        --color-red-corner-bright:  oklch(72% 0.210 28);
+        --color-red-corner-soft:    oklch(30% 0.080 26);
+
+        --color-blue-corner:        oklch(62% 0.180 240);
+        --color-blue-corner-bright: oklch(72% 0.170 240);
+        --color-blue-corner-soft:   oklch(30% 0.075 240);
+
+        --color-trophy-gold:        oklch(82% 0.160 78);
+        --color-trophy-gold-deep:   oklch(72% 0.180 75);
+        --color-trophy-gold-soft:   oklch(34% 0.070 75);
+
+        --color-status-success:      oklch(72% 0.180 150);
+        --color-status-success-soft: oklch(32% 0.075 150);
+        --color-status-danger:       oklch(64% 0.210 28);
+        --color-status-danger-soft:  oklch(30% 0.080 28);
+        --color-status-info:         oklch(72% 0.140 230);
+        --color-status-info-soft:    oklch(30% 0.060 230);
+
         --color-accent:            oklch(96% 0.011 80);
         --color-accent-content:    oklch(96% 0.011 80);
         --color-accent-foreground: oklch(11% 0.011 80);
@@ -89,7 +124,7 @@
         border-color: var(--color-stage-line, currentColor);
     }
 
-    html.dark {
+    html {
         background-color: var(--color-stage-bg);
         color: var(--color-stage-text);
     }
@@ -103,6 +138,10 @@
         font-variant-numeric: tabular-nums;
         font-feature-settings: 'tnum' 1, 'zero' 1, 'ss01' 1;
     }
+
+    /* Alpine x-cloak: hide until Alpine evaluates, so the appearance toggle
+       doesn't flash both sun and moon icons on first paint. */
+    [x-cloak] { display: none !important; }
 }
 
 /* ────────────────────────────────────────────────────────────────────
@@ -152,7 +191,7 @@ select:focus[data-flux-control] {
     outline: 0;
     box-shadow:
         0 0 0 2px var(--color-stage-bg),
-        0 0 0 4px var(--color-trophy-gold);
+        0 0 0 4px var(--color-trophy-gold-deep);
 }
 
 /* ────────────────────────────────────────────────────────────────────
@@ -219,8 +258,8 @@ select:focus[data-flux-control] {
 .live-glow {
     box-shadow:
         inset 0 0 0 1px var(--color-trophy-gold),
-        0 0 24px -2px oklch(82% 0.160 78 / 0.18),
-        0 18px 38px -18px oklch(82% 0.160 78 / 0.14);
+        0 0 24px -2px color-mix(in oklch, var(--color-trophy-gold) 22%, transparent),
+        0 18px 38px -18px color-mix(in oklch, var(--color-trophy-gold) 16%, transparent);
 }
 
 .live-marker {
@@ -252,10 +291,10 @@ select:focus[data-flux-control] {
 .face-off-bg {
     background:
         radial-gradient(ellipse 80% 60% at 0% 50%,
-            oklch(30% 0.080 26 / 0.55) 0%,
+            color-mix(in oklch, var(--color-red-corner-soft) 70%, transparent) 0%,
             transparent 60%),
         radial-gradient(ellipse 80% 60% at 100% 50%,
-            oklch(30% 0.075 240 / 0.55) 0%,
+            color-mix(in oklch, var(--color-blue-corner-soft) 70%, transparent) 0%,
             transparent 60%),
         var(--color-stage-surface);
 }
@@ -289,15 +328,15 @@ select:focus[data-flux-control] {
 }
 .rank-chip[data-rank="1"] {
     background-color: var(--color-trophy-gold);
-    color: var(--color-stage-bg);
+    color: oklch(11% 0.011 80);
 }
 .rank-chip[data-rank="2"] {
-    background-color: oklch(80% 0.020 80);
-    color: var(--color-stage-bg);
+    background-color: oklch(72% 0.020 80);
+    color: oklch(11% 0.011 80);
 }
 .rank-chip[data-rank="3"] {
-    background-color: oklch(68% 0.110 50);
-    color: var(--color-stage-bg);
+    background-color: oklch(60% 0.110 50);
+    color: oklch(96% 0.011 80);
 }
 
 /* ────────────────────────────────────────────────────────────────────
@@ -331,23 +370,23 @@ select:focus[data-flux-control] {
    ──────────────────────────────────────────────────────────────────── */
 
 /* Resting */
-html.dark a[data-flux-sidebar-item],
-html.dark a[data-flux-navlist-item] {
+a[data-flux-sidebar-item],
+a[data-flux-navlist-item] {
     color: var(--color-stage-text-muted);
     background-color: transparent;
     border-color: transparent;
 }
 
 /* Hover (non-active) */
-html.dark a[data-flux-sidebar-item]:not([data-current]):hover,
-html.dark a[data-flux-navlist-item]:not([data-current]):hover {
+a[data-flux-sidebar-item]:not([data-current]):hover,
+a[data-flux-navlist-item]:not([data-current]):hover {
     color: var(--color-stage-text);
     background-color: var(--color-stage-surface-2);
 }
 
 /* Active (current route) */
-html.dark a[data-flux-sidebar-item][data-current],
-html.dark a[data-flux-navlist-item][data-current] {
+a[data-flux-sidebar-item][data-current],
+a[data-flux-navlist-item][data-current] {
     color: var(--color-stage-text);
     background-color: var(--color-stage-surface-2);
     border-color: var(--color-stage-line);
@@ -356,21 +395,85 @@ html.dark a[data-flux-navlist-item][data-current] {
 
 /* Active + hover keeps the same surface; weight stays at 600 so the
    user keeps a clear "you are here" cue without a third bg tone. */
-html.dark a[data-flux-sidebar-item][data-current]:hover,
-html.dark a[data-flux-navlist-item][data-current]:hover {
+a[data-flux-sidebar-item][data-current]:hover,
+a[data-flux-navlist-item][data-current]:hover {
     color: var(--color-stage-text);
     background-color: var(--color-stage-surface-2);
 }
 
 /* Same discipline for the group disclosure heading button. */
-html.dark [data-flux-sidebar] [data-flux-disclosure-button],
-html.dark [data-flux-navlist] [data-flux-disclosure-button] {
+[data-flux-sidebar] [data-flux-disclosure-button],
+[data-flux-navlist] [data-flux-disclosure-button] {
     color: var(--color-stage-text-muted);
 }
-html.dark [data-flux-sidebar] [data-flux-disclosure-button]:hover,
-html.dark [data-flux-navlist] [data-flux-disclosure-button]:hover {
+[data-flux-sidebar] [data-flux-disclosure-button]:hover,
+[data-flux-navlist] [data-flux-disclosure-button]:hover {
     color: var(--color-stage-text);
     background-color: var(--color-stage-surface-2);
+}
+
+/* ────────────────────────────────────────────────────────────────────
+   Flux profile button (bottom-of-sidebar avatar + name + chevron).
+   Flux ships text-zinc-500/dark:text-white/80 plus hover:bg-white/15 —
+   the cool zinc text and the white wash both clash with the brewery
+   canvas. Pull every child into the stage vocabulary.
+   ──────────────────────────────────────────────────────────────────── */
+
+[data-flux-profile] {
+    color: var(--color-stage-text-muted);
+}
+[data-flux-profile] :where(span, svg) {
+    color: var(--color-stage-text-muted);
+}
+[data-flux-profile]:hover {
+    background-color: var(--color-stage-surface-2);
+}
+[data-flux-profile]:hover :where(span, svg) {
+    color: var(--color-stage-text);
+}
+
+/* ────────────────────────────────────────────────────────────────────
+   Flux dropdown menus (profile menu, future overflow menus).
+   Default Flux skin: bg-zinc-700 surface, white text, bg-zinc-600 for
+   data-active. The cool zinc reads cold against the warm canvas and the
+   active-state contrast collapses on the brewery tone. Re-skin both the
+   surface and the items, plus their icons, in stage colors.
+   Specificity (0,3,0) for items beats Tailwind utilities at (0,1,0).
+   ──────────────────────────────────────────────────────────────────── */
+
+[data-flux-menu] {
+    background-color: var(--color-stage-surface);
+    border-color: var(--color-stage-line);
+}
+[data-flux-menu] [data-flux-menu-item] {
+    color: var(--color-stage-text-muted);
+}
+[data-flux-menu] [data-flux-menu-item][data-active],
+[data-flux-menu] [data-flux-menu-item]:hover,
+[data-flux-menu] [data-flux-menu-item]:focus-visible {
+    color: var(--color-stage-text);
+    background-color: var(--color-stage-surface-2);
+}
+[data-flux-menu] [data-flux-menu-item-icon] {
+    color: var(--color-stage-text-dim);
+}
+[data-flux-menu] [data-flux-menu-item][data-active] [data-flux-menu-item-icon],
+[data-flux-menu] [data-flux-menu-item]:hover [data-flux-menu-item-icon] {
+    color: var(--color-stage-text);
+}
+[data-flux-menu] [data-flux-separator] {
+    background-color: var(--color-stage-line);
+}
+
+/* ────────────────────────────────────────────────────────────────────
+   Flux form labels. The shipped utility resolves to color: #fff in dark
+   mode, which violates the Tinted-Black Rule (no pure white/black) and
+   reads slightly cold against the warm stage canvas. Re-anchor labels
+   on stage-text so they share the body-text tone of the rest of the UI.
+   ──────────────────────────────────────────────────────────────────── */
+
+[data-flux-label] {
+    color: var(--color-stage-text);
 }
 
 /* ────────────────────────────────────────────────────────────────────
@@ -440,7 +543,7 @@ html.dark [data-flux-navlist] [data-flux-disclosure-button]:hover {
 .ko-match[data-live="true"] {
     box-shadow:
         inset 0 0 0 1px var(--color-trophy-gold),
-        0 0 24px -2px oklch(82% 0.160 78 / 0.18);
+        0 0 24px -2px color-mix(in oklch, var(--color-trophy-gold) 22%, transparent);
 }
 
 /* Bracket connectors. Each match in a non-final round gets a right tail.

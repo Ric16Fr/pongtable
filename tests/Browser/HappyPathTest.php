@@ -35,16 +35,16 @@ it('walks through a complete match from pre_entry to finished', function () {
 
     $page = visit('/match/'.$match->id);
 
-    // Auto-accept wire:confirm dialogs (Playwright auto-dismisses by default).
-    $page->script('window.confirm = () => true');
-
-    $page->assertSee('Vor dem Spiel eintragen')
+    $page->assertSee('Teams an den Tisch')
         ->assertSee('Team Home')
         ->assertSee('Team Away')
         ->press('Spiel starten');
 
     $page->assertSee('Verbleibende Zeit')
-        ->press('Runde beenden');
+        ->fill('homeThrows', '6')
+        ->fill('awayThrows', '5')
+        ->press('Runde beenden')                  // opens the Flux confirmation modal
+        ->click('@confirm-end-round');            // confirms inside the modal
 
     $page->assertSee('Getroffene Becher eintragen')
         ->fill('homeCups', '6')

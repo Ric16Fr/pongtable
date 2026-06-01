@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
         @include('partials.head')
     </head>
@@ -31,6 +31,7 @@
                 <div class="mx-auto flex max-w-6xl items-center justify-between px-6 py-5 lg:px-10">
                     <a href="{{ route('home') }}" class="wordmark text-xl">pongtable</a>
                     <nav class="flex items-center gap-2 text-sm">
+                        <x-appearance-toggle />
                         @auth
                             <a href="{{ route('dashboard') }}"
                                class="rounded-md px-4 py-2 font-medium text-stage-text hover:bg-stage-surface transition">
@@ -68,7 +69,7 @@
 
                         <div class="flex flex-wrap items-center gap-3 pt-2">
                             <a href="{{ route('tournament.public', $tournament->public_token) }}"
-                               class="inline-flex items-center gap-2 rounded-md bg-stage-text px-6 py-3 text-base font-semibold text-stage-bg hover:bg-zinc-200 transition">
+                               class="inline-flex items-center gap-2 rounded-md bg-stage-text px-6 py-3 text-base font-semibold text-stage-bg hover:opacity-90 transition">
                                 Zum Turnier
                                 <svg viewBox="0 0 16 16" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 4l4 4-4 4"/></svg>
                             </a>
@@ -106,12 +107,12 @@
                         <div class="flex flex-wrap items-center gap-3 pt-2">
                             @auth
                                 <a href="{{ route('tournament.setup') }}"
-                                   class="inline-flex items-center gap-2 rounded-md bg-stage-text px-6 py-3 text-base font-semibold text-stage-bg hover:bg-zinc-200 transition">
+                                   class="inline-flex items-center gap-2 rounded-md bg-stage-text px-6 py-3 text-base font-semibold text-stage-bg hover:opacity-90 transition">
                                     Turnier anlegen
                                 </a>
                             @else
                                 <a href="{{ route('login') }}"
-                                   class="inline-flex items-center gap-2 rounded-md bg-stage-text px-6 py-3 text-base font-semibold text-stage-bg hover:bg-zinc-200 transition">
+                                   class="inline-flex items-center gap-2 rounded-md bg-stage-text px-6 py-3 text-base font-semibold text-stage-bg hover:opacity-90 transition">
                                     Anmelden
                                 </a>
                                 <a href="{{ route('register') }}"

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
         @include('partials.head')
     </head>
@@ -24,12 +24,13 @@
                     @endif
                 </a>
 
-                <div class="flex items-center gap-4">
+                <div class="flex items-center gap-3">
                     @if ($publicTournament)
                         <span class="font-label hidden text-stage-text-dim md:inline">
                             {{ $phaseLabels[$publicTournament->status] ?? $publicTournament->status }}
                         </span>
                     @endif
+                    <x-appearance-toggle />
                     @auth
                         <a href="{{ route('dashboard') }}"
                            class="rounded-md border border-stage-line-strong px-3 py-1.5 text-sm font-medium text-stage-text hover:bg-stage-surface transition">

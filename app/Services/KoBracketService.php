@@ -5,7 +5,7 @@ namespace App\Services;
 use App\Models\GameMatch;
 use App\Models\Team;
 use App\Models\Tournament;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class KoBracketService
@@ -128,17 +128,97 @@ class KoBracketService
     }
 
     /**
-     * Ranked teams for a group, sorted by points → cup diff → cups scored.
+     * Ranked teams for a group, following the official tournament rules:
+     * Punkte → direkter Vergleich → Torverhältnis → getroffene Becher.
+     *
+     * "Direkter Vergleich" is a head-to-head mini-table among teams that
+     * are tied on overall points — for a two-way tie it's effectively who
+     * won the match between them; for 3+ tied teams it's the points each
+     * collected against only the other tied teams.
+     *
+     * If everything is still equal the rules call for an "Entscheidungsspiel"
+     * (decided manually); we fall back to a stable team-id order so the
+     * algorithm is deterministic in the meantime.
      *
      * @return Collection<int, Team>
      */
     public function groupStandings($group): Collection
     {
-        return $group->teams()
+        $teams = $group->teams()
             ->withPivot('points', 'wins', 'losses', 'cups_scored_total', 'cups_conceded_total')
-            ->orderByPivot('points', 'desc')
-            ->orderByRaw('(group_team.cups_scored_total - group_team.cups_conceded_total) DESC')
-            ->orderByPivot('cups_scored_total', 'desc')
             ->get();
+
+        if ($teams->count() < 2) {
+            return $teams;
+        }
+
+        $matches = GameMatch::query()
+            ->where('group_id', $group->id)
+            ->where('status', 'finished')
+            ->whereNotNull('winner_team_id')
+            ->get(['id', 'home_team_id', 'away_team_id', 'winner_team_id']);
+
+        return $teams
+            ->groupBy(fn ($team) => $team->pivot->points)
+            ->sortKeysDesc()
+            ->flatMap(function ($bucket) use ($matches) {
+                if ($bucket->count() === 1) {
+                    return $bucket;
+                }
+
+                $h2h = $this->headToHeadPoints($matches, $bucket->pluck('id')->all());
+
+                return $bucket->sort(function ($a, $b) use ($h2h) {
+                    // 2. Direkter Vergleich — head-to-head points within tied set.
+                    if (($h2h[$a->id] ?? 0) !== ($h2h[$b->id] ?? 0)) {
+                        return ($h2h[$b->id] ?? 0) <=> ($h2h[$a->id] ?? 0);
+                    }
+
+                    // 3. Torverhältnis — overall cup difference.
+                    $aDiff = $a->pivot->cups_scored_total - $a->pivot->cups_conceded_total;
+                    $bDiff = $b->pivot->cups_scored_total - $b->pivot->cups_conceded_total;
+                    if ($aDiff !== $bDiff) {
+                        return $bDiff <=> $aDiff;
+                    }
+
+                    // 4. Getroffene Becher — overall cups scored.
+                    if ($a->pivot->cups_scored_total !== $b->pivot->cups_scored_total) {
+                        return $b->pivot->cups_scored_total <=> $a->pivot->cups_scored_total;
+                    }
+
+                    // Stable fallback — rules require Entscheidungsspiel here.
+                    return $a->id <=> $b->id;
+                });
+            })
+            ->values();
+    }
+
+    /**
+     * Head-to-head points among a set of tied teams: 3 per win in any match
+     * where BOTH participants are part of the tied bucket. Returns a
+     * team_id → points map (0 for teams without h2h matches yet).
+     *
+     * @param  Collection<int, GameMatch>  $matches
+     * @param  array<int, int>  $tiedIds
+     * @return array<int, int>
+     */
+    private function headToHeadPoints(Collection $matches, array $tiedIds): array
+    {
+        $points = array_fill_keys($tiedIds, 0);
+
+        foreach ($matches as $match) {
+            if (! in_array($match->home_team_id, $tiedIds, true)
+                || ! in_array($match->away_team_id, $tiedIds, true)) {
+                continue;
+            }
+
+            if ($match->winner_team_id === $match->home_team_id) {
+                $points[$match->home_team_id] += 3;
+            } elseif ($match->winner_team_id === $match->away_team_id) {
+                $points[$match->away_team_id] += 3;
+            }
+        }
+
+        return $points;
     }
 }

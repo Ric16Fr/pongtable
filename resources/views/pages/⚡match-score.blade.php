@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\GameMatch;
+use App\Models\MatchStat;
 use App\Services\MatchResultService;
 use Flux\Flux;
 use Livewire\Attributes\Computed;
@@ -22,7 +23,7 @@ new #[Title('Match')] class extends Component {
     {
         $this->matchId = $match->id;
 
-        if ($match->status === 'pending') {
+        if ($match->status === 'pending' && $match->home_team_id !== null && $match->away_team_id !== null) {
             app(MatchResultService::class)->startPreEntry($match);
         }
 
@@ -34,8 +35,16 @@ new #[Title('Match')] class extends Component {
         $this->awayThrows = $away?->throws ?? 0;
         $this->awayPenalty = $away?->penalty_cups ?? 0;
 
-        $this->homeCups = $home?->cups_scored ?? 0;
-        $this->awayCups = $away?->cups_scored ?? 0;
+        // Cups: bei Bierpong gibt es 10 Becher und der Sieger hat fast immer
+        // alle. 10:10 vorbelegen → Schiri zählt nur vom Verliererteam runter.
+        // Für bereits abgeschlossene Matches die echten Werte laden.
+        if ($match->status === 'finished') {
+            $this->homeCups = $home?->cups_scored ?? 0;
+            $this->awayCups = $away?->cups_scored ?? 0;
+        } else {
+            $this->homeCups = ($home?->cups_scored ?: 10);
+            $this->awayCups = ($away?->cups_scored ?: 10);
+        }
     }
 
     #[Computed]
@@ -44,20 +53,79 @@ new #[Title('Match')] class extends Component {
         return GameMatch::with(['homeTeam', 'awayTeam', 'table', 'tournament', 'stats'])->findOrFail($this->matchId);
     }
 
+    /** @var array<string, array{string, string}> */
+    protected const LIVE_FIELD_MAP = [
+        'homeThrows' => ['home', 'throws'],
+        'homePenalty' => ['home', 'penalty_cups'],
+        'awayThrows' => ['away', 'throws'],
+        'awayPenalty' => ['away', 'penalty_cups'],
+    ];
+
     public function adjust(string $field, int $delta): void
     {
         $value = max(0, $this->{$field} + $delta);
         $this->{$field} = $value;
+
+        // Livewire `updated*` hooks only fire for client-driven property changes
+        // (wire:model). +/- buttons mutate state on the server, so we must
+        // persist explicitly here.
+        $this->persistFromField($field);
+    }
+
+    public function updatedHomeThrows(): void { $this->persistFromField('homeThrows'); }
+    public function updatedHomePenalty(): void { $this->persistFromField('homePenalty'); }
+    public function updatedAwayThrows(): void { $this->persistFromField('awayThrows'); }
+    public function updatedAwayPenalty(): void { $this->persistFromField('awayPenalty'); }
+
+    protected function persistFromField(string $field): void
+    {
+        if (! isset(self::LIVE_FIELD_MAP[$field])) {
+            return;
+        }
+
+        [$side, $column] = self::LIVE_FIELD_MAP[$field];
+        $this->persistLiveStat($side, $column, (int) $this->{$field});
+    }
+
+    /**
+     * Persist a live throw/penalty edit. Only fires during the active phase —
+     * pre_entry stays empty by design (entry happens DURING the match now),
+     * scoring would let live cups leak into the running totals.
+     */
+    protected function persistLiveStat(string $side, string $column, int $value): void
+    {
+        $match = $this->match;
+
+        if ($match->status !== 'active') {
+            return;
+        }
+
+        $teamId = $side === 'home' ? $match->home_team_id : $match->away_team_id;
+
+        MatchStat::updateOrCreate(
+            ['match_id' => $match->id, 'team_id' => $teamId],
+            [$column => max(0, $value)],
+        );
+
+        unset($this->match);
     }
 
     public function startMatch(MatchResultService $service): void
     {
+        // Throws & penalties are entered LIVE during the active phase, not before.
+        // We hand zeros to the service so it can still seed the MatchStat rows.
         $service->startMatch($this->match, [
-            'home_throws' => $this->homeThrows,
-            'home_penalty_cups' => $this->homePenalty,
-            'away_throws' => $this->awayThrows,
-            'away_penalty_cups' => $this->awayPenalty,
+            'home_throws' => 0,
+            'home_penalty_cups' => 0,
+            'away_throws' => 0,
+            'away_penalty_cups' => 0,
         ]);
+
+        $this->homeThrows = 0;
+        $this->homePenalty = 0;
+        $this->awayThrows = 0;
+        $this->awayPenalty = 0;
+
         unset($this->match);
     }
 
@@ -128,67 +196,66 @@ new #[Title('Match')] class extends Component {
                 <span class="font-label text-red-corner-bright">Red Corner</span>
                 <span class="team-tag">
                     <span class="team-dot" @if($home?->color) style="background-color: {{ $home->color }}" @endif></span>
-                    <span class="font-display text-stage-text text-[clamp(1.5rem,5vw,2.5rem)]">{{ $home?->name }}</span>
+                    @if ($home)
+                        <span class="font-display text-stage-text text-[clamp(1.5rem,5vw,2.5rem)]">{{ $home->name }}</span>
+                    @else
+                        <span class="font-display text-stage-text-dim text-[clamp(1.5rem,5vw,2.5rem)]">Sieger Vorrunde</span>
+                    @endif
                 </span>
             </div>
             <div aria-hidden="true" class="face-off-divider h-20 w-px self-stretch"></div>
             <div class="flex flex-col gap-2 text-right">
                 <span class="font-label text-blue-corner-bright">Blue Corner</span>
                 <span class="team-tag justify-end">
-                    <span class="font-display text-stage-text text-[clamp(1.5rem,5vw,2.5rem)]">{{ $away?->name }}</span>
+                    @if ($away)
+                        <span class="font-display text-stage-text text-[clamp(1.5rem,5vw,2.5rem)]">{{ $away->name }}</span>
+                    @else
+                        <span class="font-display text-stage-text-dim text-[clamp(1.5rem,5vw,2.5rem)]">Sieger Vorrunde</span>
+                    @endif
                     <span class="team-dot" @if($away?->color) style="background-color: {{ $away->color }}" @endif></span>
                 </span>
             </div>
         </div>
     </header>
 
-    {{-- ───────── PRE_ENTRY ───────── --}}
+    {{-- ───────── PRE_ENTRY ─────────
+         No inputs here on purpose — Würfe & Strafe are entered LIVE during
+         the active phase. Pre-entry exists only as a "Teams, an den Tisch"
+         signal between matches. KO matches whose opponent is still in play
+         render a "wartet auf Vorrunde" state instead. --}}
     @if (in_array($match->status, ['pending', 'pre_entry'], true))
+        @php $teamsReady = $match->home_team_id !== null && $match->away_team_id !== null; @endphp
         <section class="space-y-6">
-            <div class="flex items-baseline justify-between">
-                <h2 class="font-label text-stage-text-muted">Vor dem Spiel eintragen</h2>
-                <span class="text-xs text-stage-text-dim">Würfe & Strafbecher pro Team</span>
-            </div>
+            @if ($teamsReady)
+                <div class="rounded-lg face-off-bg px-6 py-10 text-center lg:px-10 lg:py-14">
+                    <span class="font-label text-trophy-gold">Bereitmachen</span>
+                    <h2 class="mt-3 font-display text-stage-text text-[clamp(1.75rem,5vw,2.75rem)]">
+                        Teams an den Tisch
+                    </h2>
+                    <p class="mt-3 text-sm text-stage-text-muted lg:text-base">
+                        Würfe und Strafbecher werden während des laufenden Spiels gezählt.
+                    </p>
+                </div>
 
-            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-                @foreach ([
-                    'home' => ['team' => $home, 'throws' => 'homeThrows', 'penalty' => 'homePenalty', 'corner' => 'Red', 'tint' => 'red'],
-                    'away' => ['team' => $away, 'throws' => 'awayThrows', 'penalty' => 'awayPenalty', 'corner' => 'Blue', 'tint' => 'blue'],
-                ] as $side => $cfg)
-                    <div class="space-y-5 rounded-lg p-5 lg:p-6"
-                         style="background: linear-gradient(180deg, var(--color-{{ $cfg['tint'] }}-corner-soft) 0%, transparent 100%), var(--color-stage-surface);">
-                        <div class="flex items-baseline justify-between">
-                            <span class="font-label text-{{ $cfg['tint'] }}-corner-bright">{{ $cfg['corner'] }} Corner</span>
-                            <span class="team-tag">
-                                <span class="team-dot" @if($cfg['team']?->color) style="background-color: {{ $cfg['team']->color }}" @endif></span>
-                                <span class="font-display text-lg">{{ $cfg['team']?->name }}</span>
-                            </span>
-                        </div>
-
-                        @foreach ([
-                            ['label' => 'Würfe', 'field' => $cfg['throws']],
-                            ['label' => 'Strafbecher', 'field' => $cfg['penalty']],
-                        ] as $row)
-                            <div class="flex items-center justify-between gap-3">
-                                <label class="font-label text-stage-text-dim">{{ $row['label'] }}</label>
-                                <div class="flex items-center gap-2">
-                                    <button wire:click="adjust('{{ $row['field'] }}', -1)" type="button"
-                                            class="h-14 w-14 rounded-md bg-stage-bg text-2xl font-semibold text-stage-text hover:bg-stage-surface-2 active:scale-95 transition">&minus;</button>
-                                    <input wire:model.live="{{ $row['field'] }}" type="number" min="0" inputmode="numeric"
-                                           class="h-14 w-20 rounded-md border border-stage-line bg-stage-bg text-center font-numeric text-xl font-semibold text-stage-text focus:border-stage-line-strong">
-                                    <button wire:click="adjust('{{ $row['field'] }}', 1)" type="button"
-                                            class="h-14 w-14 rounded-md bg-stage-bg text-2xl font-semibold text-stage-text hover:bg-stage-surface-2 active:scale-95 transition">+</button>
-                                </div>
-                            </div>
-                        @endforeach
-                    </div>
-                @endforeach
-            </div>
-
-            <button wire:click="startMatch"
-                    class="w-full rounded-lg bg-stage-text px-5 py-5 text-lg font-bold tracking-wide text-stage-bg hover:bg-zinc-200 active:scale-[0.99] transition">
-                Spiel starten
-            </button>
+                <button wire:click="startMatch"
+                        class="w-full rounded-lg bg-stage-text px-5 py-5 text-lg font-bold tracking-wide text-stage-bg hover:opacity-90 active:scale-[0.99] transition">
+                    Spiel starten
+                </button>
+            @else
+                <div class="rounded-lg border border-stage-line bg-stage-surface px-6 py-10 text-center lg:px-10 lg:py-14">
+                    <span class="font-label text-stage-text-dim">Noch nicht spielbereit</span>
+                    <h2 class="mt-3 font-display text-stage-text text-[clamp(1.5rem,4vw,2.25rem)]">
+                        Wartet auf Vorrunde
+                    </h2>
+                    <p class="mt-3 max-w-md mx-auto text-sm text-stage-text-muted lg:text-base">
+                        @if ($match->home_team_id === null && $match->away_team_id === null)
+                            Beide Vorrundenspiele müssen noch beendet werden.
+                        @else
+                            Das Vorrundenspiel der Gegenseite läuft noch. Sobald der Sieger feststeht, kann es hier weitergehen.
+                        @endif
+                    </p>
+                </div>
+            @endif
         </section>
     @endif
 
@@ -225,30 +292,67 @@ new #[Title('Match')] class extends Component {
                 <span class="font-label text-stage-text-dim">Verbleibende Zeit</span>
             </div>
 
-            <div class="grid grid-cols-2 border-t border-stage-line">
-                <div class="px-5 py-4 text-left lg:px-7 lg:py-5">
-                    <span class="font-label text-red-corner-bright">Red &mdash; {{ $home?->name }}</span>
-                    <p class="mt-1 text-sm text-stage-text-muted">
-                        <span class="font-numeric text-stage-text">{{ $homeThrows }}</span> Würfe
-                        <span class="mx-1 text-stage-text-dim">·</span>
-                        <span class="font-numeric text-stage-text">{{ $homePenalty }}</span> Strafe
-                    </p>
-                </div>
-                <div class="border-l border-stage-line px-5 py-4 text-right lg:px-7 lg:py-5">
-                    <span class="font-label text-blue-corner-bright">Blue &mdash; {{ $away?->name }}</span>
-                    <p class="mt-1 text-sm text-stage-text-muted">
-                        <span class="font-numeric text-stage-text">{{ $awayThrows }}</span> Würfe
-                        <span class="mx-1 text-stage-text-dim">·</span>
-                        <span class="font-numeric text-stage-text">{{ $awayPenalty }}</span> Strafe
-                    </p>
-                </div>
+            <div class="grid grid-cols-1 border-t border-stage-line md:grid-cols-2">
+                @foreach ([
+                    'home' => ['team' => $home, 'throws' => 'homeThrows', 'penalty' => 'homePenalty', 'corner' => 'Red', 'tint' => 'red'],
+                    'away' => ['team' => $away, 'throws' => 'awayThrows', 'penalty' => 'awayPenalty', 'corner' => 'Blue', 'tint' => 'blue'],
+                ] as $side => $cfg)
+                    <div @class([
+                        'space-y-4 px-5 py-5 lg:px-7 lg:py-6',
+                        'border-t border-stage-line md:border-t-0 md:border-l' => $side === 'away',
+                    ])>
+                        <div class="flex items-center justify-between gap-3">
+                            <span class="font-label text-{{ $cfg['tint'] }}-corner-bright">{{ $cfg['corner'] }} &mdash; {{ $cfg['team']?->name }}</span>
+                            <span class="team-dot" @if($cfg['team']?->color) style="background-color: {{ $cfg['team']->color }}" @endif></span>
+                        </div>
+
+                        @foreach ([
+                            ['label' => 'Würfe', 'field' => $cfg['throws']],
+                            ['label' => 'Strafe', 'field' => $cfg['penalty']],
+                        ] as $row)
+                            <div class="flex items-center justify-between gap-3">
+                                <label class="font-label text-stage-text-dim">{{ $row['label'] }}</label>
+                                <div class="flex items-center gap-2">
+                                    <button wire:click="adjust('{{ $row['field'] }}', -1)" type="button"
+                                            class="h-11 w-11 rounded-md bg-stage-bg/60 text-xl font-semibold text-stage-text hover:bg-stage-surface-2 active:scale-95 transition">&minus;</button>
+                                    <input wire:model.live="{{ $row['field'] }}" name="{{ $row['field'] }}" type="number" min="0" inputmode="numeric"
+                                           class="h-11 w-16 rounded-md border border-stage-line bg-stage-bg/60 text-center font-numeric text-lg font-semibold text-stage-text focus:border-stage-line-strong">
+                                    <button wire:click="adjust('{{ $row['field'] }}', 1)" type="button"
+                                            class="h-11 w-11 rounded-md bg-stage-bg/60 text-xl font-semibold text-stage-text hover:bg-stage-surface-2 active:scale-95 transition">+</button>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @endforeach
             </div>
         </section>
 
-        <button wire:click="endTimer" wire:confirm="Runde wirklich beenden?"
-                class="w-full rounded-lg border border-status-danger bg-status-danger-soft px-5 py-5 text-lg font-bold tracking-wide text-status-danger hover:bg-stage-surface-2 active:scale-[0.99] transition">
-            Runde beenden
-        </button>
+        <flux:modal.trigger name="confirm-end-round">
+            <button type="button"
+                    class="w-full rounded-lg border border-status-danger bg-status-danger-soft px-5 py-5 text-lg font-bold tracking-wide text-status-danger hover:bg-stage-surface-2 active:scale-[0.99] transition">
+                Runde beenden
+            </button>
+        </flux:modal.trigger>
+
+        <flux:modal name="confirm-end-round" class="md:w-104">
+            <div class="space-y-6">
+                <div>
+                    <flux:heading size="lg">Runde beenden?</flux:heading>
+                    <flux:text class="mt-2">
+                        Sobald die Runde endet, geht es weiter zur Becher-Eingabe. Würfe und Strafe lassen sich danach nicht mehr ändern.
+                    </flux:text>
+                </div>
+                <div class="flex gap-2">
+                    <flux:spacer />
+                    <flux:modal.close>
+                        <flux:button variant="ghost">Abbrechen</flux:button>
+                    </flux:modal.close>
+                    <flux:button wire:click="endTimer" variant="danger" data-test="confirm-end-round">
+                        Ja, Runde beenden
+                    </flux:button>
+                </div>
+            </div>
+        </flux:modal>
     @endif
 
     {{-- ───────── SCORING ───────── --}}
@@ -290,7 +394,7 @@ new #[Title('Match')] class extends Component {
             @error('awayCups') <p class="text-sm text-status-danger">{{ $message }}</p> @enderror
 
             <button wire:click="saveResult"
-                    class="w-full rounded-lg bg-stage-text px-5 py-5 text-lg font-bold tracking-wide text-stage-bg hover:bg-zinc-200 active:scale-[0.99] transition">
+                    class="w-full rounded-lg bg-stage-text px-5 py-5 text-lg font-bold tracking-wide text-stage-bg hover:opacity-90 active:scale-[0.99] transition">
                 Ergebnis speichern
             </button>
         </section>
