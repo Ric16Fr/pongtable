@@ -2,7 +2,7 @@
 
 Diese Dokumentation beschreibt, wie das System bedient wird. Sie geht
 gezielt **nicht** auf die Bierpong-Regeln selbst ein — die liegen in
-[Bierpongregeln .md](./Bierpongregeln%20.md). Hier geht es um die App:
+[Bierpongregeln.md](./Bierpongregeln.md). Hier geht es um die App:
 wie ein Schiri ein Match steuert, wie ein Admin ein Turnier aufbaut,
 wie der Sieger ermittelt wird, was die Statistiken bedeuten.
 

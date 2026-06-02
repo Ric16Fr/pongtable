@@ -113,11 +113,7 @@
                             @else
                                 <a href="{{ route('login') }}"
                                    class="inline-flex items-center gap-2 rounded-md bg-stage-text px-6 py-3 text-base font-semibold text-stage-bg hover:opacity-90 transition">
-                                    Anmelden
-                                </a>
-                                <a href="{{ route('register') }}"
-                                   class="inline-flex items-center gap-2 rounded-md border border-stage-line-strong px-6 py-3 text-base font-medium text-stage-text hover:bg-stage-surface transition">
-                                    Registrieren
+                                    Schiri-Login
                                 </a>
                             @endauth
                         </div>

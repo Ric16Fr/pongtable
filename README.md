@@ -42,5 +42,5 @@ Diese Accounts können (anders als der Admin) die Turniereinstellungen nicht än
 ## Doku
 Für (unsere) Bierpongregeln und eine, teilweise technische, detaillierte Beschreibung aller Features (organisiert nach den Elementen in der 
 Sidebar) bitte im 
-`docs`-Ordner nachschauen
+`docs`-Ordner nachschauen, empfohlener Start: [README](docs/README.md)
 
