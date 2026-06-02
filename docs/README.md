@@ -30,7 +30,7 @@ Pro Sidebar-/Profil-Eintrag gibt es ein Dokument:
 3. **Setup aufrufen.** Tische und Teams eintragen, Match-Dauer
    konfigurieren, **Gruppen generieren** anklicken.
 4. **Public-Link teilen.** Im Dashboard auf den Public-Link-Button
-   klicken; die URL als QR-Code auf den Beamer.
+   klicken; die URL (als QR-Code) auf dem Beamer aufrufen
 5. **Spielen lassen.** Schiris öffnen `/matches`, klicken sich in das
    nächste Match und steuern die Phasen `pre_entry` → `active` →
    `scoring` → `finished` durch.
