@@ -29,12 +29,13 @@ Aufgrund fehlender Alternativen selbst gebaut und stetig erweitert.
 - QR-Codes für das Leaderboard, bei Interesse einfach mit der eigenen URL erstellen
 
 ## Was ist noch geplant
--[ ] festlegen der Gruppen per CSV anstelle von Auslosung (falls die Gruppen live festgelegt oder vorab ausgelost werden sollen) 
--[ ] ein Archiv mit vergangenen Turnieren
--[ ] Download der Ergebnisse als CSV
--[ ] (wenn ich mal viel Zeit hab) Generierung von Zertifikaten
--[ ] Sonderregeln, etwa wie der Sieger in der KO-Phase bestimmt wird
--[ ] Platzierungsspiele nach Ende der Gruppenphase
+- [ ] festlegen der Gruppen per CSV anstelle von Auslosung (falls die Gruppen live festgelegt oder vorab ausgelost werden sollen) 
+- [ ] ein Archiv mit vergangenen Turnieren
+- [ ] Download der Ergebnisse als CSV
+- [ ] (wenn ich mal viel Zeit hab) Generierung von Zertifikaten
+- [ ] Sonderregeln, etwa wie der Sieger in der KO-Phase bestimmt wird
+- [ ] Platzierungsspiele nach Ende der Gruppenphase
+- [ ] ggf. Wünsche vom lokalen Studentenclub
 
 
 ## Installation
