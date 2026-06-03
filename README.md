@@ -14,7 +14,7 @@ Aufgrund fehlender Alternativen selbst gebaut und stetig erweitert.
 ## Features
 
 - beliebig viele Teams und Spieltische erstellbar
-- automatischer Gruppenmodus (per Auslosung) oder Festlegen von Gruppen, falls bereits gelost wurde
+- automatischer Gruppenmodus (per Auslosung), verteilung auf die Spieltische (falls mehr Gruppen gewünscht, einfach Dummytische erstellen)
 - ernennung von Schiris, welche die Spielergebnisse eintragen
 - Eintragungsmöglichkeit für die Anzahl an Würfen pro Team und den Strafbechern (nicht notwenig, aber für die Statistiken nett)
 - öffentliches Dashboard für das aktuelle Turnier
@@ -29,11 +29,12 @@ Aufgrund fehlender Alternativen selbst gebaut und stetig erweitert.
 - QR-Codes für das Leaderboard, bei Interesse einfach mit der eigenen URL erstellen
 
 ## Was ist noch geplant
-- ein Archiv mit vergangenen Turnieren
-- Download der Ergebnisse als CSV
-- (wenn ich mal viel Zeit hab) Generierung von Zertifikaten
-- Sonderregeln, etwa wie der Sieger in der KO-Phase bestimmt wird
-- Platzierungsspiele nach Ende der Gruppenphase
+-[ ] festlegen der Gruppen per CSV anstelle von Auslosung (falls die Gruppen live festgelegt oder vorab ausgelost werden sollen) 
+-[ ] ein Archiv mit vergangenen Turnieren
+-[ ] Download der Ergebnisse als CSV
+-[ ] (wenn ich mal viel Zeit hab) Generierung von Zertifikaten
+-[ ] Sonderregeln, etwa wie der Sieger in der KO-Phase bestimmt wird
+-[ ] Platzierungsspiele nach Ende der Gruppenphase
 
 
 ## Installation
