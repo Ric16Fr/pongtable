@@ -4,7 +4,7 @@
         @include('partials.head')
     </head>
     <body class="min-h-screen bg-stage-bg text-stage-text">
-        <flux:sidebar sticky collapsible="mobile" class="border-e border-stage-line bg-stage-surface">
+        <flux:sidebar sticky collapsible="mobile" class="w-72 border-e border-stage-line bg-stage-surface">
             <flux:sidebar.header>
                 <div class="flex w-full items-start justify-between gap-2">
                     <a href="{{ route('dashboard') }}" wire:navigate class="flex flex-col items-start gap-0.5 px-2 py-4">
@@ -32,6 +32,12 @@
                         </flux:sidebar.item>
                         <flux:sidebar.item icon="chart-bar" :href="route('statistics')" :current="request()->routeIs('statistics')" wire:navigate>
                             {{ __('Statistik') }}
+                        </flux:sidebar.item>
+                        <flux:sidebar.item :href="route('special-rules')" :current="request()->routeIs('special-rules')" wire:navigate>
+                            <x-slot:icon>
+                                <span class="flex size-4 items-center justify-center text-base leading-none" aria-hidden="true">🍺</span>
+                            </x-slot:icon>
+                            {{ __('Sonderregeln & Einstellungen') }}
                         </flux:sidebar.item>
                     @endif
                 </flux:sidebar.group>

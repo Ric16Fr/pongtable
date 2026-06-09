@@ -18,20 +18,6 @@ it('auto-creates a tournament on first mount when none exists', function () {
     expect(Tournament::count())->toBe(1);
 });
 
-it('saves tournament settings', function () {
-    Livewire::test('pages::admin-setup')
-        ->set('tournamentName', 'Neuer Cup')
-        ->set('groupMinutes', 12)
-        ->set('koMinutes', 20)
-        ->call('saveSettings')
-        ->assertHasNoErrors();
-
-    $t = Tournament::first();
-    expect($t->name)->toBe('Neuer Cup')
-        ->and($t->group_match_duration_minutes)->toBe(12)
-        ->and($t->ko_match_duration_minutes)->toBe(20);
-});
-
 it('adds a new table during setup phase', function () {
     Livewire::test('pages::admin-setup')
         ->set('newTableName', 'Tisch Kellerbar')

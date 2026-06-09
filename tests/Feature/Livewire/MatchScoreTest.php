@@ -234,3 +234,35 @@ it('renders the finished view for a completed match', function () {
         ->assertSee('Sieger')
         ->assertSeeInOrder(['>6<', '>4<']);
 });
+
+it('shows the throw counter during an active match by default', function () {
+    $match = freshMatch('pre_entry');
+
+    Livewire::test('pages::match-score', ['match' => $match])
+        ->call('startMatch')
+        ->assertSee('Würfe')
+        ->assertSee('Strafe');
+});
+
+it('hides the throw counter while a match is active when count_throws is off', function () {
+    $match = freshMatch('pre_entry');
+    $match->tournament->update(['count_throws' => false]);
+
+    Livewire::test('pages::match-score', ['match' => $match])
+        ->call('startMatch')
+        ->assertDontSee('Würfe')
+        ->assertSee('Strafe');
+});
+
+it('hides the Würfe row in the finished summary when count_throws is off', function () {
+    $match = freshMatch('pre_entry');
+    $match->tournament->update(['count_throws' => false]);
+
+    Livewire::test('pages::match-score', ['match' => $match])
+        ->call('startMatch')
+        ->call('endTimer')
+        ->set('homeCups', 6)->set('awayCups', 4)
+        ->call('saveResult')
+        ->assertSee('Sieger')
+        ->assertDontSee('Würfe');
+});

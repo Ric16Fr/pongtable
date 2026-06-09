@@ -15,15 +15,6 @@ new #[Title('Setup')] class extends Component {
     public ?int $tournamentId = null;
 
     #[Validate('required|string|max:255')]
-    public string $tournamentName = '';
-
-    #[Validate('required|integer|min:1|max:60')]
-    public int $groupMinutes = 10;
-
-    #[Validate('required|integer|min:1|max:60')]
-    public int $koMinutes = 15;
-
-    #[Validate('required|string|max:255')]
     public string $newTableName = '';
 
     #[Validate('required|string|max:255')]
@@ -51,30 +42,12 @@ new #[Title('Setup')] class extends Component {
         }
 
         $this->tournamentId = $tournament->id;
-        $this->tournamentName = $tournament->name;
-        $this->groupMinutes = $tournament->group_match_duration_minutes;
-        $this->koMinutes = $tournament->ko_match_duration_minutes;
     }
 
     #[Computed]
     public function tournament(): Tournament
     {
         return Tournament::with(['tables', 'teams'])->findOrFail($this->tournamentId);
-    }
-
-    public function saveSettings(): void
-    {
-        $this->validateOnly('tournamentName');
-        $this->validateOnly('groupMinutes');
-        $this->validateOnly('koMinutes');
-
-        $this->tournament->update([
-            'name' => $this->tournamentName,
-            'group_match_duration_minutes' => $this->groupMinutes,
-            'ko_match_duration_minutes' => $this->koMinutes,
-        ]);
-
-        Flux::toast(variant: 'success', text: __('Einstellungen gespeichert.'));
     }
 
     public function startAddingTable(): void
@@ -243,20 +216,6 @@ new #[Title('Setup')] class extends Component {
                 @endif
             </div>
         </header>
-
-        {{-- Settings --}}
-        <section class="space-y-5">
-            <div class="flex items-baseline justify-between border-b border-stage-line pb-3">
-                <h2 class="font-display text-2xl text-stage-text">Einstellungen</h2>
-                <span class="font-label text-stage-text-dim">Name & Match-Dauer</span>
-            </div>
-            <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
-                <flux:input wire:model="tournamentName" label="Turniername" />
-                <flux:input wire:model="groupMinutes" type="number" min="1" max="60" label="Gruppen-Match (Min)" />
-                <flux:input wire:model="koMinutes" type="number" min="1" max="60" label="KO-Match (Min)" />
-            </div>
-            <flux:button wire:click="saveSettings" variant="primary">Speichern</flux:button>
-        </section>
 
         {{-- Tables --}}
         <section class="space-y-5">

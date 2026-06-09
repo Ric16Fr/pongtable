@@ -10,25 +10,6 @@ beforeEach(function () {
     $this->actingAs(User::factory()->admin()->create());
 });
 
-it('rejects a blank tournament name on save', function () {
-    Livewire::test('pages::admin-setup')
-        ->set('tournamentName', '')
-        ->call('saveSettings')
-        ->assertHasErrors(['tournamentName' => 'required']);
-});
-
-it('rejects match durations out of 1-60 range', function () {
-    Livewire::test('pages::admin-setup')
-        ->set('groupMinutes', 0)
-        ->call('saveSettings')
-        ->assertHasErrors(['groupMinutes']);
-
-    Livewire::test('pages::admin-setup')
-        ->set('koMinutes', 999)
-        ->call('saveSettings')
-        ->assertHasErrors(['koMinutes']);
-});
-
 it('rejects an empty new-table name', function () {
     Livewire::test('pages::admin-setup')
         ->set('newTableName', '')

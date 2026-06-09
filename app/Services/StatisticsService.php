@@ -29,15 +29,17 @@ class StatisticsService
             ->with(['stats.team', 'homeTeam', 'awayTeam', 'winnerTeam'])
             ->get();
 
+        $countThrows = $tournament->count_throws ?? true;
+
         return [
             'champion' => $this->champion($tournament),
-            'sharpest_shooter' => $this->shooterRate($finishedMatches, true),
-            'water_spitter' => $this->shooterRate($finishedMatches, false),
+            'sharpest_shooter' => $countThrows ? $this->shooterRate($finishedMatches, true) : null,
+            'water_spitter' => $countThrows ? $this->shooterRate($finishedMatches, false) : null,
             'blitz_win' => $this->blitzWin($finishedMatches),
             'marathon' => $this->marathon($finishedMatches),
             'nail_biter' => $this->nailBiter($finishedMatches),
             'penalty_magnet' => $this->penaltyMagnet($finishedMatches),
-            'efficiency' => $this->efficiency($finishedMatches),
+            'efficiency' => $countThrows ? $this->efficiency($finishedMatches) : null,
             'schluck_olymp' => $this->schluckOlymp($finishedMatches),
             'total_cups' => (int) $finishedMatches->flatMap->stats->sum('cups_scored'),
         ];

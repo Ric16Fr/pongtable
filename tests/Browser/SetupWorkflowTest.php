@@ -16,11 +16,11 @@ it('renders the setup page for an admin without JS errors', function () {
         ->assertNoJavascriptErrors();
 });
 
-it('lets an admin rename the tournament via the settings form', function () {
+it('lets an admin rename the tournament via the special-rules settings form', function () {
     $this->actingAs(User::factory()->admin()->create());
     Tournament::factory()->create(['name' => 'Initial Name']);
 
-    visit('/setup')
+    visit('/sonderregeln')
         ->fill('tournamentName', 'Browser Test Cup')
         ->press('Speichern')
         ->assertSee('Einstellungen gespeichert.')

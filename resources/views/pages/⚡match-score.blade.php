@@ -159,6 +159,7 @@ new #[Title('Match')] class extends Component {
             ? $match->tournament->group_match_duration_minutes
             : $match->tournament->ko_match_duration_minutes;
         $startedAtIso = $match->started_at?->toIso8601String();
+        $countThrows = $match->tournament->count_throws ?? true;
     @endphp
 
     {{-- Back link --}}
@@ -306,10 +307,10 @@ new #[Title('Match')] class extends Component {
                             <span class="team-dot" @if($cfg['team']?->color) style="background-color: {{ $cfg['team']->color }}" @endif></span>
                         </div>
 
-                        @foreach ([
-                            ['label' => 'Würfe', 'field' => $cfg['throws']],
+                        @foreach (array_filter([
+                            $countThrows ? ['label' => 'Würfe', 'field' => $cfg['throws']] : null,
                             ['label' => 'Strafe', 'field' => $cfg['penalty']],
-                        ] as $row)
+                        ]) as $row)
                             <div class="flex items-center justify-between gap-3">
                                 <label class="font-label text-stage-text-dim">{{ $row['label'] }}</label>
                                 <div class="flex items-center gap-2">
@@ -339,7 +340,11 @@ new #[Title('Match')] class extends Component {
                 <div>
                     <flux:heading size="lg">Runde beenden?</flux:heading>
                     <flux:text class="mt-2">
-                        Sobald die Runde endet, geht es weiter zur Becher-Eingabe. Würfe und Strafe lassen sich danach nicht mehr ändern.
+                        @if ($countThrows)
+                            Sobald die Runde endet, geht es weiter zur Becher-Eingabe. Würfe und Strafe lassen sich danach nicht mehr ändern.
+                        @else
+                            Sobald die Runde endet, geht es weiter zur Becher-Eingabe. Die Strafbecher lassen sich danach nicht mehr ändern.
+                        @endif
                     </flux:text>
                 </div>
                 <div class="flex gap-2">
@@ -425,17 +430,23 @@ new #[Title('Match')] class extends Component {
                 </p>
             </div>
 
-            <dl class="grid grid-cols-3 border-t border-trophy-gold/30">
+            <dl @class([
+                'grid border-t border-trophy-gold/30',
+                'grid-cols-3' => $countThrows,
+                'grid-cols-2' => ! $countThrows,
+            ])>
                 <div class="border-r border-trophy-gold/30 px-5 py-4 text-center lg:py-5">
                     <dt class="font-label text-stage-text-dim">Dauer</dt>
                     <dd class="mt-1 font-numeric text-lg font-semibold text-stage-text">
                         {{ $duration ? sprintf('%02d:%02d', intdiv($duration, 60), $duration % 60) : '—' }}
                     </dd>
                 </div>
-                <div class="border-r border-trophy-gold/30 px-5 py-4 text-center lg:py-5">
-                    <dt class="font-label text-stage-text-dim">Würfe</dt>
-                    <dd class="mt-1 font-numeric text-lg font-semibold text-stage-text">{{ $homeStat?->throws ?? 0 }} : {{ $awayStat?->throws ?? 0 }}</dd>
-                </div>
+                @if ($countThrows)
+                    <div class="border-r border-trophy-gold/30 px-5 py-4 text-center lg:py-5">
+                        <dt class="font-label text-stage-text-dim">Würfe</dt>
+                        <dd class="mt-1 font-numeric text-lg font-semibold text-stage-text">{{ $homeStat?->throws ?? 0 }} : {{ $awayStat?->throws ?? 0 }}</dd>
+                    </div>
+                @endif
                 <div class="px-5 py-4 text-center lg:py-5">
                     <dt class="font-label text-stage-text-dim">Strafe</dt>
                     <dd class="mt-1 font-numeric text-lg font-semibold text-stage-text">{{ $homeStat?->penalty_cups ?? 0 }} : {{ $awayStat?->penalty_cups ?? 0 }}</dd>

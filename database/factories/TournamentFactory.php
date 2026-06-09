@@ -17,6 +17,7 @@ class TournamentFactory extends Factory
             'status' => 'setup',
             'group_match_duration_minutes' => 10,
             'ko_match_duration_minutes' => 15,
+            'count_throws' => true,
         ];
     }
 }

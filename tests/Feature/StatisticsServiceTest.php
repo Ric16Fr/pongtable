@@ -231,3 +231,22 @@ it('sums every cup ever scored', function () {
 
     expect(app(StatisticsService::class)->summary($this->tournament)['total_cups'])->toBe(16);
 });
+
+it('hides throw-based stats when count_throws is disabled', function () {
+    $this->tournament->update(['count_throws' => false]);
+
+    makeFinishedMatch($this->tournament, $this->shotgun, $this->bierherz, [
+        'home_cups' => 8, 'away_cups' => 2, 'home_throws' => 10, 'away_throws' => 10,
+        'home_penalty' => 1, 'away_penalty' => 2, 'duration' => 420,
+    ], $this->shotgun->id);
+
+    $summary = app(StatisticsService::class)->summary($this->tournament);
+
+    // Throw-dependent stats vanish, but penalty/duration/cup-based ones stay.
+    expect($summary['sharpest_shooter'])->toBeNull()
+        ->and($summary['water_spitter'])->toBeNull()
+        ->and($summary['efficiency'])->toBeNull()
+        ->and($summary['penalty_magnet']['team'])->toBe('Team Bierherz')
+        ->and($summary['blitz_win']['team'])->toBe('Team Shotgun')
+        ->and($summary['schluck_olymp']['team'])->not->toBeNull();
+});

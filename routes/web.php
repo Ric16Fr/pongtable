@@ -18,5 +18,6 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:admin')->group(function () {
         Route::livewire('/setup', 'pages::admin-setup')->name('tournament.setup');
         Route::livewire('/statistics', 'pages::statistics')->name('statistics');
+        Route::livewire('/sonderregeln', 'pages::special-rules')->name('special-rules');
     });
 });
