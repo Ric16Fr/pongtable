@@ -4,8 +4,8 @@ Aufgrund fehlender Alternativen selbst gebaut und stetig erweitert.
 ### Runs
 [![Analyze Code (PhpStan)](https://github.com/Ric16Fr/pongtable/actions/workflows/analyzeCode.yml/badge.svg?branch=main)](https://github.com/Ric16Fr/pongtable/actions/workflows/analyzeCode.yml)
 [![PHP Linting (Pint)](https://github.com/Ric16Fr/pongtable/actions/workflows/phpLinting.yml/badge.svg)](https://github.com/Ric16Fr/pongtable/actions/workflows/phpLinting.yml)
-[![Featuretest](https://github.com/Ric16Fr/pongtable/actions/workflows/runFeatureTests.yml/badge.svg)](https://github.com/Ric16Fr/pongtable/actions/workflows/runFeatureTests.yml)
-[![Featuretests](https://github.com/Ric16Fr/pongtable/actions/workflows/runFeatureTests.yml/badge.svg)](https://github.com/Ric16Fr/pongtable/actions/workflows/runFeatureTests.yml)
+[![Webtests](https://github.com/Ric16Fr/pongtable/actions/workflows/runBrowsertests.yml/badge.svg)](https://github.com/Ric16Fr/pongtable/actions/workflows/runBrowsertests.yml)
+[![Featuretests](https://github.com/Ric16Fr/pongtable/actions/workflows/runFeatureAndUnitTests.yml/badge.svg)](https://github.com/Ric16Fr/pongtable/actions/workflows/runFeatureAndUnitTests.yml)
 
 
 ## Screenshots
