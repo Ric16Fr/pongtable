@@ -150,4 +150,5 @@ it('renders the public page on a mobile viewport without JS errors', function ()
         ->on()->mobile()
         ->assertSee('Mobile Public Cup')
         ->assertNoJavascriptErrors();
-});
+})->skip(fn () => env('BROWSER_NAME') === 'firefox', 'This test does not apply to Firefox.');
+

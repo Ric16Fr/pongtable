@@ -12,6 +12,9 @@ jobs:
       matrix:
         browser: [chrome, firefox, safari]
 
+    env:
+      BROWSER_NAME: ${{ matrix.browser }}
+
     steps:
       - uses: shivammathur/setup-php@v2
         with:
@@ -38,7 +41,7 @@ jobs:
         run: ./vendor/bin/pest tests/Browser --browser ${{ matrix.browser }}
       - name: Upload Screenshots
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: screenshots-${{ matrix.browser }}
           path: Tests/Browser/Screenshots

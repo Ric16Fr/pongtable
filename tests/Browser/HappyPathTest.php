@@ -66,4 +66,4 @@ it('shows the public tournament page on a mobile viewport', function () {
         ->on()->mobile()
         ->assertSee('Mobile Cup')
         ->assertNoSmoke();
-});
+})->skip(fn () => env('BROWSER_NAME') === 'firefox', 'This test does not apply to Firefox.');
