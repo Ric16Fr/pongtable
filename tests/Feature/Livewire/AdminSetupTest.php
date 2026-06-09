@@ -104,6 +104,32 @@ it('generates groups via confirmGenerate and redirects', function () {
         ->and($tournament->fresh()->matches()->count())->toBe(2);
 });
 
+it('uploads groups from a CSV via the modal action', function () {
+    $tournament = Tournament::factory()->create();
+    Table::factory()->count(2)->create(['tournament_id' => $tournament->id]);
+
+    $csv = "Gruppe A;Gruppe B\nT1;T2\nT3;T4";
+
+    Livewire::test('pages::admin-setup')
+        ->set('csvContent', $csv)
+        ->call('uploadGroups')
+        ->assertHasNoErrors()
+        ->assertRedirect(route('matches.index'));
+
+    expect($tournament->fresh()->status)->toBe('group')
+        ->and($tournament->fresh()->groups()->count())->toBe(2)
+        ->and($tournament->fresh()->teams()->count())->toBe(4);
+});
+
+it('validates that csvContent is provided before uploading groups', function () {
+    Tournament::factory()->create();
+
+    Livewire::test('pages::admin-setup')
+        ->set('csvContent', '')
+        ->call('uploadGroups')
+        ->assertHasErrors(['csvContent' => 'required']);
+});
+
 it('resets a running tournament back to setup', function () {
     $tournament = Tournament::factory()->create(['status' => 'group']);
     Table::factory()->count(2)->create(['tournament_id' => $tournament->id]);

@@ -66,4 +66,5 @@ it('shows the public tournament page on a mobile viewport', function () {
         ->on()->mobile()
         ->assertSee('Mobile Cup')
         ->assertNoSmoke();
-})->skip(fn () => env('BROWSER_NAME') === 'firefox', 'This test does not apply to Firefox.');
+})->skip(fn () => env('BROWSER_NAME') === 'firefox', 'There is no Firefox Mobile');
+// last test skipped because on Android websites are rendered through chrome, on iOS throuhg webkit. So there is no Firefox on Mobile

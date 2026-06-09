@@ -56,6 +56,39 @@ it('forbids referees from reaching the setup page', function () {
     $this->get('/setup')->assertForbidden();
 });
 
+it('exposes the "Gruppen hochladen" action only in setup phase', function () {
+    $this->actingAs(User::factory()->admin()->create());
+    Tournament::factory()->create(['status' => 'setup']);
+
+    visit('/setup')->assertSee('Gruppen hochladen');
+
+    Tournament::query()->delete();
+    Tournament::factory()->create(['status' => 'group']);
+
+    visit('/setup')->assertDontSee('Gruppen hochladen');
+});
+
+it('imports a CSV via the upload modal and lands on the match list', function () {
+    $this->actingAs(User::factory()->admin()->create());
+    $tournament = Tournament::factory()->create(['status' => 'setup']);
+    Table::factory()->count(2)->create(['tournament_id' => $tournament->id]);
+
+    $csv = "Gruppe A;Gruppe B\nRenx & Philipp;Stefan & Henry\nDennis & Yves H.;Paul N. & Niklas";
+
+    visit('/setup')
+        ->press('Gruppen hochladen')
+        ->fill('csvContent', $csv)
+        ->click('@upload-groups-button')
+        ->assertSee('Gruppen aus CSV übernommen.')
+        ->assertPathIs('/matches')
+        ->assertNoJavascriptErrors();
+
+    $tournament = $tournament->fresh();
+    expect($tournament->status)->toBe('group')
+        ->and($tournament->teams()->count())->toBe(4)
+        ->and($tournament->groups()->count())->toBe(2);
+});
+
 it('shows tables and teams in the setup overview', function () {
     $this->actingAs(User::factory()->admin()->create());
     $tournament = Tournament::factory()->create();

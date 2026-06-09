@@ -23,6 +23,9 @@ new #[Title('Setup')] class extends Component {
     #[Validate('nullable|string|max:9')]
     public ?string $newTeamColor = '#f59e0b';
 
+    #[Validate('required|string|min:5')]
+    public string $csvContent = '';
+
     public bool $addingTable = false;
 
     public bool $addingTeam = false;
@@ -149,6 +152,21 @@ new #[Title('Setup')] class extends Component {
         $this->redirectRoute('matches.index', navigate: true);
     }
 
+    public function uploadGroups(GroupGeneratorService $service): void
+    {
+        $this->validateOnly('csvContent');
+
+        $service->importFromCsv($this->tournament, $this->csvContent);
+
+        $this->csvContent = '';
+        unset($this->tournament);
+        Flux::modal('upload-groups')->close();
+
+        Flux::toast(variant: 'success', text: __('Gruppen aus CSV übernommen.'));
+
+        $this->redirectRoute('matches.index', navigate: true);
+    }
+
     public function startKoPhase(KoBracketService $service): void
     {
         $service->startKoPhase($this->tournament);
@@ -209,11 +227,19 @@ new #[Title('Setup')] class extends Component {
             </div>
             <div class="flex flex-wrap items-end justify-between gap-4">
                 <h1 class="font-display text-stage-text text-[clamp(2rem,5vw,3.5rem)]">Turnier-Setup</h1>
-                @if (! $t->isSetup())
-                    <flux:modal.trigger name="reset-confirm">
-                        <flux:button variant="ghost" size="sm">Turnier zurücksetzen</flux:button>
-                    </flux:modal.trigger>
-                @endif
+                <div class="flex flex-wrap items-center gap-2">
+                    @if ($t->isSetup())
+                        <flux:modal.trigger name="upload-groups">
+                            <flux:button variant="ghost" size="sm" icon="arrow-up-tray" data-test="open-upload-groups">
+                                Gruppen hochladen
+                            </flux:button>
+                        </flux:modal.trigger>
+                    @else
+                        <flux:modal.trigger name="reset-confirm">
+                            <flux:button variant="ghost" size="sm">Turnier zurücksetzen</flux:button>
+                        </flux:modal.trigger>
+                    @endif
+                </div>
             </div>
         </header>
 
@@ -402,6 +428,39 @@ new #[Title('Setup')] class extends Component {
                 </button>
             </div>
         </div>
+    </flux:modal>
+
+    <flux:modal name="upload-groups" class="max-w-2xl">
+        <form wire:submit="uploadGroups" class="space-y-5">
+            <div>
+                <flux:heading size="lg">Gruppen hochladen</flux:heading>
+                <flux:text class="mt-2">
+                    Füge eine semikolon-getrennte CSV ein. Erste Zeile enthält die Gruppennamen
+                    (werden ignoriert — wir benennen die Gruppen alphabetisch A, B, C, …),
+                    danach folgen die Teams. Die Zellen werden reihum auf die Gruppen verteilt.
+                </flux:text>
+                <flux:text class="mt-2 text-status-danger">
+                    Vorhandene Teams werden dabei ersetzt.
+                </flux:text>
+            </div>
+
+            <flux:textarea
+                wire:model="csvContent"
+                rows="10"
+                placeholder="Gruppe A;Gruppe B;Gruppe C;Gruppe D&#10;Team 1;Team 2;Team 3;Team 4&#10;..."
+                data-test="csv-content"
+            />
+            @error('csvContent') <p class="text-sm text-status-danger">{{ $message }}</p> @enderror
+
+            <div class="flex justify-end gap-2">
+                <flux:modal.close>
+                    <flux:button type="button" variant="ghost">Abbrechen</flux:button>
+                </flux:modal.close>
+                <flux:button type="submit" variant="primary" data-test="upload-groups-button">
+                    Übernehmen
+                </flux:button>
+            </div>
+        </form>
     </flux:modal>
 
     <flux:modal name="reset-confirm" class="max-w-md">

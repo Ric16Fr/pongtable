@@ -150,5 +150,5 @@ it('renders the public page on a mobile viewport without JS errors', function ()
         ->on()->mobile()
         ->assertSee('Mobile Public Cup')
         ->assertNoJavascriptErrors();
-})->skip(fn () => env('BROWSER_NAME') === 'firefox', 'This test does not apply to Firefox.');
-
+})->skip(fn () => env('BROWSER_NAME') === 'firefox', 'There is no Firefox Mobile');
+// last test skipped because on Android websites are rendered through chrome, on iOS throuhg webkit. So there is no Firefox on Mobile

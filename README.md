@@ -4,8 +4,8 @@ Aufgrund fehlender Alternativen selbst gebaut und stetig erweitert.
 ### Runs
 [![Analyze Code (PhpStan)](https://github.com/Ric16Fr/pongtable/actions/workflows/analyzeCode.yml/badge.svg?branch=main)](https://github.com/Ric16Fr/pongtable/actions/workflows/analyzeCode.yml)
 [![PHP Linting (Pint)](https://github.com/Ric16Fr/pongtable/actions/workflows/phpLinting.yml/badge.svg)](https://github.com/Ric16Fr/pongtable/actions/workflows/phpLinting.yml)
-[![Webtests](https://github.com/Ric16Fr/pongtable/actions/workflows/runUnitFeatureAndBrowsertestWithPest.yml/badge.svg)](https://github.com/Ric16Fr/pongtable/actions/workflows/runUnitFeatureAndBrowsertestWithPest.yml) ==> i mobile nicht unterstützt auf Firefox, daher dort ein Fehlschlag. Noch fixen
-[![Featuretests](https://github.com/Ric16Fr/pongtable/actions/workflows/runFeaturetest.yml/badge.svg)](https://github.com/Ric16Fr/pongtable/actions/workflows/runUnitFeatureAndBrowsertestWithPest.yml)
+[![Featuretest](https://github.com/Ric16Fr/pongtable/actions/workflows/runFeatureTests.yml/badge.svg)](https://github.com/Ric16Fr/pongtable/actions/workflows/runFeatureTests.yml)
+[![Featuretests](https://github.com/Ric16Fr/pongtable/actions/workflows/runFeatureTests.yml/badge.svg)](https://github.com/Ric16Fr/pongtable/actions/workflows/runFeatureTests.yml)
 
 
 ## Screenshots

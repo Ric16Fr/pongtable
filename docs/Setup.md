@@ -7,6 +7,13 @@ generiert und die KO-Phase gestartet.
 > 🔒 Diese Seite ist hinter `middleware('role:admin')` versteckt.
 > Schiedsrichter sehen den Setup-Eintrag in der Sidebar nicht.
 
+> Hinweis: Die turnierweiten Einstellungen (Name, Match-Dauer) und
+> die Sonderregeln (z. B. „Würfe zählen") sind aus dem Setup
+> ausgelagert und liegen jetzt unter
+> [Sonderregeln & Einstellungen](Sonderregeln.md). Im Setup geht es
+> nur noch um das einzelne Turnier-Spiel (Tische, Teams, Auslosen,
+> KO-Start, Reset).
+
 ## Lebenszyklus eines Turniers
 
 Ein Turnier durchläuft genau vier Phasen, hinterlegt in
@@ -50,24 +57,6 @@ Datenbank, sind über die App aber nicht mehr erreichbar.
 
 ---
 
-## Einstellungen-Block
-
-Drei Felder:
-
-- **Turniername** – beliebiger String, max. 255 Zeichen.
-- **Gruppen-Match (Min)** – Match-Dauer in Minuten für alle
-  Gruppenspiele. Default 10, Range 1–60.
-- **KO-Match (Min)** – Match-Dauer für KO-Spiele. Default 15,
-  Range 1–60.
-
-Diese Werte werden zur Laufzeit des Spiels vom Timer in der
-Match-Steuerung eingelesen — Änderungen wirken sich also _sofort_ auf
-das nächste startende Spiel aus. Bereits laufende Matches benutzen den
-Wert, der zum Zeitpunkt des Starts galt (Alpine-Timer arbeitet mit
-`started_at`).
-
----
-
 ## Tische
 
 Tische repräsentieren parallel laufende Spielflächen (z. B.
@@ -106,6 +95,86 @@ Einfluss auf die Wertung.
 - Mindestens 2 Teams sind nötig, damit die Gruppenphase generiert
   werden kann (sonst Abort 422 mit
   `Mindestens 2 Teams erforderlich.`).
+
+---
+
+## Gruppen hochladen (CSV)
+
+Alternative zur App-internen Auslosung: Wer die Gruppenverteilung
+**außerhalb** der App ermittelt (z. B. per Hand ausgelost, per Excel
+vorbereitet, in einem anderen Tool berechnet), kann sie direkt
+übernehmen — ohne dass die App neu auslost.
+
+Oben rechts im Setup-Header steht in der Setup-Phase die Aktion
+**Gruppen hochladen**. Sie öffnet ein Modal mit einer Textarea, in
+die eine **semikolon-getrennte CSV** gepastet wird.
+
+### Erwartetes Format
+
+Die erste Zeile enthält die Gruppennamen (sie wird _ignoriert_, weil
+die App die Gruppen immer alphabetisch A, B, C, … benennt — die
+Spaltenanzahl bestimmt aber, wie viele Gruppen es gibt). In den
+folgenden Zeilen steht pro Spalte ein Team. Beispiel mit 4 Gruppen à
+4 Teams:
+
+```
+Gruppe A;Gruppe B;Gruppe C;Gruppe D
+Renx & Philipp;Stefan & Henry;Kitty & Till;Schachi & Huschke
+Dennis & Yves H.;Paul N. & Niklas;Tobi & Richard;Felo & Kluwe
+Kevin & Grodon;Valle & TB;Justin & Yves M.;Franik & MB
+Felix & Lude;Mörre & Gussi;John & Ede;Marvin & Luki
+```
+
+Wird die CSV als _eine einzige Zeile_ ohne Zeilenumbrüche gepastet,
+erkennt der Parser die Gruppen automatisch an den führenden Zellen,
+die mit "Gruppe " beginnen, und verteilt die restlichen Zellen
+reihum (modulo Spaltenanzahl) auf die Buckets.
+
+### Voraussetzungen
+
+- Das Turnier muss im Status `setup` sein.
+- Die **Anzahl der bestehenden Tische** muss exakt zur Anzahl der
+  Gruppenspalten in der CSV passen. Beispiel: 4 Spalten → exakt 4
+  Tische müssen vorher angelegt sein. Sonst HTTP 422 mit klarer
+  Fehlermeldung.
+- Mindestens 2 Teams pro Gruppe.
+
+### Was passiert beim Upload?
+
+`GroupGeneratorService::importFromCsv()` läuft in einer
+DB-Transaktion:
+
+1. **Alle bisherigen Matches, Gruppen und Teams** des Turniers werden
+   gelöscht. Tische bleiben erhalten, denn sie sind physische
+   Spielflächen.
+2. Pro Spalte wird eine Gruppe (`Gruppe A`, `Gruppe B`, …) am
+   passenden Tisch (in Tisch-`id`-Reihenfolge) angelegt.
+3. Die Teamzellen werden in der CSV-natürlichen Reihenfolge auf die
+   Gruppen verteilt (`cell[index]` → Gruppe `index % Spaltenanzahl`).
+4. Jedem Team wird automatisch eine Farbe aus einer 8er-Palette
+   zugewiesen (zyklisch). Wer individuelle Farben braucht, kann die
+   Teams nach dem Import nicht mehr editieren — dafür müsste das
+   Turnier zurückgesetzt werden.
+5. Innerhalb jeder Gruppe wird das Round-Robin-Set an
+   `pending`-Matches erzeugt (jedes Team gegen jedes andere genau
+   einmal).
+6. Der Tournament-Status springt auf `group`.
+
+Danach landet der Admin direkt auf `/matches` — die Schiris können
+sofort loslegen.
+
+> ⚠️ **Achtung:** Beim Upload werden **alle existierenden Teams
+> ersetzt**. Wer schon Teams + Farben in der Setup-UI angelegt hat,
+> verliert diese durch den Import. Die Warnung steht auch im Modal.
+
+### Wann sinnvoll, wann nicht?
+
+- **Sinnvoll**, wenn die Auslosung manuell vorab gemacht wurde (z. B.
+  Setz-Verfahren, Wunsch-Pairings, fester Modus aus einer Vorrunde)
+  oder die Teamliste sowieso schon als CSV vorliegt.
+- **Nicht sinnvoll**, wenn man die Teams einfach zufällig verteilen
+  möchte — dafür ist der Standard-Pfad **Gruppen generieren** (siehe
+  unten) bequemer.
 
 ---
 
