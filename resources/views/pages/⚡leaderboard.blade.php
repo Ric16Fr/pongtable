@@ -45,10 +45,44 @@ new class extends Component {
             }
         }
 
-        return $combined
+        $rows = $combined
             ->sortByDesc(fn ($r) => $r['points'] * 100000 + $r['cup_diff'] * 100 + $r['cups_scored'])
-            ->values()
-            ->all();
+            ->values();
+
+        return $this->applyPlacementResults($tournament, $rows)->all();
+    }
+
+    /**
+     * Finished placement matches override the group-phase order: each
+     * winner takes the better of the two slots its pairing occupies.
+     *
+     * @param  \Illuminate\Support\Collection<int, array<string, mixed>>  $rows
+     * @return \Illuminate\Support\Collection<int, array<string, mixed>>
+     */
+    private function applyPlacementResults(Tournament $tournament, $rows)
+    {
+        $placementMatches = $tournament->matches()
+            ->where('phase', 'placement')
+            ->where('status', 'finished')
+            ->whereNotNull('winner_team_id')
+            ->get(['home_team_id', 'away_team_id', 'winner_team_id']);
+
+        foreach ($placementMatches as $match) {
+            $loserId = $match->winner_team_id === $match->home_team_id
+                ? $match->away_team_id
+                : $match->home_team_id;
+
+            $winnerIndex = $rows->search(fn ($r) => $r['team']->id === $match->winner_team_id);
+            $loserIndex = $rows->search(fn ($r) => $r['team']->id === $loserId);
+
+            if ($winnerIndex !== false && $loserIndex !== false && $loserIndex < $winnerIndex) {
+                $winnerRow = $rows[$winnerIndex];
+                $rows[$winnerIndex] = $rows[$loserIndex];
+                $rows[$loserIndex] = $winnerRow;
+            }
+        }
+
+        return $rows;
     }
 }; ?>
 

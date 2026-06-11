@@ -32,6 +32,7 @@
         $phaseLabels = [
             'setup' => 'Vorbereitung',
             'group' => 'Gruppenphase',
+            'placement' => 'Platzierungsspiele',
             'ko' => 'KO-Phase',
             'finished' => 'Beendet',
         ];
@@ -43,7 +44,7 @@
         $tournamentStartedAt = $tournament->matches()->whereNotNull('started_at')->min('started_at');
         $startedAtMs = $tournamentStartedAt ? \Illuminate\Support\Carbon::parse($tournamentStartedAt)->getTimestampMs() : null;
 
-        $isRunning = in_array($tournament->status, ['group', 'ko'], true);
+        $isRunning = in_array($tournament->status, ['group', 'placement', 'ko'], true);
 
         // Champion meta: real match wins for the personality subhead
         $championWins = null;

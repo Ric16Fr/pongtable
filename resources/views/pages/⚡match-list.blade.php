@@ -107,6 +107,8 @@ new #[Title('Matches')] class extends Component {
                             {{ $match->table?->name }}
                             @if ($match->phase === 'group')
                                 · {{ $match->group?->name }}
+                            @elseif ($match->phase === 'placement')
+                                · Platzierung
                             @else
                                 · KO @if($match->ko_round) R{{ $match->ko_round }} @endif
                             @endif

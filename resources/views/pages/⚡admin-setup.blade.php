@@ -172,7 +172,9 @@ new #[Title('Setup')] class extends Component {
         $service->startKoPhase($this->tournament);
         unset($this->tournament);
 
-        Flux::toast(variant: 'success', text: __('KO-Phase gestartet.'));
+        Flux::toast(variant: 'success', text: $this->tournament->isPlacementPhase()
+            ? __('Platzierungsspiele gestartet.')
+            : __('KO-Phase gestartet.'));
 
         $this->redirectRoute('matches.index', navigate: true);
     }
@@ -201,8 +203,20 @@ new #[Title('Setup')] class extends Component {
     #[Computed]
     public function koPhaseReady(): bool
     {
+        if ($this->tournament->isPlacementPhase()) {
+            return app(KoBracketService::class)->isPlacementRoundComplete($this->tournament);
+        }
+
         return $this->tournament->isGroupPhase()
             && app(KoBracketService::class)->isGroupPhaseComplete($this->tournament);
+    }
+
+    #[Computed]
+    public function placementRoundNext(): bool
+    {
+        return $this->tournament->isGroupPhase()
+            && $this->tournament->play_placement_matches
+            && app(KoBracketService::class)->nonQualifiedTeams($this->tournament)->count() >= 2;
     }
 }; ?>
 
@@ -212,6 +226,7 @@ new #[Title('Setup')] class extends Component {
         $phaseLabels = [
             'setup' => 'Vorbereitung',
             'group' => 'Gruppenphase',
+            'placement' => 'Platzierungsspiele',
             'ko' => 'KO-Phase',
             'finished' => 'Beendet',
         ];
@@ -384,22 +399,38 @@ new #[Title('Setup')] class extends Component {
             </section>
         @endif
 
-        {{-- Start KO --}}
-        @if ($t->isGroupPhase() && $this->koPhaseReady)
+        {{-- Start placement round / KO --}}
+        @if ($this->koPhaseReady)
             <section class="overflow-hidden rounded-lg border border-trophy-gold/30 bg-trophy-gold-soft">
                 <div class="px-6 py-8 lg:px-10 lg:py-10">
                     <div class="font-label flex items-center gap-3 text-trophy-gold">
                         <span class="block h-px w-12 bg-trophy-gold"></span>
-                        <span>Gruppenphase abgeschlossen</span>
+                        <span>{{ $t->isPlacementPhase() ? 'Platzierungsspiele abgeschlossen' : 'Gruppenphase abgeschlossen' }}</span>
                     </div>
-                    <h2 class="mt-3 font-display text-stage-text text-2xl lg:text-3xl">KO-Phase starten</h2>
-                    <p class="mt-3 max-w-lg text-sm text-stage-text-muted">
-                        Alle Matches der Gruppenphase sind beendet. Aus den besten Teams jeder Gruppe wird das KO-Bracket gebaut.
-                    </p>
-                    <button wire:click="startKoPhase"
-                            class="mt-6 inline-flex items-center gap-2 rounded-md bg-trophy-gold px-6 py-3 text-base font-bold text-stage-bg hover:bg-trophy-gold-deep transition">
-                        KO-Phase starten →
-                    </button>
+                    @if ($this->placementRoundNext)
+                        <h2 class="mt-3 font-display text-stage-text text-2xl lg:text-3xl">Platzierungsspiele starten</h2>
+                        <p class="mt-3 max-w-lg text-sm text-stage-text-muted">
+                            Alle Matches der Gruppenphase sind beendet. Die Teams, die es nicht in die KO-Phase
+                            geschafft haben, spielen zuerst ihre Plätze aus — danach startet die KO-Phase.
+                        </p>
+                        <button wire:click="startKoPhase"
+                                class="mt-6 inline-flex items-center gap-2 rounded-md bg-trophy-gold px-6 py-3 text-base font-bold text-stage-bg hover:bg-trophy-gold-deep transition">
+                            Platzierungsspiele starten →
+                        </button>
+                    @else
+                        <h2 class="mt-3 font-display text-stage-text text-2xl lg:text-3xl">KO-Phase starten</h2>
+                        <p class="mt-3 max-w-lg text-sm text-stage-text-muted">
+                            @if ($t->isPlacementPhase())
+                                Alle Platzierungsspiele sind beendet. Aus den besten Teams jeder Gruppe wird das KO-Bracket gebaut.
+                            @else
+                                Alle Matches der Gruppenphase sind beendet. Aus den besten Teams jeder Gruppe wird das KO-Bracket gebaut.
+                            @endif
+                        </p>
+                        <button wire:click="startKoPhase"
+                                class="mt-6 inline-flex items-center gap-2 rounded-md bg-trophy-gold px-6 py-3 text-base font-bold text-stage-bg hover:bg-trophy-gold-deep transition">
+                            KO-Phase starten →
+                        </button>
+                    @endif
                 </div>
             </section>
         @endif

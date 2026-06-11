@@ -21,6 +21,8 @@ new #[Title('Sonderregeln & Einstellungen')] class extends Component {
 
     public bool $countThrows = true;
 
+    public bool $playPlacementMatches = false;
+
     public function mount(): void
     {
         $tournament = Tournament::query()->latest()->first();
@@ -38,6 +40,7 @@ new #[Title('Sonderregeln & Einstellungen')] class extends Component {
         $this->groupMinutes = $tournament->group_match_duration_minutes;
         $this->koMinutes = $tournament->ko_match_duration_minutes;
         $this->countThrows = $tournament->count_throws ?? true;
+        $this->playPlacementMatches = $tournament->play_placement_matches ?? false;
     }
 
     #[Computed]
@@ -57,6 +60,7 @@ new #[Title('Sonderregeln & Einstellungen')] class extends Component {
             'group_match_duration_minutes' => $this->groupMinutes,
             'ko_match_duration_minutes' => $this->koMinutes,
             'count_throws' => $this->countThrows,
+            'play_placement_matches' => $this->playPlacementMatches,
         ]);
 
         Flux::toast(variant: 'success', text: __('Einstellungen gespeichert.'));
@@ -103,6 +107,14 @@ new #[Title('Sonderregeln & Einstellungen')] class extends Component {
                     wire:model="countThrows"
                     :label="__('Würfe zählen')"
                     :description="__('Wenn aus: Schiris zählen nur Strafbecher. Statistiken zu Wurfanzahl & Trefferquote werden ausgeblendet.')"
+                />
+            </div>
+
+            <div class="rounded-md bg-stage-surface px-5 py-4">
+                <flux:switch
+                    wire:model="playPlacementMatches"
+                    :label="__('Platzierungsspiele austragen')"
+                    :description="__('Wenn an: Teams, die die KO-Phase verpassen, spielen vor der KO-Phase ihre Plätze aus — die letzten beiden der Gesamtwertung gegeneinander, die nächsten beiden darüber usw. Wenn aus: Die Platzierungen bleiben wie in der Gruppenphase erspielt.')"
                 />
             </div>
 

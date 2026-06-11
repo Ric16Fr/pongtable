@@ -22,16 +22,53 @@ class KoBracketService
     }
 
     /**
-     * Generate first KO round + flip the tournament to "ko" status.
+     * Returns true once every placement match is finished.
+     */
+    public function isPlacementRoundComplete(Tournament $tournament): bool
+    {
+        return $tournament->matches()
+            ->where('phase', 'placement')
+            ->where('status', '!=', 'finished')
+            ->count() === 0;
+    }
+
+    /**
+     * Advance the tournament out of the group phase. Depending on the
+     * "Platzierungsspiele austragen" setting this either starts the
+     * placement round for the non-qualified teams first, or generates
+     * the KO bracket directly. From the placement phase it generates
+     * the KO bracket once all placement matches are finished.
      */
     public function startKoPhase(Tournament $tournament): void
     {
+        if ($tournament->isPlacementPhase()) {
+            abort_unless($this->isPlacementRoundComplete($tournament), 422, 'Platzierungsspiele noch nicht abgeschlossen.');
+
+            $this->generateKoBracket($tournament);
+
+            return;
+        }
+
         if (! $tournament->isGroupPhase()) {
             return;
         }
 
         abort_unless($this->isGroupPhaseComplete($tournament), 422, 'Gruppenphase noch nicht abgeschlossen.');
 
+        if ($tournament->play_placement_matches && $this->nonQualifiedTeams($tournament)->count() >= 2) {
+            $this->startPlacementRound($tournament);
+
+            return;
+        }
+
+        $this->generateKoBracket($tournament);
+    }
+
+    /**
+     * Generate first KO round + flip the tournament to "ko" status.
+     */
+    private function generateKoBracket(Tournament $tournament): void
+    {
         DB::transaction(function () use ($tournament) {
             $ranked = collect();
 
@@ -82,6 +119,77 @@ class KoBracketService
 
             $tournament->update(['status' => 'ko']);
         });
+    }
+
+    /**
+     * Create the placement round for all teams that did not qualify for
+     * the KO phase + flip the tournament to "placement" status.
+     *
+     * Teams are paired bottom-up in the overall standings: the last two
+     * play for the last two places, the next two above them for the next
+     * two places, and so on. With an odd team count the best non-qualified
+     * team has no opponent and simply keeps its place.
+     */
+    private function startPlacementRound(Tournament $tournament): void
+    {
+        DB::transaction(function () use ($tournament) {
+            $teams = $this->nonQualifiedTeams($tournament);
+            $tables = $tournament->tables()->orderBy('id')->get();
+            $matchIndex = 0;
+
+            // Pair from the bottom of the table upwards; better-ranked team is home.
+            // With an odd team count the loop never reaches index 0, leaving the
+            // best non-qualified team without a match.
+            for ($i = $teams->count() - 2; $i >= 0; $i -= 2) {
+                GameMatch::create([
+                    'tournament_id' => $tournament->id,
+                    'phase' => 'placement',
+                    'ko_position' => $matchIndex,
+                    'table_id' => $tables[$matchIndex % $tables->count()]->id,
+                    'home_team_id' => $teams[$i]->id,
+                    'away_team_id' => $teams[$i + 1]->id,
+                    'status' => 'pending',
+                ]);
+                $matchIndex++;
+            }
+
+            $tournament->update(['status' => 'placement']);
+        });
+    }
+
+    /**
+     * All teams that did NOT qualify for the KO phase (everyone below the
+     * top two of their group), ordered by overall standings (best first).
+     *
+     * @return Collection<int, Team>
+     */
+    public function nonQualifiedTeams(Tournament $tournament): Collection
+    {
+        $remaining = collect();
+
+        foreach ($tournament->groups()->get() as $group) {
+            $remaining = $remaining->concat($this->groupStandings($group)->slice(2)->values());
+        }
+
+        return $remaining
+            ->sort(function ($a, $b) {
+                if ($a->pivot->points !== $b->pivot->points) {
+                    return $b->pivot->points <=> $a->pivot->points;
+                }
+
+                $aDiff = $a->pivot->cups_scored_total - $a->pivot->cups_conceded_total;
+                $bDiff = $b->pivot->cups_scored_total - $b->pivot->cups_conceded_total;
+                if ($aDiff !== $bDiff) {
+                    return $bDiff <=> $aDiff;
+                }
+
+                if ($a->pivot->cups_scored_total !== $b->pivot->cups_scored_total) {
+                    return $b->pivot->cups_scored_total <=> $a->pivot->cups_scored_total;
+                }
+
+                return $a->id <=> $b->id;
+            })
+            ->values();
     }
 
     /**

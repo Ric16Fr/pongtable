@@ -155,7 +155,7 @@ new #[Title('Match')] class extends Component {
         $match = $this->match;
         $home = $match->homeTeam;
         $away = $match->awayTeam;
-        $durationMinutes = $match->phase === 'group'
+        $durationMinutes = in_array($match->phase, ['group', 'placement'], true)
             ? $match->tournament->group_match_duration_minutes
             : $match->tournament->ko_match_duration_minutes;
         $startedAtIso = $match->started_at?->toIso8601String();
@@ -178,6 +178,8 @@ new #[Title('Match')] class extends Component {
                 <span>
                     @if ($match->phase === 'group')
                         Gruppenphase
+                    @elseif ($match->phase === 'placement')
+                        Platzierungsspiel
                     @else
                         KO &middot; @switch($match->ko_round)
                             @case(1) Finale @break

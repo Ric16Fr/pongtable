@@ -16,6 +16,7 @@
             $phaseLabels = [
                 'setup' => 'Vorbereitung',
                 'group' => 'Gruppenphase',
+                'placement' => 'Platzierungsspiele',
                 'ko' => 'KO-Phase',
                 'finished' => 'Beendet',
             ];

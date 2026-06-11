@@ -2,7 +2,6 @@
 Eine Turniersoftware für unsere Bierpong WM, mit Gruppenphase, KO-Bracket und Live-Dashboard, selbst hostbar über LaravelCloud, lokal, o.ä.
 Aufgrund fehlender Alternativen selbst gebaut und stetig erweitert.
 ### Runs
-[![Analyze Code (PhpStan)](https://github.com/Ric16Fr/pongtable/actions/workflows/analyzeCode.yml/badge.svg?branch=main)](https://github.com/Ric16Fr/pongtable/actions/workflows/analyzeCode.yml)
 [![PHP Linting (Pint)](https://github.com/Ric16Fr/pongtable/actions/workflows/phpLinting.yml/badge.svg)](https://github.com/Ric16Fr/pongtable/actions/workflows/phpLinting.yml)
 [![Webtests](https://github.com/Ric16Fr/pongtable/actions/workflows/runBrowsertests.yml/badge.svg)](https://github.com/Ric16Fr/pongtable/actions/workflows/runBrowsertests.yml)
 [![Featuretests](https://github.com/Ric16Fr/pongtable/actions/workflows/runFeatureAndUnitTests.yml/badge.svg)](https://github.com/Ric16Fr/pongtable/actions/workflows/runFeatureAndUnitTests.yml)
@@ -28,13 +27,13 @@ Aufgrund fehlender Alternativen selbst gebaut und stetig erweitert.
 - Docker-Unterstützung, bei Bedarf gerne schreiben
 - QR-Codes für das Leaderboard, bei Interesse einfach mit der eigenen URL erstellen
 
-## Was ist noch geplant
-- [ ] festlegen der Gruppen per CSV anstelle von Auslosung (falls die Gruppen live festgelegt oder vorab ausgelost werden sollen) 
+## Gesonderte Funktionen (teilweise geplant)
+- [x] festlegen der Gruppen per CSV anstelle von Auslosung (falls die Gruppen live festgelegt oder vorab ausgelost werden sollen) 
 - [ ] ein Archiv mit vergangenen Turnieren
 - [ ] Download der Ergebnisse als CSV
 - [ ] (wenn ich mal viel Zeit hab) Generierung von Zertifikaten
 - [ ] Sonderregeln, etwa wie der Sieger in der KO-Phase bestimmt wird
-- [ ] Platzierungsspiele nach Ende der Gruppenphase
+- [x] Platzierungsspiele nach Ende der Gruppenphase
 - [ ] ggf. Wünsche vom lokalen Studentenclub
 
 

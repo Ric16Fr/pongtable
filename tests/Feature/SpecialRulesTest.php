@@ -55,6 +55,30 @@ it('defaults the "Würfe zählen" switch to on', function () {
         ->assertSet('countThrows', true);
 });
 
+it('defaults the "Platzierungsspiele austragen" switch to off', function () {
+    Tournament::factory()->create();
+
+    Livewire::test('pages::special-rules')
+        ->assertSet('playPlacementMatches', false);
+});
+
+it('persists the play_placement_matches toggle to the tournament', function () {
+    $tournament = Tournament::factory()->create();
+
+    Livewire::test('pages::special-rules')
+        ->set('playPlacementMatches', true)
+        ->call('saveSettings')
+        ->assertHasNoErrors();
+
+    expect($tournament->fresh()->play_placement_matches)->toBeTrue();
+
+    Livewire::test('pages::special-rules')
+        ->set('playPlacementMatches', false)
+        ->call('saveSettings');
+
+    expect($tournament->fresh()->play_placement_matches)->toBeFalse();
+});
+
 it('persists the count_throws toggle to the tournament', function () {
     $tournament = Tournament::factory()->create();
 
