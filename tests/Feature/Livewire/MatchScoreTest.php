@@ -235,6 +235,82 @@ it('renders the finished view for a completed match', function () {
         ->assertSeeInOrder(['>6<', '>4<']);
 });
 
+function koScoringMatch(bool $suddenDeath): GameMatch
+{
+    $tournament = Tournament::factory()->create(['ko_sudden_death' => $suddenDeath]);
+    $table = Table::factory()->create(['tournament_id' => $tournament->id]);
+    $home = Team::factory()->create(['tournament_id' => $tournament->id, 'name' => 'Home Team']);
+    $away = Team::factory()->create(['tournament_id' => $tournament->id, 'name' => 'Away Team']);
+
+    return GameMatch::create([
+        'tournament_id' => $tournament->id,
+        'phase' => 'ko',
+        'ko_round' => 1,
+        'ko_position' => 0,
+        'table_id' => $table->id,
+        'home_team_id' => $home->id,
+        'away_team_id' => $away->id,
+        'status' => 'pre_entry',
+    ]);
+}
+
+it('blocks saving a tied KO match until a sudden-death winner is picked', function () {
+    $match = koScoringMatch(suddenDeath: true);
+
+    Livewire::test('pages::match-score', ['match' => $match])
+        ->call('startMatch')
+        ->call('endTimer')
+        ->set('homeCups', 6)->set('awayCups', 6)
+        ->call('saveResult')
+        ->assertHasErrors(['suddenDeathWinner']);
+
+    expect($match->fresh()->status)->toBe('scoring');
+});
+
+it('finishes a tied KO match with the referee-selected sudden-death winner', function () {
+    $match = koScoringMatch(suddenDeath: true);
+
+    Livewire::test('pages::match-score', ['match' => $match])
+        ->call('startMatch')
+        ->call('endTimer')
+        ->set('homeCups', 6)->set('awayCups', 6)
+        ->set('suddenDeathWinner', $match->away_team_id)
+        ->call('saveResult')
+        ->assertHasNoErrors();
+
+    expect($match->fresh()->status)->toBe('finished')
+        ->and($match->fresh()->winner_team_id)->toBe($match->away_team_id);
+});
+
+it('shows the sudden-death selector only when a KO match is tied', function () {
+    $match = koScoringMatch(suddenDeath: true);
+
+    $component = Livewire::test('pages::match-score', ['match' => $match])
+        ->call('startMatch')
+        ->call('endTimer')
+        ->set('homeCups', 6)->set('awayCups', 4);
+
+    $component->assertDontSee('Sudden Death');
+
+    $component->set('awayCups', 6)
+        ->assertSee('Sudden Death');
+});
+
+it('auto-resolves a tied KO match when sudden death is off', function () {
+    $match = koScoringMatch(suddenDeath: false);
+
+    Livewire::test('pages::match-score', ['match' => $match])
+        ->call('startMatch')
+        ->set('homeThrows', 5)->set('awayThrows', 9)
+        ->call('endTimer')
+        ->set('homeCups', 6)->set('awayCups', 6)
+        ->call('saveResult')
+        ->assertHasNoErrors();
+
+    // Fewer throws (home) wins automatically — no referee prompt.
+    expect($match->fresh()->winner_team_id)->toBe($match->home_team_id);
+});
+
 it('shows the throw counter during an active match by default', function () {
     $match = freshMatch('pre_entry');
 

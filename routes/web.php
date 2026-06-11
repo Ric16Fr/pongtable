@@ -9,6 +9,8 @@ Route::get('/', function () {
 
 Route::get('/t/{token}', PublicTournamentController::class)->name('tournament.public');
 
+Route::view('/regeln', 'rules', ['title' => 'Spielregeln'])->name('rules');
+
 Route::middleware('auth')->group(function () {
     Route::livewire('/dashboard', 'pages::dashboard')->name('dashboard');
     Route::livewire('/matches', 'pages::match-list')->name('matches.index');

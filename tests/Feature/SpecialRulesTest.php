@@ -29,6 +29,33 @@ it('saves tournament settings', function () {
         ->and($t->ko_match_duration_minutes)->toBe(20);
 });
 
+it('prefills the description with the default when none is set', function () {
+    Tournament::factory()->create(['description' => null]);
+
+    Livewire::test('pages::special-rules')
+        ->assertSet('description', Tournament::DEFAULT_DESCRIPTION);
+});
+
+it('saves a custom tournament description', function () {
+    $tournament = Tournament::factory()->create();
+
+    Livewire::test('pages::special-rules')
+        ->set('description', 'Das härteste Bierpong-Turnier der Stadt.')
+        ->call('saveSettings')
+        ->assertHasNoErrors();
+
+    expect($tournament->fresh()->description)->toBe('Das härteste Bierpong-Turnier der Stadt.');
+});
+
+it('rejects a blank description on save', function () {
+    Tournament::factory()->create();
+
+    Livewire::test('pages::special-rules')
+        ->set('description', '')
+        ->call('saveSettings')
+        ->assertHasErrors(['description' => 'required']);
+});
+
 it('rejects a blank tournament name on save', function () {
     Livewire::test('pages::special-rules')
         ->set('tournamentName', '')
@@ -77,6 +104,46 @@ it('persists the play_placement_matches toggle to the tournament', function () {
         ->call('saveSettings');
 
     expect($tournament->fresh()->play_placement_matches)->toBeFalse();
+});
+
+it('defaults the KO winner mode to automatic', function () {
+    Tournament::factory()->create();
+
+    Livewire::test('pages::special-rules')
+        ->assertSet('koWinnerMode', 'auto');
+});
+
+it('reflects an existing sudden-death tournament as the sudden_death mode', function () {
+    Tournament::factory()->create(['ko_sudden_death' => true]);
+
+    Livewire::test('pages::special-rules')
+        ->assertSet('koWinnerMode', 'sudden_death');
+});
+
+it('maps the KO winner mode to the ko_sudden_death boolean', function () {
+    $tournament = Tournament::factory()->create();
+
+    Livewire::test('pages::special-rules')
+        ->set('koWinnerMode', 'sudden_death')
+        ->call('saveSettings')
+        ->assertHasNoErrors();
+
+    expect($tournament->fresh()->ko_sudden_death)->toBeTrue();
+
+    Livewire::test('pages::special-rules')
+        ->set('koWinnerMode', 'auto')
+        ->call('saveSettings');
+
+    expect($tournament->fresh()->ko_sudden_death)->toBeFalse();
+});
+
+it('rejects an invalid KO winner mode', function () {
+    Tournament::factory()->create();
+
+    Livewire::test('pages::special-rules')
+        ->set('koWinnerMode', 'bogus')
+        ->call('saveSettings')
+        ->assertHasErrors(['koWinnerMode']);
 });
 
 it('persists the count_throws toggle to the tournament', function () {

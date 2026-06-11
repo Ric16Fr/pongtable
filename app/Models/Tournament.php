@@ -8,10 +8,15 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
-#[Fillable(['name', 'public_token', 'status', 'group_match_duration_minutes', 'ko_match_duration_minutes', 'count_throws', 'play_placement_matches'])]
+#[Fillable(['name', 'description', 'public_token', 'status', 'group_match_duration_minutes', 'ko_match_duration_minutes', 'count_throws', 'play_placement_matches', 'ko_sudden_death'])]
 class Tournament extends Model
 {
     use HasFactory;
+
+    /**
+     * Default hero description shown when no custom description has been set.
+     */
+    public const DEFAULT_DESCRIPTION = 'Selbst gehostete Bierpong-Turnierverwaltung. Gruppen, KO-Bracket, Live-Timer und eine Bracket-Ansicht für die Großleinwand.';
 
     protected function casts(): array
     {
@@ -20,6 +25,7 @@ class Tournament extends Model
             'ko_match_duration_minutes' => 'integer',
             'count_throws' => 'boolean',
             'play_placement_matches' => 'boolean',
+            'ko_sudden_death' => 'boolean',
         ];
     }
 

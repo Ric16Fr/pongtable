@@ -44,6 +44,10 @@
                                 {{ __('Schiri-Login') }}
                             </a>
                         @endauth
+                        <a href="{{ route('rules') }}"
+                           class="rounded-md px-4 py-2 font-medium text-stage-text-muted hover:text-stage-text hover:bg-stage-surface transition">
+                            {{ __('Regeln') }}
+                        </a>
                     </nav>
                 </div>
             </header>
@@ -65,7 +69,7 @@
                         </h1>
 
                         <p class="max-w-xl text-base leading-relaxed text-stage-text-muted lg:text-lg">
-                            Mehrere Tische parallel, automatisch verteilte Gruppen, KO-Bracket mit Live-Timer. Das Publikum schaut zu, die Schiedsrichter zählen, der Algorithmus rechnet sauber durch.
+                            {{ $tournament->description ?: \App\Models\Tournament::DEFAULT_DESCRIPTION }}
                         </p>
 
                         <div class="flex flex-wrap items-center gap-3 pt-2">
@@ -103,7 +107,7 @@
                             pongtable
                         </h1>
                         <p class="max-w-xl text-base leading-relaxed text-stage-text-muted lg:text-lg">
-                            Selbst gehostete Bierpong-Turnierverwaltung. Gruppen, KO-Bracket, Live-Timer und eine Bracket-Ansicht für die Großleinwand.
+                            {{ \App\Models\Tournament::DEFAULT_DESCRIPTION }}
                         </p>
                         <div class="flex flex-wrap items-center gap-3 pt-2">
                             @auth
@@ -166,7 +170,7 @@
             <footer class="border-t border-stage-line">
                 <div class="mx-auto flex max-w-6xl items-center justify-between px-6 py-5 text-xs text-stage-text-dim lg:px-10">
                     <span class="wordmark">pongtable</span>
-                    <span>self-hosted · made for the Bierpong-WM</span>
+                    <span>self-hosted · made for the Bierpong-WM by <a href="https://franke-richard.de" target="_blank">Richard Franke</a></span>
                 </div>
             </footer>
         </div>

@@ -32,7 +32,7 @@ Aufgrund fehlender Alternativen selbst gebaut und stetig erweitert.
 - [ ] ein Archiv mit vergangenen Turnieren
 - [ ] Download der Ergebnisse als CSV
 - [ ] (wenn ich mal viel Zeit hab) Generierung von Zertifikaten
-- [ ] Sonderregeln, etwa wie der Sieger in der KO-Phase bestimmt wird
+- [x] Sonderregeln, etwa wie der Sieger in der KO-Phase bestimmt wird
 - [x] Platzierungsspiele nach Ende der Gruppenphase
 - [ ] ggf. Wünsche vom lokalen Studentenclub
 
@@ -56,9 +56,10 @@ Sidebar) bitte im
 `docs`-Ordner nachschauen, empfohlener Start: [README](docs/README.md)
 
 ## Testsuite
-Für den Fall dass, bei einer eigenen Weiterentwicklung oder so, die vorhandenen Unit, und Webtests ausgeführt werden sollen muss einmalig
+Für den Fall dass, bei einer eigenen Weiterentwicklung oder vor einem PR die vorhandenen Unit, Feature und Webtests ausgeführt werden 
+sollen muss 
+einmalig
 
-Um den Adminaccount anzulegen und einen Key von Laravel zu generieren muss nach dem Skript einmalig
 ``` shell
 composer install
 bun install

@@ -19,6 +19,8 @@ new #[Title('Match')] class extends Component {
     public int $homeCups = 0;
     public int $awayCups = 0;
 
+    public ?int $suddenDeathWinner = null;
+
     public function mount(GameMatch $match): void
     {
         $this->matchId = $match->id;
@@ -51,6 +53,18 @@ new #[Title('Match')] class extends Component {
     public function match(): GameMatch
     {
         return GameMatch::with(['homeTeam', 'awayTeam', 'table', 'tournament', 'stats'])->findOrFail($this->matchId);
+    }
+
+    /**
+     * A KO match that ended tied while the sudden-death rule is active —
+     * the referee must pick the winning team manually.
+     */
+    #[Computed]
+    public function needsSuddenDeath(): bool
+    {
+        return $this->match->phase === 'ko'
+            && ($this->match->tournament->ko_sudden_death ?? false)
+            && $this->homeCups === $this->awayCups;
     }
 
     /** @var array<string, array{string, string}> */
@@ -142,7 +156,22 @@ new #[Title('Match')] class extends Component {
             'awayCups' => 'required|integer|min:0|max:30',
         ]);
 
-        $service->saveResult($this->match, $this->homeCups, $this->awayCups);
+        if ($this->needsSuddenDeath) {
+            $validWinners = array_filter([$this->match->home_team_id, $this->match->away_team_id]);
+
+            if (! in_array($this->suddenDeathWinner, $validWinners, true)) {
+                $this->addError('suddenDeathWinner', __('Bitte das siegreiche Team des Sudden Death auswählen.'));
+
+                return;
+            }
+        }
+
+        $service->saveResult(
+            $this->match,
+            $this->homeCups,
+            $this->awayCups,
+            $this->needsSuddenDeath ? $this->suddenDeathWinner : null,
+        );
         unset($this->match);
 
         Flux::toast(variant: 'success', text: __('Ergebnis gespeichert.'));
@@ -400,6 +429,47 @@ new #[Title('Match')] class extends Component {
             @error('homeCups') <p class="text-sm text-status-danger">{{ $message }}</p> @enderror
             @error('awayCups') <p class="text-sm text-status-danger">{{ $message }}</p> @enderror
 
+            {{-- Sudden Death: tied KO match, referee picks the shoot-out winner. --}}
+            @if ($this->needsSuddenDeath)
+                <div class="rounded-lg border border-trophy-gold/40 bg-trophy-gold-soft p-6">
+                    <div class="font-label flex items-center gap-3 text-trophy-gold">
+                        <span class="block h-px w-12 bg-trophy-gold"></span>
+                        <span>Sudden Death</span>
+                    </div>
+                    <h3 class="mt-3 font-display text-xl text-stage-text lg:text-2xl">Gleichstand — wer gewinnt das Stechen?</h3>
+                    <p class="mt-2 text-sm text-stage-text-muted">
+                        Schere, Stein, Papier um den Anwurf, kein Nachwurf — der erste Treffer gewinnt. Trage hier das siegreiche Team ein.
+                    </p>
+
+                    <div class="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                        @foreach ([
+                            ['team' => $home, 'id' => $match->home_team_id, 'corner' => 'Red', 'tint' => 'red'],
+                            ['team' => $away, 'id' => $match->away_team_id, 'corner' => 'Blue', 'tint' => 'blue'],
+                        ] as $cfg)
+                            <button type="button"
+                                    wire:click="$set('suddenDeathWinner', {{ $cfg['id'] }})"
+                                    @class([
+                                        'flex items-center justify-between gap-3 rounded-lg border px-5 py-4 text-left transition',
+                                        'border-trophy-gold bg-stage-bg' => $suddenDeathWinner === $cfg['id'],
+                                        'border-stage-line-strong bg-stage-bg/60 hover:border-stage-text' => $suddenDeathWinner !== $cfg['id'],
+                                    ])>
+                                <span class="team-tag">
+                                    <span class="team-dot" @if($cfg['team']?->color) style="background-color: {{ $cfg['team']->color }}" @endif></span>
+                                    <span class="font-display text-lg text-stage-text">{{ $cfg['team']?->name }}</span>
+                                </span>
+                                @if ($suddenDeathWinner === $cfg['id'])
+                                    <flux:icon.check-circle class="size-6 text-trophy-gold" />
+                                @else
+                                    <span class="font-label text-{{ $cfg['tint'] }}-corner-bright">{{ $cfg['corner'] }}</span>
+                                @endif
+                            </button>
+                        @endforeach
+                    </div>
+
+                    @error('suddenDeathWinner') <p class="mt-3 text-sm text-status-danger">{{ $message }}</p> @enderror
+                </div>
+            @endif
+
             <button wire:click="saveResult"
                     class="w-full rounded-lg bg-stage-text px-5 py-5 text-lg font-bold tracking-wide text-stage-bg hover:opacity-90 active:scale-[0.99] transition">
                 Ergebnis speichern
@@ -415,6 +485,9 @@ new #[Title('Match')] class extends Component {
             $awayStat = $match->stats->firstWhere('team_id', $match->away_team_id);
             $duration = $homeStat?->duration_seconds ?? $awayStat?->duration_seconds;
             $homeWin = $match->winner_team_id === $match->home_team_id;
+            $decidedBySuddenDeath = $match->phase === 'ko'
+                && ($match->tournament->ko_sudden_death ?? false)
+                && ($homeStat?->cups_scored ?? 0) === ($awayStat?->cups_scored ?? 0);
         @endphp
         <section class="overflow-hidden rounded-lg border border-trophy-gold/40 bg-trophy-gold-soft">
             <div class="px-6 py-10 lg:px-10 lg:py-14">
@@ -430,6 +503,9 @@ new #[Title('Match')] class extends Component {
                     <span class="mx-3 text-stage-text-dim">:</span>
                     <span class="@if(! $homeWin) text-trophy-gold @else text-stage-text-muted @endif">{{ $awayStat?->cups_scored ?? 0 }}</span>
                 </p>
+                @if ($decidedBySuddenDeath)
+                    <p class="mt-4 font-label text-stage-text-dim">Entschieden im Sudden Death</p>
+                @endif
             </div>
 
             <dl @class([

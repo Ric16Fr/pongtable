@@ -87,23 +87,26 @@ class MatchResultService
 
     /**
      * Save cups scored and finalize the result.
+     *
+     * @param  int|null  $suddenDeathWinnerId  When the KO sudden-death rule is active and the
+     *                                         cups are tied, the referee-selected winning team.
      */
-    public function saveResult(GameMatch $match, int $homeCups, int $awayCups): void
+    public function saveResult(GameMatch $match, int $homeCups, int $awayCups, ?int $suddenDeathWinnerId = null): void
     {
         if (! in_array($match->status, ['scoring', 'active'], true)) {
             return;
         }
 
-        $match->loadMissing(['stats', 'homeTeam', 'awayTeam']);
+        $match->loadMissing(['stats', 'homeTeam', 'awayTeam', 'tournament']);
 
-        DB::transaction(function () use ($match, $homeCups, $awayCups) {
+        DB::transaction(function () use ($match, $homeCups, $awayCups, $suddenDeathWinnerId) {
             $home = $match->stats->firstWhere('team_id', $match->home_team_id);
             $away = $match->stats->firstWhere('team_id', $match->away_team_id);
 
             $home?->update(['cups_scored' => $homeCups]);
             $away?->update(['cups_scored' => $awayCups]);
 
-            $winner = $this->determineWinner($match, $homeCups, $awayCups, $home, $away);
+            $winner = $this->determineWinner($match, $homeCups, $awayCups, $home, $away, $suddenDeathWinnerId);
 
             $match->update([
                 'status' => 'finished',
@@ -121,7 +124,7 @@ class MatchResultService
         });
     }
 
-    private function determineWinner(GameMatch $match, int $homeCups, int $awayCups, ?MatchStat $home, ?MatchStat $away): int
+    private function determineWinner(GameMatch $match, int $homeCups, int $awayCups, ?MatchStat $home, ?MatchStat $away, ?int $suddenDeathWinnerId = null): int
     {
         if ($homeCups > $awayCups) {
             return $match->home_team_id;
@@ -129,6 +132,15 @@ class MatchResultService
 
         if ($awayCups > $homeCups) {
             return $match->away_team_id;
+        }
+
+        // Cups tied. When the KO sudden-death rule is active, the referee decides
+        // the winner manually (a real-life Schere-Stein-Papier shoot-out) instead
+        // of the automatic throws/penalty tiebreaker below.
+        if ($match->phase === 'ko'
+            && ($match->tournament?->ko_sudden_death ?? false)
+            && in_array($suddenDeathWinnerId, [$match->home_team_id, $match->away_team_id], true)) {
+            return $suddenDeathWinnerId;
         }
 
         // Tiebreaker 1: fewer throws wins
