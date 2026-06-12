@@ -16,11 +16,13 @@ generiert und die KO-Phase gestartet.
 
 ## Lebenszyklus eines Turniers
 
-Ein Turnier durchläuft genau vier Phasen, hinterlegt in
-`tournaments.status`:
+Ein Turnier durchläuft bis zu fünf Phasen, hinterlegt in
+`tournaments.status`. `placement` ist dabei optional und wird nur
+durchlaufen, wenn die Sonderregel **Platzierungsspiele austragen**
+aktiv ist und mindestens 2 Teams die KO-Phase verpassen:
 
 ```
-setup → group → ko → finished
+setup → group → (placement) → ko → finished
 ```
 
 Die Übergänge sind nicht frei wählbar — jeder davon wird von einer
@@ -29,7 +31,9 @@ konkreten UI-Aktion ausgelöst:
 | Übergang | Wird ausgelöst durch |
 |---|---|
 | `setup → group` | **Gruppen generieren** im Setup |
-| `group → ko` | **KO-Phase starten** im Setup |
+| `group → placement` | **KO-Phase starten** im Setup, wenn Platzierungsspiele aktiv sind und ≥ 2 Teams nicht qualifiziert |
+| `group → ko` | **KO-Phase starten** im Setup (ohne Platzierungsspiele) |
+| `placement → ko` | erneutes **KO-Phase starten**, sobald alle Platzierungsspiele beendet sind |
 | `ko → finished` | Speichern des Finals (`ko_round = 1`) in der Match-Steuerung |
 | _zurück auf_ `setup` | **Turnier zurücksetzen** im Setup |
 
@@ -51,9 +55,13 @@ Das spart einen Klick — der Admin landet sofort auf der Setup-Seite und
 kann direkt anfangen, Tische und Teams einzutragen.
 
 Existiert bereits ein Turnier, lädt das Setup immer das _zuletzt
-angelegte_ (`Tournament::latest()`). Ein UI zum Wechseln zwischen
-Turnieren gibt es derzeit nicht — historische Turniere bleiben in der
-Datenbank, sind über die App aber nicht mehr erreichbar.
+angelegte_ (`Tournament::latest()`). Es ist also immer genau ein
+Turnier „aktiv". Wer ein neues Turnier starten will, nutzt im
+Setup-Header **Neues Turnier** (mit Bestätigung): Das legt ein
+frisches Turnier im Status `setup` an, das damit zum aktiven wird.
+Das bisherige Turnier bleibt unangetastet in der Datenbank und ist ab
+dann über den Menüpunkt **Archiv** schreibgeschützt einsehbar
+(siehe [Archiv](#archiv)).
 
 ---
 
@@ -218,9 +226,37 @@ Schiedsrichter können loslegen.
 
 ---
 
+## Platzierungsspiele
+
+Nur relevant, wenn die Sonderregel **Platzierungsspiele austragen**
+aktiv ist (siehe [Sonderregeln](Sonderregeln.md#platzierungsspiele-austragen)).
+Dann schiebt sich zwischen Gruppen- und KO-Phase eine optionale Runde
+für die Teams, die die KO-Phase _nicht_ erreichen.
+
+Ablauf:
+
+1. Sind alle Gruppenspiele beendet, erscheint im Setup — sofern
+   mindestens 2 Teams nicht qualifiziert sind — der Block
+   **Platzierungsspiele starten**.
+2. `KoBracketService::startPlacementRound()` legt die Paarungen an
+   (`phase = placement`) und setzt den Turnierstatus auf `placement`:
+   die beiden Letzten der Gesamtwertung gegeneinander, die nächsten
+   beiden darüber usw.
+3. Die Spiele werden wie gewohnt in der Match-Steuerung ausgetragen.
+   Beendete Platzierungsspiele überschreiben die Reihenfolge im
+   Leaderboard (der Sieger einer Paarung nimmt den besseren Platz ein).
+4. Sind alle Platzierungsspiele beendet, erscheint **KO-Phase starten**
+   erneut und baut das Bracket aus den qualifizierten Teams.
+
+Sind weniger als 2 Teams nicht qualifiziert, wird die Platzierungsrunde
+übersprungen und es geht direkt von `group` nach `ko`.
+
+---
+
 ## KO-Phase
 
-Sobald **alle Gruppen-Matches beendet sind**, taucht der goldene Block
+Sobald **alle Gruppen-Matches beendet sind** (bzw. nach den
+Platzierungsspielen), taucht der goldene Block
 **KO-Phase starten** auf (`koPhaseReady`-Check). Er ist erst dann
 sichtbar, wenn:
 
@@ -302,13 +338,19 @@ War das Match das Finale (`ko_round === 1`), wird der Turnierstatus auf
 
 ### Unentschieden in der KO-Phase
 
-Es gibt _keine_ extra Verlängerung. Auch in der KO-Phase greifen die
-Tiebreaker aus `MatchResultService::determineWinner()`:
+Im Default-Modus (**Automatisch**) gibt es _keine_ extra Verlängerung.
+Auch in der KO-Phase greifen dann die Tiebreaker aus
+`MatchResultService::determineWinner()`:
 
 1. Mehr Cups → Sieger.
 2. Bei Cup-Gleichstand: weniger Würfe → Sieger.
 3. Bei Würfe-Gleichstand: weniger Strafbecher → Sieger.
 4. Sonst: Heimteam gewinnt (Fallback).
+
+Ist hingegen die Sonderregel **Bestimmung des Siegers in der KO-Phase**
+auf **Sudden Death** gestellt, wählt bei Becher-Gleichstand der Schiri
+das siegreiche Team selbst aus (siehe
+[Sonderregeln](Sonderregeln.md#bestimmung-des-siegers-in-der-ko-phase)).
 
 Mehr Details dazu in [Matches – Wertungslogik](Matches.md#wertungslogik-im-detail).
 
@@ -341,6 +383,30 @@ ohne dass man Tische und Teams neu eintragen muss.
 
 ---
 
+## Archiv
+
+Das **Archiv** (`/archiv`, nur Admin) macht vergangene Turniere wieder
+einsehbar. Der Sidebar-Eintrag erscheint erst, **sobald mehr als ein
+Turnier existiert** (sonst gibt es nichts zu archivieren).
+
+- **Was zählt als „vergangen"?** Alle Turniere _außer_ dem aktuellen
+  (= dem zuletzt angelegten). Das aktive Turnier bleibt über die
+  normale App erreichbar und taucht im Archiv daher nicht auf.
+- **Übersicht.** Ein Klick auf **Archiv** öffnet die Liste der
+  vergangenen Turniere (neuestes zuerst) mit Datum, Team- und
+  Match-Zahl.
+- **Detailansicht.** Die Auswahl eines Turniers öffnet eine Seite mit
+  einem Tab-Umschalter zwischen **Wertung** (KO-Bracket + Leaderboard)
+  und **Statistik** — exakt die öffentlichen Ansichten, aber
+  **schreibgeschützt** und ohne Live-Polling. Der Aufruf des _aktuellen_
+  Turniers über die Archiv-URL wird mit 404 abgewiesen.
+- **Kein zweites Datenmodell.** Es gibt bewusst _keine_ Archivtabelle:
+  Turnierdaten werden nie turnierübergreifend gelöscht (Reset und
+  CSV-Import betreffen nur das eigene Turnier), daher _sind_ die
+  bestehenden Tabellen das Archiv. Die Detailseite verwendet dieselben
+  Livewire-Komponenten wie Dashboard und öffentliche Seite, nur mit
+  fixiertem `tournament_id` und abgeschaltetem Polling.
+
 ## Schiris anlegen
 
 Nicht im Setup, sondern unter **Einstellungen** (Profil-Dropdown).
@@ -355,6 +421,6 @@ Siehe [Einstellungen.md](Einstellungen.md#schiris-anlegen-und-verwalten-admin).
 - `teams` — Teams, je Turnier.
 - `groups` — wird beim Generieren erzeugt, 1 pro Tisch.
 - `group_team` — Pivot mit den Tabellenständen (Punkte, W/L, Cups).
-- `matches` — alle Spiele (Phase `group` oder `ko`).
+- `matches` — alle Spiele (Phase `group`, `placement` oder `ko`).
 - `match_stats` — je Match _pro Team_ eine Zeile mit Würfen,
   Strafbechern, getroffenen Bechern und Dauer.

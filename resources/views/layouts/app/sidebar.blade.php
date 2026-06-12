@@ -39,6 +39,11 @@
                             </x-slot:icon>
                             {{ __('Sonderregeln & Einstellungen') }}
                         </flux:sidebar.item>
+                        @if (\App\Models\Tournament::count() > 1)
+                            <flux:sidebar.item icon="archive-box" :href="route('archive.index')" :current="request()->routeIs('archive.*')" wire:navigate>
+                                {{ __('Archiv') }}
+                            </flux:sidebar.item>
+                        @endif
                     @endif
                 </flux:sidebar.group>
             </flux:sidebar.nav>

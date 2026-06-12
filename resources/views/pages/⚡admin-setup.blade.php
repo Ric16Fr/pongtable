@@ -194,6 +194,25 @@ new #[Title('Setup')] class extends Component {
         Flux::toast(variant: 'success', text: __('Turnier zurückgesetzt.'));
     }
 
+    /**
+     * Start a fresh tournament. The current one is left untouched and
+     * moves into the archive (it is no longer the latest tournament).
+     */
+    public function createNewTournament(): void
+    {
+        $tournament = Tournament::create([
+            'name' => 'Bierpong Cup '.now()->year,
+            'group_match_duration_minutes' => 10,
+            'ko_match_duration_minutes' => 15,
+        ]);
+
+        $this->tournamentId = $tournament->id;
+        $this->reset(['newTableName', 'newTeamName', 'csvContent', 'addingTable', 'addingTeam', 'showGroupPreview']);
+        unset($this->tournament);
+
+        Flux::toast(variant: 'success', text: __('Neues Turnier gestartet. Das bisherige liegt jetzt im Archiv.'));
+    }
+
     #[Computed]
     public function groupPreview(): array
     {
@@ -254,6 +273,12 @@ new #[Title('Setup')] class extends Component {
                             <flux:button variant="ghost" size="sm">Turnier zurücksetzen</flux:button>
                         </flux:modal.trigger>
                     @endif
+                    <flux:button variant="ghost" size="sm" icon="plus"
+                                 wire:click="createNewTournament"
+                                 wire:confirm="Neues Turnier starten? Das aktuelle Turnier wandert unverändert ins Archiv und bleibt dort einsehbar."
+                                 data-test="new-tournament">
+                        Neues Turnier
+                    </flux:button>
                 </div>
             </div>
         </header>

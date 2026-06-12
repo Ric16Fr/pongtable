@@ -94,9 +94,11 @@ Löscht den Schiri komplett aus `users`. Vorher gibt es einen
 Die App kennt zwei Rollen, gespeichert in `users.role`:
 
 - `admin` – sieht alle Sidebar-Punkte (Dashboard, Matches, Setup,
-  Statistik) und darf Schiris anlegen/zurücksetzen/löschen.
+  Statistik, Sonderregeln & Einstellungen, sowie Archiv sobald mehr als
+  ein Turnier existiert) und darf Schiris anlegen/zurücksetzen/löschen.
 - `referee` – sieht nur Dashboard und Matches. Hat keinen Zugriff auf
-  `/setup` und `/statistics` (HTTP 403 über `EnsureRole`-Middleware).
+  `/setup`, `/statistics`, `/sonderregeln` und `/archiv` (HTTP 403 über
+  `EnsureRole`-Middleware).
 
 Es gibt _keine_ Selbst-Registrierung. Schiri-Accounts werden vom Admin
 angelegt; Admins werden in der DB oder über eine Migration erzeugt

@@ -1,8 +1,8 @@
 # pongtable – Dokumentation
 
 Diese Dokumentation beschreibt, wie das System bedient wird. Sie geht
-gezielt **nicht** auf die Bierpong-Regeln selbst ein — die liegen in
-[Bierpongregeln.md](./Bierpongregeln.md). Hier geht es um die App:
+gezielt **nicht** auf die Bierpong-Regeln selbst ein — die stehen in
+der App unter **Spielregeln** (`/regeln`). Hier geht es um die App:
 wie ein Schiri ein Match steuert, wie ein Admin ein Turnier aufbaut,
 wie der Sieger ermittelt wird, was die Statistiken bedeuten.
 
@@ -17,8 +17,9 @@ Pro Sidebar-/Profil-Eintrag gibt es ein Dokument:
 | [Setup.md](Setup.md) | Setup | Admin |
 | [Statistik.md](Statistik.md) | Statistik | Admin |
 | [Sonderregeln.md](Sonderregeln.md) | Sonderregeln & Einstellungen 🍺 | Admin |
+| [Setup.md](Setup.md#archiv) | Archiv | Admin |
 | [Einstellungen.md](Einstellungen.md) | _(Profil-Dropdown)_ | Schiri & Admin |
-| [Oeffentliche-Ansicht.md](Oeffentliche-Ansicht.md) | _(Public-Link auf dem Dashboard)_ | Publikum |
+| [Öfentliche-Ansicht.md](Öfentliche-Ansicht.md) | _(Public-Link auf dem Dashboard)_ | Publikum |
 
 ## Quick-Start
 

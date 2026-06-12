@@ -18,6 +18,22 @@ it('auto-creates a tournament on first mount when none exists', function () {
     expect(Tournament::count())->toBe(1);
 });
 
+it('starts a fresh tournament and switches the active one to it', function () {
+    $old = Tournament::factory()->create(['name' => 'Alter Cup', 'status' => 'finished', 'created_at' => now()->subDay()]);
+
+    Livewire::test('pages::admin-setup')
+        ->call('createNewTournament')
+        ->assertHasNoErrors();
+
+    expect(Tournament::count())->toBe(2);
+
+    $latest = Tournament::query()->latest()->first();
+    expect($latest->id)->not->toBe($old->id);
+    expect($latest->status)->toBe('setup');
+    // The old tournament is left completely untouched.
+    expect($old->fresh()->status)->toBe('finished');
+});
+
 it('adds a new table during setup phase', function () {
     Livewire::test('pages::admin-setup')
         ->set('newTableName', 'Tisch Kellerbar')

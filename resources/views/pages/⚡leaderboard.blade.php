@@ -8,9 +8,12 @@ use Livewire\Component;
 new class extends Component {
     public ?int $tournamentId = null;
 
-    public function mount(?int $tournamentId = null): void
+    public bool $poll = true;
+
+    public function mount(?int $tournamentId = null, bool $poll = true): void
     {
         $this->tournamentId = $tournamentId ?? Tournament::query()->latest()->value('id');
+        $this->poll = $poll;
     }
 
     #[Computed]
@@ -86,7 +89,7 @@ new class extends Component {
     }
 }; ?>
 
-<div wire:poll.15s>
+<div @if($poll) wire:poll.15s @endif>
     @if (empty($this->rows))
         <p class="text-sm text-stage-text-dim">Noch ruhig hier. Sobald der erste Becher fällt, sortiert sich's sofort.</p>
     @else

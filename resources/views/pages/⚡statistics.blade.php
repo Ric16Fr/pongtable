@@ -9,9 +9,12 @@ use Livewire\Component;
 new #[Title('Statistik')] class extends Component {
     public ?int $tournamentId = null;
 
-    public function mount(?int $tournamentId = null): void
+    public bool $poll = true;
+
+    public function mount(?int $tournamentId = null, bool $poll = true): void
     {
         $this->tournamentId = $tournamentId ?? Tournament::query()->latest()->value('id');
+        $this->poll = $poll;
     }
 
     #[Computed]
@@ -63,7 +66,7 @@ if ($stats) {
 }
 @endphp
 
-<div class="mx-auto w-full max-w-6xl space-y-10 p-4 lg:p-6" wire:poll.30s>
+<div class="mx-auto w-full max-w-6xl space-y-10 p-4 lg:p-6" @if($poll) wire:poll.30s @endif>
 
     {{-- Title --}}
     <header class="flex flex-col gap-4">

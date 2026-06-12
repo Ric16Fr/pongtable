@@ -13,15 +13,17 @@ Statistik beeinflussen.
 ## Auf welchem Turnier wirken die Änderungen?
 
 Die Seite lädt — wie das Setup — immer das _zuletzt angelegte_
-Turnier (`Tournament::latest()`). Ein UI zum Wechseln zwischen
-Turnieren gibt es nicht. Existiert noch kein Turnier, wird automatisch
-eines mit Default-Werten angelegt.
+Turnier (`Tournament::latest()`). Über diese Seite selbst lässt sich
+das bearbeitete Turnier nicht wechseln; ein neues startet man im Setup
+über **Neues Turnier**, vergangene Turniere liegen schreibgeschützt im
+**Archiv** (siehe [Setup.md](Setup.md)). Existiert noch kein Turnier,
+wird automatisch eines mit Default-Werten angelegt.
 
 ---
 
 ## Einstellungen-Block
 
-Drei Felder, identisch zu den ursprünglich im Setup verankerten
+Vier Felder, identisch zu den ursprünglich im Setup verankerten
 Einstellungen:
 
 - **Turniername** – beliebiger String, max. 255 Zeichen.
@@ -29,8 +31,11 @@ Einstellungen:
   Gruppenspiele. Default 10, Range 1–60.
 - **KO-Match (Min)** – Match-Dauer für KO-Spiele. Default 15,
   Range 1–60.
+- **Beschreibung** – Freitext (max. 1000 Zeichen), wird auf der
+  Startseite unter dem Turniernamen angezeigt. Ist anfangs mit
+  `Tournament::DEFAULT_DESCRIPTION` vorbelegt.
 
-Diese Werte werden zur Laufzeit eines Spiels vom Timer in der
+Die Dauer-Werte werden zur Laufzeit eines Spiels vom Timer in der
 Match-Steuerung eingelesen. Änderungen wirken sich also _sofort_ auf
 das nächste startende Spiel aus. Bereits laufende Matches benutzen den
 Wert, der zum Zeitpunkt des Starts galt.
@@ -40,7 +45,9 @@ Wert, der zum Zeitpunkt des Starts galt.
 ## Sonderregeln
 
 Die Sonderregeln verändern, wie das Turnier gespielt und ausgewertet
-wird. Aktuell gibt es genau eine Regel.
+wird. Aktuell gibt es drei Regeln: **Würfe zählen** (Schalter),
+**Platzierungsspiele austragen** (Schalter) und **Bestimmung des
+Siegers in der KO-Phase** (Auswahl).
 
 ### Würfe zählen
 
@@ -65,6 +72,36 @@ ermittelt werden.
 > die wurf-basierten Statistiken automatisch wieder, sobald wieder
 > Würfe in neuen Matches erfasst werden.
 
+### Platzierungsspiele austragen
+
+Schalter (Switch), Default **aus**. Steuert, ob Teams, die die KO-Phase
+verpassen, ihre Endplatzierung noch ausspielen dürfen.
+
+| Zustand | Auswirkung |
+|---|---|
+| aus _(Default)_ | Die Platzierungen unterhalb der KO-Plätze bleiben so, wie sie in der Gruppenphase erspielt wurden. Vom Status `group` geht es direkt in die KO-Phase. |
+| an | Beim Klick auf **KO-Phase starten** wird – sofern mindestens 2 Teams die KO-Phase verpassen – zuerst eine **Platzierungsrunde** ausgetragen: Die beiden letzten der Gesamtwertung spielen gegeneinander, die nächsten beiden darüber usw. Das Turnier wechselt dafür in den Status `placement`. Erst wenn alle Platzierungsspiele beendet sind, baut ein erneutes **KO-Phase starten** das Bracket. |
+
+Beendete Platzierungsspiele überschreiben die Reihenfolge im
+Leaderboard: Der jeweilige Sieger eines Paarungs-Slots nimmt den
+besseren der beiden Plätze ein. Details zum Phasen-Übergang in
+[Setup – Platzierungsspiele](Setup.md#platzierungsspiele).
+
+### Bestimmung des Siegers in der KO-Phase
+
+Auswahl (Select), Default **Automatisch**. Legt fest, wie ein
+KO-Spiel entschieden wird, das mit **gleicher Becherzahl** endet.
+
+| Option | Verhalten bei Becher-Gleichstand im KO |
+|---|---|
+| Automatisch _(Default)_ | Der Gleichstand wird automatisch aufgelöst: weniger Würfe gewinnt, bei erneutem Gleichstand weniger Strafbecher, sonst Heimteam (Fallback). |
+| Sudden Death (Auswahl durch Schiri) | Die Match-Steuerung blendet beim Speichern einen **Sudden-Death-Block** ein; der Schiri wählt das siegreiche Team aus (Pflichtauswahl, sonst Validierungsfehler). Das Finished-Banner vermerkt „Entschieden im Sudden Death". |
+
+Die Einstellung wirkt **nur in der KO-Phase** und **nur bei
+Becher-Gleichstand**. Eindeutige Ergebnisse werden immer über die
+getroffenen Becher entschieden. Mehr dazu in
+[Matches – Unentschieden in der KO-Phase](Matches.md#unentschieden-in-der-ko-phase).
+
 ---
 
 ## Speichern
@@ -77,15 +114,26 @@ Sonderregeln in einem Rutsch. Bei Erfolg wird ein Toast
 Validierung:
 
 - `tournamentName` ist Pflichtfeld, max. 255 Zeichen.
+- `description` ist Pflichtfeld, max. 1000 Zeichen.
 - `groupMinutes` / `koMinutes` müssen ganzzahlig zwischen 1 und 60
   liegen.
+- `koWinnerMode` muss `auto` oder `sudden_death` sein.
+
+Die beiden Schalter `countThrows` und `playPlacementMatches` sind
+Booleans und werden ohne weitere Validierung übernommen.
 
 ---
 
 ## Datenmodell-Querverweis
 
 - `tournaments.name` — Turniername.
+- `tournaments.description` — Freitext-Beschreibung für die Startseite.
 - `tournaments.group_match_duration_minutes` — Match-Dauer Gruppe.
 - `tournaments.ko_match_duration_minutes` — Match-Dauer KO.
 - `tournaments.count_throws` — Boolean, Default `true`. Steuert die
   Würfe-Erfassung und die Sichtbarkeit der wurf-basierten Statistiken.
+- `tournaments.play_placement_matches` — Boolean, Default `false`.
+  Steuert, ob vor der KO-Phase Platzierungsspiele ausgetragen werden.
+- `tournaments.ko_sudden_death` — Boolean, Default `false`. `true`
+  entspricht der Select-Option „Sudden Death", `false` der Option
+  „Automatisch".

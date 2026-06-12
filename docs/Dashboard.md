@@ -8,8 +8,9 @@ gerade an den Tischen passiert und wie weit der Spielplan abgearbeitet ist.
 
 ### Kopfbereich
 
-- **Phasen-Label** – `Vorbereitung`, `Gruppenphase`, `KO-Phase` oder
-  `Beendet`. Wird aus `tournaments.status` abgeleitet.
+- **Phasen-Label** – `Vorbereitung`, `Gruppenphase`,
+  `Platzierungsspiele`, `KO-Phase` oder `Beendet`. Wird aus
+  `tournaments.status` abgeleitet.
 - **Turniername** – aus `tournaments.name`.
 - **Public-Link-Button** – öffnet die öffentliche Ansicht
   (`/t/{public_token}`) in einem neuen Tab. Diese URL kannst du z. B.
@@ -77,8 +78,10 @@ Poll-Intervall auch im Dashboard.
 
 Das Dashboard ist für **Admins und Schiedsrichter** identisch. Die
 Sidebar zeigt Schiris aber nur die Punkte *Dashboard* und *Matches*.
-Setup und Statistik sind hinter `middleware('role:admin')` versteckt
-(`routes/web.php`).
+Die Admin-Punkte *Setup*, *Statistik*, *Sonderregeln & Einstellungen*
+und *Archiv* sind hinter `middleware('role:admin')` versteckt
+(`routes/web.php`). *Archiv* erscheint zusätzlich erst, wenn mehr als
+ein Turnier existiert.
 
 ## Was tun, wenn nichts angezeigt wird?
 

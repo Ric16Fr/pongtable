@@ -158,6 +158,11 @@ diesen einen Schritt eingedampft: zwei große Eingabefelder mit `±`.
 > haben. Das ist verlustfrei: falls eure Tische mit anderer Cup-Zahl
 > spielen, kann der Schiri den Wert einfach hochsetzen.
 
+Endet ein **KO-Spiel** mit gleicher Becherzahl und ist die Sonderregel
+**Sudden Death** aktiv, erscheint hier zusätzlich ein Auswahlblock, in
+dem der Schiri das siegreiche Team bestimmt (siehe
+[Unentschieden in der KO-Phase](#unentschieden-in-der-ko-phase)).
+
 Bei Klick auf **Ergebnis speichern** läuft `saveResult()`:
 
 - Validation: beide Werte müssen `integer`, `>= 0`, `<= 30` sein.
@@ -250,10 +255,22 @@ Zeile ist nicht anklickbar.
 
 ### Unentschieden in der KO-Phase
 
-In der KO-Phase greift dieselbe Tiebreaker-Reihenfolge wie in der
-Gruppenphase (Cups → Würfe → Strafbecher → Heimteam-Fallback). Es gibt
-also _kein_ explizites Verlängerungsspiel; jedes KO-Match endet mit
-einem Sieger, sobald das Ergebnis gespeichert ist.
+Was bei **Becher-Gleichstand** passiert, hängt von der Sonderregel
+**Bestimmung des Siegers in der KO-Phase** ab
+(siehe [Sonderregeln](Sonderregeln.md#bestimmung-des-siegers-in-der-ko-phase)):
+
+- **Automatisch** _(Default)_ — es greift dieselbe Tiebreaker-Reihen­
+  folge wie in der Gruppenphase (Cups → Würfe → Strafbecher →
+  Heimteam-Fallback). Kein explizites Verlängerungsspiel; das Match
+  endet mit einem Sieger, sobald das Ergebnis gespeichert ist.
+- **Sudden Death** — die Match-Steuerung blendet vor dem Speichern
+  einen Sudden-Death-Block ein (`needsSuddenDeath`), in dem der Schiri
+  das siegreiche Team auswählt. Ohne Auswahl schlägt das Speichern mit
+  einem Validierungsfehler fehl. Das Finished-Banner vermerkt dann
+  „Entschieden im Sudden Death".
+
+Beide Wege liefern garantiert einen Sieger — eine frei spielbare
+Verlängerung mit eigenem Timer gibt es nicht.
 
 Wenn ihr stattdessen lieber eine echte Verlängerung wollt: Das
 Turnier zurücksetzen ist nicht das richtige Werkzeug (das löscht

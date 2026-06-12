@@ -21,5 +21,7 @@ Route::middleware('auth')->group(function () {
         Route::livewire('/setup', 'pages::admin-setup')->name('tournament.setup');
         Route::livewire('/statistics', 'pages::statistics')->name('statistics');
         Route::livewire('/sonderregeln', 'pages::special-rules')->name('special-rules');
+        Route::livewire('/archiv', 'pages::archive')->name('archive.index');
+        Route::livewire('/archiv/{tournament}', 'pages::archive-show')->name('archive.show');
     });
 });

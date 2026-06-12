@@ -17,8 +17,9 @@ eine reine Anzeige.
 Die View wird vom `PublicTournamentController` gerendert. Sichtbar
 sind, in dieser Reihenfolge:
 
-1. **Header** – Phase (`Vorbereitung` / `Gruppenphase` / `KO-Phase` /
-   `Beendet`), Turniername, ein Lauf-Counter („Läuft seit …") und
+1. **Header** – Phase (`Vorbereitung` / `Gruppenphase` /
+   `Platzierungsspiele` / `KO-Phase` / `Beendet`), Turniername, ein
+   Lauf-Counter („Läuft seit …") und
    eine Fortschrittsleiste in Gold („X / Y Matches gespielt").
 2. **Champion-Banner** – nur nach Turnierende. Großer Sieger-Name in
    Gold, dazu ein Satz „Hat sich durch X Matches nach oben getrunken".
@@ -64,6 +65,7 @@ Zugangsvoraussetzung. Aktuelle Eigenschaften:
 |---|---|
 | `setup` | Nur Header + Hinweis aus dem Bracket-Widget („Hier wird gleich gespielt"). Keine Matches, keine Tabellen. |
 | `group` | Header mit Fortschritt, Live-Matches (falls vorhanden), Gruppen-Tabellen. KO-Bracket ist leer. |
+| `placement` | Wie `group`, plus die laufenden Platzierungsspiele. Erscheint nur, wenn die Sonderregel **Platzierungsspiele austragen** aktiv ist. |
 | `ko` | Wie `group`, plus voll gerendertes KO-Bracket. Gruppen-Tabellen bleiben sichtbar (jeweils Top 2 hervorgehoben). |
 | `finished` | Champion-Banner, Bracket, Leaderboard, Fun-Stats. Lauf-Counter wird durch „Letzte Runde gespielt" ersetzt. |
 
