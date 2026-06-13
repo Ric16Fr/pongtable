@@ -78,7 +78,7 @@ new class extends Component {
         </div>
 
         <div x-show="tab === 'statistik'" x-cloak role="tabpanel" class="pt-8">
-            <livewire:pages::statistics :tournament-id="$tournament->id" :poll="false" :key="'archive-statistics-'.$tournament->id" />
+            <livewire:pages::statistics :tournament-id="$tournament->id" :poll="false" :show-header="false" :key="'archive-statistics-'.$tournament->id" />
         </div>
     </div>
 </div>

@@ -11,10 +11,13 @@ new #[Title('Statistik')] class extends Component {
 
     public bool $poll = true;
 
-    public function mount(?int $tournamentId = null, bool $poll = true): void
+    public bool $showHeader = true;
+
+    public function mount(?int $tournamentId = null, bool $poll = true, bool $showHeader = true): void
     {
         $this->tournamentId = $tournamentId ?? Tournament::query()->latest()->value('id');
         $this->poll = $poll;
+        $this->showHeader = $showHeader;
     }
 
     #[Computed]
@@ -68,18 +71,20 @@ if ($stats) {
 
 <div class="mx-auto w-full max-w-6xl space-y-10 p-4 lg:p-6" @if($poll) wire:poll.30s @endif>
 
-    {{-- Title --}}
-    <header class="flex flex-col gap-4">
-        @if ($this->tournament)
-            <div class="font-label flex items-center gap-3 text-trophy-gold">
-                <span class="block h-px w-12 bg-trophy-gold"></span>
-                <span>Turnier-Statistik</span>
-            </div>
-            <h1 class="font-display text-stage-text text-[clamp(2rem,5vw,3.5rem)]">{{ $this->tournament->name }}</h1>
-        @else
-            <h1 class="font-display text-stage-text text-3xl">Kein Turnier</h1>
-        @endif
-    </header>
+    {{-- Header nur außerhalb des Archivs zeigen; im Archiv liefert die Hülle bereits den Turniertitel. --}}
+    @if ($showHeader)
+        <header class="flex flex-col gap-4">
+            @if ($this->tournament)
+                <div class="font-label flex items-center gap-3 text-trophy-gold">
+                    <span class="block h-px w-12 bg-trophy-gold"></span>
+                    <span>Turnier-Statistik</span>
+                </div>
+                <h1 class="font-display text-stage-text text-[clamp(2rem,5vw,3.5rem)]">{{ $this->tournament->name }}</h1>
+            @else
+                <h1 class="font-display text-stage-text text-3xl">Kein Turnier</h1>
+            @endif
+        </header>
+    @endif
 
     @if (empty($tiles) && ! ($stats['champion'] ?? null))
         <p class="text-stage-text-muted">Noch keine Daten. Statistiken erscheinen sobald Matches gespielt wurden.</p>

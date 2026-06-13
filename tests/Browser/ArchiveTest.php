@@ -51,6 +51,7 @@ it('lets an admin browse the archive and switch between Wertung and Statistik', 
         ->click('@tab-statistik')
         ->assertSee('Turniersieger')
         ->assertSee('Team Pokalheld')
+        ->assertDontSee('Turnier-Statistik')
         ->assertNoJavascriptErrors();
 });
 

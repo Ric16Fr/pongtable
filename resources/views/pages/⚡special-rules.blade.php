@@ -89,7 +89,6 @@ new #[Title('Sonderregeln & Einstellungen')] class extends Component {
                 <span>{{ __('Administrator') }}</span>
             </div>
             <h1 class="font-display text-stage-text text-[clamp(2rem,5vw,3.5rem)] flex items-center gap-3">
-                <span aria-hidden="true">🍺</span>
                 {{ __('Sonderregeln & Einstellungen') }}
             </h1>
         </header>

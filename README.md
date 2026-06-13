@@ -1,5 +1,6 @@
 # Pongtable
-Eine Turniersoftware für unsere Bierpong WM, mit Gruppenphase, KO-Bracket und Live-Dashboard, selbst hostbar über LaravelCloud, lokal, o.ä.
+Eine Turniersoftware für unsere Bierpong WM, mit Gruppenphase, KO-Bracket und Live-Dashboard, selbst hostbar über LaravelCloud, lokal 
+per Docker, o.ä.
 Aufgrund fehlender Alternativen selbst gebaut und stetig erweitert.
 ### Runs
 [![PHP Linting (Pint)](https://github.com/Ric16Fr/pongtable/actions/workflows/phpLinting.yml/badge.svg)](https://github.com/Ric16Fr/pongtable/actions/workflows/phpLinting.yml)
@@ -20,16 +21,16 @@ Aufgrund fehlender Alternativen selbst gebaut und stetig erweitert.
 - diverse lustige Statistiken
 - Diagramm für die KO Runden
 - Dark und Lightmode
+- Docker-Unterstützung
 
 ## Was aktuell nicht geht
 - mehrere getrennte Accounts, dies ist primär ein Tool für den eigenen Gebrauch
 - mehrere verschiedene Turniere zeitgleich, da mein Fokus auf einem Turnier lag
-- Docker-Unterstützung, bei Bedarf gerne schreiben
 - QR-Codes für das Leaderboard, bei Interesse einfach mit der eigenen URL erstellen
 
 ## Gesonderte Funktionen (teilweise geplant)
 - [x] festlegen der Gruppen per CSV anstelle von Auslosung (falls die Gruppen live festgelegt oder vorab ausgelost werden sollen) 
-- [ ] ein Archiv mit vergangenen Turnieren
+- [x] ein Archiv mit vergangenen Turnieren
 - [ ] Download der Ergebnisse als CSV
 - [ ] (wenn ich mal viel Zeit hab) Generierung von Zertifikaten
 - [x] Sonderregeln, etwa wie der Sieger in der KO-Phase bestimmt wird
@@ -38,6 +39,16 @@ Aufgrund fehlender Alternativen selbst gebaut und stetig erweitert.
 
 
 ## Installation
+### Per Docker
+Will man das Projekt per Docker laufen lassen muss man erst trotzdem die .env generieren und einen App Key setzen. Die Datei kopiert man 
+einfach per `cp .env.example .env`.
+
+In der Datei kann man dann APP_URL auf den gewünschten Host setzen, z.B. http://localhost:8080. Dann muss man den App-Key mit
+`docker compose run --rm app php artisan key:generate --show` erzeugen und auch in der .env Datei eintragen (unter APP_KEY).
+Nun kann das Projekt per `docker compose up -d --build` gestartet werden.
+
+
+### Mit Laravel Herd
 Man kann das Projekt mit Herd lokal laufen lassen (dafür einfach klonen, [Herd installieren](https://herd.laravel.com/docs/windows/getting-started/installation) (die Standardversion reicht völlig) und der [Anleitung von Herd](https://herd.laravel.com/docs/windows/getting-started/sites#linking-an-existing-site) zum verbinden eines existierenden 
 Projektes folgen). Das geht super unter Windows und MacOS, unter Linux muss man sich beispielsweilse mit Sail selbst einen Server aufsetzen.
 
@@ -51,9 +62,11 @@ Diese Accounts können (anders als der Admin) die Turniereinstellungen nicht än
 Demodaten können auf Wunsch über `php artisan db:seed` angelegt werden.
 
 ## Doku
-Für (unsere) Bierpongregeln und eine, teilweise technische, detaillierte Beschreibung aller Features (organisiert nach den Elementen in der 
-Sidebar) bitte im 
-`docs`-Ordner nachschauen, empfohlener Start: [README](docs/README.md)
+Für (unsere) Bierpongregeln gibt es eine Seite direkt in dem Projekt. Eine teilweise technische, detaillierte Beschreibung aller 
+Features (organisiert nach den 
+Elementen in der 
+Sidebar) findet man im 
+`docs`-Ordner, empfohlener Start: [README](docs/README.md)
 
 ## Testsuite
 Für den Fall dass, bei einer eigenen Weiterentwicklung oder vor einem PR die vorhandenen Unit, Feature und Webtests ausgeführt werden 

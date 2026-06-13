@@ -652,6 +652,7 @@ a[data-flux-navlist-item][data-current]:hover {
     letter-spacing: 0.04em;
     text-transform: lowercase;
     line-height: 1;
+    padding-right: 5px;
 }
 
 .wordmark-display {
