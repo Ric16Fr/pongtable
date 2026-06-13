@@ -1,0 +1,35 @@
+# Self-hosting the Bierpong WM app via Docker.
+#
+#   1. cp .env.example .env && edit it (set APP_URL to your host, e.g. http://localhost:8080)
+#   2. docker compose run --rm app php artisan key:generate --show   # paste into .env as APP_KEY
+#   3. docker compose up -d --build
+#
+# The SQLite database and the storage directory persist in named volumes,
+# so container rebuilds keep your tournaments.
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: bierpong-wm
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    env_file:
+      - .env
+    environment:
+      APP_ENV: production
+      APP_DEBUG: "false"
+      DB_CONNECTION: sqlite
+      DB_DATABASE: /data/database.sqlite
+      SESSION_DRIVER: database
+      CACHE_STORE: database
+      QUEUE_CONNECTION: database
+      SERVER_NAME: ":80"
+    volumes:
+      - pong-db:/data
+      - pong-storage:/app/storage
+
+volumes:
+  pong-db:
+  pong-storage:
