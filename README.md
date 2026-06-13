@@ -31,10 +31,10 @@ Aufgrund fehlender Alternativen selbst gebaut und stetig erweitert.
 ## Gesonderte Funktionen (teilweise geplant)
 - [x] festlegen der Gruppen per CSV anstelle von Auslosung (falls die Gruppen live festgelegt oder vorab ausgelost werden sollen) 
 - [x] ein Archiv mit vergangenen Turnieren
-- [ ] Download der Ergebnisse als CSV
-- [ ] (wenn ich mal viel Zeit hab) Generierung von Zertifikaten
 - [x] Sonderregeln, etwa wie der Sieger in der KO-Phase bestimmt wird
 - [x] Platzierungsspiele nach Ende der Gruppenphase
+- [ ] Download der Ergebnisse als CSV
+- [ ] (wenn ich mal viel Zeit hab) Generierung von Zertifikaten
 - [ ] ggf. Wünsche vom lokalen Studentenclub
 
 

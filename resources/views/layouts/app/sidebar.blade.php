@@ -55,9 +55,12 @@
             <flux:dropdown position="bottom" align="start" class="hidden lg:block">
                 <flux:profile
                     :name="auth()->user()->name"
-                    :initials="auth()->user()->initials()"
                     icon-trailing="chevron-up"
-                />
+                >
+                    <x-slot:avatar>
+                        <x-user-avatar :user="auth()->user()" />
+                    </x-slot:avatar>
+                </flux:profile>
 
                 <flux:menu>
                     <div class="px-2 py-1.5 text-xs text-stage-text-muted">
@@ -98,18 +101,18 @@
 
             <flux:dropdown position="top" align="end">
                 <flux:profile
-                    :initials="auth()->user()->initials()"
                     icon-trailing="chevron-down"
-                />
+                >
+                    <x-slot:avatar>
+                        <x-user-avatar :user="auth()->user()" />
+                    </x-slot:avatar>
+                </flux:profile>
 
                 <flux:menu>
                     <flux:menu.radio.group>
                         <div class="p-0 text-sm font-normal">
                             <div class="flex items-center gap-2 px-1 py-1.5 text-start text-sm">
-                                <flux:avatar
-                                    :name="auth()->user()->name"
-                                    :initials="auth()->user()->initials()"
-                                />
+                                <x-user-avatar :user="auth()->user()" />
                                 <div class="grid flex-1 text-start text-sm leading-tight">
                                     <flux:heading class="truncate">{{ auth()->user()->name }}</flux:heading>
                                     <flux:text class="truncate text-xs">
