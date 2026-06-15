@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
-#[Fillable(['name', 'description', 'public_token', 'status', 'group_match_duration_minutes', 'ko_match_duration_minutes', 'count_throws', 'play_placement_matches', 'ko_sudden_death'])]
+#[Fillable(['name', 'description', 'public_token', 'status', 'group_match_duration_minutes', 'ko_match_duration_minutes', 'count_throws', 'play_placement_matches', 'ko_sudden_death', 'determine_cup_king'])]
 class Tournament extends Model
 {
     use HasFactory;
@@ -26,6 +26,7 @@ class Tournament extends Model
             'count_throws' => 'boolean',
             'play_placement_matches' => 'boolean',
             'ko_sudden_death' => 'boolean',
+            'determine_cup_king' => 'boolean',
         ];
     }
 

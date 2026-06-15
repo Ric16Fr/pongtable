@@ -30,4 +30,9 @@ class Team extends Model
     {
         return $this->hasMany(MatchStat::class);
     }
+
+    public function members(): HasMany
+    {
+        return $this->hasMany(TeamMember::class);
+    }
 }

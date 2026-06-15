@@ -16,7 +16,7 @@ Pro Sidebar-/Profil-Eintrag gibt es ein Dokument:
 | [Matches.md](Matches.md) | Matches | Schiri & Admin |
 | [Setup.md](Setup.md) | Setup | Admin |
 | [Statistik.md](Statistik.md) | Statistik | Admin |
-| [Sonderregeln.md](Sonderregeln.md) | Sonderregeln & Einstellungen 🍺 | Admin |
+| [Sonderregeln.md](Sonderregeln.md) | Sonderregeln & Einstellungen | Admin |
 | [Setup.md](Setup.md#archiv) | Archiv | Admin |
 | [Einstellungen.md](Einstellungen.md) | _(Profil-Dropdown)_ | Schiri & Admin |
 | [Öfentliche-Ansicht.md](Öfentliche-Ansicht.md) | _(Public-Link auf dem Dashboard)_ | Publikum |

@@ -35,8 +35,9 @@ mit einem Platzhalter.
 ## Fun-Stats
 
 Acht Kacheln, die immer dann gezeigt werden, wenn die zugehörige
-Berechnung mindestens ein Match findet. Reihenfolge und Inhalt sind
-fest verdrahtet.
+Berechnung mindestens ein Match findet, plus die optionale Kachel
+**Wurfkönig** (nur bei aktivierter Sonderregel). Reihenfolge und Inhalt
+sind fest verdrahtet.
 
 Hinter jedem Label sitzt ein **Info-i** mit einer Tooltip-Erklärung,
 damit Schiris im Live-Modus die Bedeutung ablesen können.
@@ -143,6 +144,22 @@ Erscheint nur, wenn ein Team echte Becher gesammelt hat (`cups > 0`).
 > aus: die Verlierer-Strafe wird über die _tatsächliche_ Differenz
 > abgeleitet, nicht über eine fixe Annahme „immer 10 Cups". Wenn ihr an
 > einigen Tischen mit 6 statt 10 Bechern spielt, bleibt das korrekt.
+
+### Wurfkönig
+
+> Einzelspieler mit den meisten getroffenen Bechern über das gesamte
+> Turnier.
+
+- **Nur sichtbar, wenn die Sonderregel „Wurfkönig ermitteln" an ist**
+  (`tournaments.determine_cup_king`). Ist sie aus, wird die Kachel — wie
+  die zugrunde liegende Tabelle — gar nicht angefasst.
+- Quelle: `match_member_cups`, gefüllt über das Modal **Getroffene
+  Becher verteilen** nach jedem Spiel (siehe
+  [Sonderregeln – Wurfkönig ermitteln](Sonderregeln.md#wurfkönig-ermitteln)).
+- Berechnung: Summe `cups_hit` je Spieler über alle Matches des
+  Turniers, absteigend; der Spieler mit der höchsten Summe gewinnt.
+- Anzeige: Spielername, dazu Gesamt-Becher und Teamname.
+- Erscheint nur, wenn überhaupt Becher verteilt wurden (Summe > 0).
 
 ---
 

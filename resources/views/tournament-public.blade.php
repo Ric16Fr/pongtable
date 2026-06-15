@@ -28,6 +28,9 @@
             if ($stats['schluck_olymp'] ?? null) {
                 $tiles[] = ['key' => 'schluck_olymp', 'label' => 'Schluck-Olymp', 'value' => $stats['schluck_olymp']['team'], 'sub' => $stats['schluck_olymp']['cups'].' Becher geleert'];
             }
+            if ($stats['cup_king'] ?? null) {
+                $tiles[] = ['key' => 'cup_king', 'label' => 'Wurfkönig', 'value' => $stats['cup_king']['name'], 'sub' => $stats['cup_king']['cups'].' Becher'.($stats['cup_king']['team'] ? ' · '.$stats['cup_king']['team'] : '')];
+            }
         }
         $phaseLabels = [
             'setup' => 'Vorbereitung',

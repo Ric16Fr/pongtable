@@ -1,7 +1,10 @@
 <?php
 
+use App\Models\Team;
+use App\Models\TeamMember;
 use App\Models\Tournament;
 use Flux\Flux;
+use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Validate;
@@ -29,6 +32,15 @@ new #[Title('Sonderregeln & Einstellungen')] class extends Component {
     #[Validate('required|in:auto,sudden_death')]
     public string $koWinnerMode = 'auto';
 
+    public bool $determineCupKing = false;
+
+    /**
+     * Member names keyed by team id, two slots per team for the naming modal.
+     *
+     * @var array<int, array<int, string>>
+     */
+    public array $memberNames = [];
+
     public function mount(): void
     {
         $tournament = Tournament::query()->latest()->first();
@@ -49,12 +61,24 @@ new #[Title('Sonderregeln & Einstellungen')] class extends Component {
         $this->countThrows = $tournament->count_throws ?? true;
         $this->playPlacementMatches = $tournament->play_placement_matches ?? false;
         $this->koWinnerMode = ($tournament->ko_sudden_death ?? false) ? 'sudden_death' : 'auto';
+        $this->determineCupKing = $tournament->determine_cup_king ?? false;
     }
 
     #[Computed]
     public function tournament(): Tournament
     {
         return Tournament::findOrFail($this->tournamentId);
+    }
+
+    /**
+     * Teams of the current tournament, used by the member-naming modal.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection<int, Team>
+     */
+    #[Computed]
+    public function teams()
+    {
+        return $this->tournament->teams()->with('members')->orderBy('name')->get();
     }
 
     public function saveSettings(): void
@@ -73,9 +97,56 @@ new #[Title('Sonderregeln & Einstellungen')] class extends Component {
             'count_throws' => $this->countThrows,
             'play_placement_matches' => $this->playPlacementMatches,
             'ko_sudden_death' => $this->koWinnerMode === 'sudden_death',
+            'determine_cup_king' => $this->determineCupKing,
         ]);
 
         Flux::toast(variant: 'success', text: __('Einstellungen gespeichert.'));
+    }
+
+    /**
+     * Pre-fill the member-naming modal from existing members and open it.
+     */
+    public function openMembersModal(): void
+    {
+        $this->memberNames = [];
+
+        foreach ($this->teams as $team) {
+            $names = $team->members->pluck('name')->values()->all();
+            $this->memberNames[$team->id] = [
+                $names[0] ?? '',
+                $names[1] ?? '',
+            ];
+        }
+
+        Flux::modal('name-members')->show();
+    }
+
+    /**
+     * Replace each team's members with the non-empty names entered in the modal.
+     */
+    public function saveMembers(): void
+    {
+        DB::transaction(function () {
+            foreach ($this->teams as $team) {
+                $names = collect($this->memberNames[$team->id] ?? [])
+                    ->map(fn ($name) => trim((string) $name))
+                    ->filter()
+                    ->values();
+
+                $team->members()->delete();
+
+                foreach ($names as $name) {
+                    TeamMember::create([
+                        'team_id' => $team->id,
+                        'name' => $name,
+                    ]);
+                }
+            }
+        });
+
+        unset($this->teams);
+        Flux::modal('name-members')->close();
+        Flux::toast(variant: 'success', text: __('Teammitglieder gespeichert.'));
     }
 }; ?>
 
@@ -150,9 +221,68 @@ new #[Title('Sonderregeln & Einstellungen')] class extends Component {
                 </flux:select>
             </div>
 
+            <div class="rounded-md bg-stage-surface px-5 py-4">
+                <flux:switch
+                    wire:model.live="determineCupKing"
+                    :label="__('Wurfkönig ermitteln')"
+                    :description="__('Wenn an: Pro Team werden die Teammitglieder benannt. Nach jedem Spiel werden die getroffenen Becher auf die Spieler verteilt. Die Statistik kürt den Spieler mit den meisten getroffenen Bechern als Wurfkönig.')"
+                />
+
+                @if ($this->determineCupKing)
+                    <div class="mt-4 border-t border-stage-line pt-4">
+                        @if ($this->tournament->isSetup())
+                            <p class="text-sm text-stage-text-dim" data-test="cup-king-setup-hint">
+                                {{ __('Die Gruppen müssen erst angelegt und zugelost (oder importiert) werden, bevor die Teammitglieder benannt werden können.') }}
+                            </p>
+                        @else
+                            <flux:button wire:click="openMembersModal" variant="filled" icon="users" data-test="name-members-button">
+                                {{ __('Teammitglieder benennen') }}
+                            </flux:button>
+                        @endif
+                    </div>
+                @endif
+            </div>
+
             <flux:button wire:click="saveSettings" variant="primary" data-test="save-special-rules-button">
                 {{ __('Speichern') }}
             </flux:button>
         </section>
     </div>
+
+    {{-- Member naming modal --}}
+    @if ($this->determineCupKing && ! $this->tournament->isSetup())
+    <flux:modal name="name-members" class="max-w-2xl">
+        <div class="space-y-6">
+            <div>
+                <flux:heading size="lg">{{ __('Teammitglieder benennen') }}</flux:heading>
+                <flux:text class="mt-2">{{ __('Trage für jedes Team die beiden Spieler ein.') }}</flux:text>
+            </div>
+
+            <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+                @foreach ($this->teams as $team)
+                    <div class="space-y-3 rounded-md bg-stage-surface px-4 py-3">
+                        <div class="flex items-center gap-2">
+                            @if ($team->color)
+                                <span class="block h-3 w-3 rounded-full" style="background-color: {{ $team->color }}"></span>
+                            @endif
+                            <span class="font-label text-stage-text">{{ $team->name }}</span>
+                        </div>
+                        <flux:input wire:model="memberNames.{{ $team->id }}.0" :label="__('Spieler 1')" :placeholder="__('Name')" />
+                        <flux:input wire:model="memberNames.{{ $team->id }}.1" :label="__('Spieler 2')" :placeholder="__('Name')" />
+                    </div>
+                @endforeach
+            </div>
+
+            <div class="flex gap-2">
+                <flux:spacer />
+                <flux:modal.close>
+                    <flux:button variant="ghost">{{ __('Abbrechen') }}</flux:button>
+                </flux:modal.close>
+                <flux:button wire:click="saveMembers" variant="primary" data-test="save-members-button">
+                    {{ __('Speichern') }}
+                </flux:button>
+            </div>
+        </div>
+    </flux:modal>
+    @endif
 </div>

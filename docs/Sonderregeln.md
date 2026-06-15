@@ -45,9 +45,10 @@ Wert, der zum Zeitpunkt des Starts galt.
 ## Sonderregeln
 
 Die Sonderregeln verändern, wie das Turnier gespielt und ausgewertet
-wird. Aktuell gibt es drei Regeln: **Würfe zählen** (Schalter),
-**Platzierungsspiele austragen** (Schalter) und **Bestimmung des
-Siegers in der KO-Phase** (Auswahl).
+wird. Aktuell gibt es vier Regeln: **Würfe zählen** (Schalter),
+**Platzierungsspiele austragen** (Schalter), **Bestimmung des
+Siegers in der KO-Phase** (Auswahl) und **Wurfkönig ermitteln**
+(Schalter).
 
 ### Würfe zählen
 
@@ -102,6 +103,47 @@ Becher-Gleichstand**. Eindeutige Ergebnisse werden immer über die
 getroffenen Becher entschieden. Mehr dazu in
 [Matches – Unentschieden in der KO-Phase](Matches.md#unentschieden-in-der-ko-phase).
 
+### Wurfkönig ermitteln
+
+Schalter (Switch), Default **aus**. Wenn an, werden die einzelnen
+Spieler eines Teams erfasst und nach jedem Spiel die getroffenen Becher
+auf sie verteilt. Die Statistik kürt daraus den **Wurfkönig** — den
+Einzelspieler mit den meisten getroffenen Bechern über das ganze
+Turnier.
+
+Der Ablauf:
+
+1. **Teammitglieder benennen.** Direkt unter dem Schalter erscheint —
+   sobald er an ist — entweder ein Hinweis oder ein Button:
+   - Solange das Turnier noch im Setup ist (`isSetup()`, Gruppen noch
+     nicht ausgelost/importiert), steht dort der Hinweis, dass die
+     Gruppen erst angelegt und zugelost werden müssen. Grund: Erst nach
+     dem Auslosen stehen die Teams fest.
+   - Danach erscheint der Button **Teammitglieder benennen**. Er öffnet
+     ein Modal, in dem pro Team zwei Spieler eingetragen werden. (Die
+     Tabelle erlaubt beliebig viele Mitglieder pro Team; die UI bietet
+     der Einfachheit halber zwei Felder.) Erneutes Speichern ersetzt
+     die bisherigen Mitglieder des Teams; leere Felder werden ignoriert.
+2. **Becher verteilen.** Ist die Regel an, erscheint nach jedem
+   **Ergebnis speichern** in der Match-Steuerung zusätzlich das Modal
+   **Getroffene Becher verteilen**. Das Ergebnis ist zu diesem Zeitpunkt
+   bereits gespeichert und das Sieger-Banner sichtbar — das Modal ist
+   ein **Bonus** und blockiert nichts. Links und rechts stehen die
+   beiden Teams mit ihren Spielern; je Spieler wird die getroffene
+   Becherzahl eingetragen. Es gibt **keine** Summen-Validierung
+   (Strafbecher müssen nicht aufgehen). Erneutes Speichern ersetzt die
+   Verteilung für dieses Match.
+3. **Statistik.** Die Kachel **Wurfkönig** auf der Statistik-Seite
+   (und in der öffentlichen Ansicht) zeigt den Spieler mit den meisten
+   getroffenen Bechern. Sie ist **nur sichtbar, wenn der Schalter an
+   ist**.
+
+**Robustheit:** Ist die Regel aus, wird die Verteil-Tabelle nie
+angefasst — der gesamte übrige Ablauf ist identisch zu vorher. Sind
+für ein Team (noch) keine Mitglieder benannt, zeigt das Verteil-Modal
+für dieses Team einen Hinweis statt Eingabefeldern; das Werten von
+Matches wird dadurch nie blockiert.
+
 ---
 
 ## Speichern
@@ -119,8 +161,11 @@ Validierung:
   liegen.
 - `koWinnerMode` muss `auto` oder `sudden_death` sein.
 
-Die beiden Schalter `countThrows` und `playPlacementMatches` sind
-Booleans und werden ohne weitere Validierung übernommen.
+Die Schalter `countThrows`, `playPlacementMatches` und
+`determineCupKing` sind Booleans und werden ohne weitere Validierung
+übernommen. Das Benennen der Teammitglieder und das Verteilen der
+Becher laufen über eigene Buttons/Modals und sind vom zentralen
+Speichern-Button unabhängig.
 
 ---
 
@@ -137,3 +182,12 @@ Booleans und werden ohne weitere Validierung übernommen.
 - `tournaments.ko_sudden_death` — Boolean, Default `false`. `true`
   entspricht der Select-Option „Sudden Death", `false` der Option
   „Automatisch".
+- `tournaments.determine_cup_king` — Boolean, Default `false`. Steuert,
+  ob Teammitglieder erfasst, nach jedem Spiel Becher verteilt und die
+  Wurfkönig-Statistik angezeigt werden.
+- `team_members` — Spieler eines Teams (`team_id`, `name`). Wird nur
+  bei aktivierter Regel befüllt.
+- `match_member_cups` — getroffene Becher je Spieler und Match
+  (`match_id`, `team_member_id`, `cups_hit`; eindeutig pro
+  Match+Spieler). Die Wurfkönig-Statistik summiert `cups_hit` je
+  Spieler über das Turnier.

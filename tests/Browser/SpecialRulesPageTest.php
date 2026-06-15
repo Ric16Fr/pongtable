@@ -21,8 +21,7 @@ it('shows the special-rules entry in the sidebar for admins', function () {
     Tournament::factory()->create();
 
     visit('/dashboard')
-        ->assertSee('Sonderregeln & Einstellungen')
-        ->assertSee('🍺');
+        ->assertSee('Sonderregeln & Einstellungen');
 });
 
 it('hides the special-rules entry in the sidebar for referees', function () {

@@ -38,8 +38,7 @@ it('allows admins on every route', function () {
 it('shows the special-rules link in the sidebar only for admins', function () {
     $admin = User::factory()->admin()->create();
     $this->actingAs($admin)->get('/dashboard')
-        ->assertSee('Sonderregeln &amp; Einstellungen', escape: false)
-        ->assertSee('🍺', escape: false);
+        ->assertSee('Sonderregeln &amp; Einstellungen', escape: false);
 
     $referee = User::factory()->referee()->create();
     $this->actingAs($referee)->get('/dashboard')

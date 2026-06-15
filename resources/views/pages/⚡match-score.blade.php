@@ -1,9 +1,12 @@
 <?php
 
 use App\Models\GameMatch;
+use App\Models\MatchMemberCup;
 use App\Models\MatchStat;
+use App\Models\TeamMember;
 use App\Services\MatchResultService;
 use Flux\Flux;
+use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -20,6 +23,13 @@ new #[Title('Match')] class extends Component {
     public int $awayCups = 0;
 
     public ?int $suddenDeathWinner = null;
+
+    /**
+     * Cups hit per team member for the cup-king rule, keyed by team_member id.
+     *
+     * @var array<int, int>
+     */
+    public array $cupDistribution = [];
 
     public function mount(GameMatch $match): void
     {
@@ -175,6 +185,79 @@ new #[Title('Match')] class extends Component {
         unset($this->match);
 
         Flux::toast(variant: 'success', text: __('Ergebnis gespeichert.'));
+
+        // Cup-king rule: after the result is saved (and the winner box shown),
+        // offer the bonus modal to spread the scored cups across the players.
+        if ($this->match->tournament->determine_cup_king ?? false) {
+            $this->prepareCupDistribution();
+            Flux::modal('distribute-cups')->show();
+        }
+    }
+
+    /**
+     * The two teams of this match, each with their named members, for the
+     * cup-distribution modal.
+     *
+     * @return \Illuminate\Support\Collection<int, \App\Models\Team>
+     */
+    #[Computed]
+    public function distributionTeams()
+    {
+        return collect([$this->match->homeTeam, $this->match->awayTeam])
+            ->filter()
+            ->each(fn ($team) => $team->loadMissing('members'))
+            ->values();
+    }
+
+    /**
+     * Pre-fill the cup distribution from any existing values for this match.
+     */
+    protected function prepareCupDistribution(): void
+    {
+        $existing = MatchMemberCup::query()
+            ->where('match_id', $this->matchId)
+            ->pluck('cups_hit', 'team_member_id');
+
+        $this->cupDistribution = [];
+
+        foreach ($this->distributionTeams as $team) {
+            foreach ($team->members as $member) {
+                $this->cupDistribution[$member->id] = (int) ($existing[$member->id] ?? 0);
+            }
+        }
+    }
+
+    /**
+     * Persist the cup distribution for this match (replacing any prior values).
+     * No sum validation by design — penalty cups break the equality anyway.
+     */
+    public function saveCupDistribution(): void
+    {
+        $match = $this->match;
+
+        $validMemberIds = TeamMember::query()
+            ->whereIn('team_id', array_filter([$match->home_team_id, $match->away_team_id]))
+            ->pluck('id')
+            ->all();
+
+        DB::transaction(function () use ($match, $validMemberIds) {
+            MatchMemberCup::where('match_id', $match->id)->delete();
+
+            foreach ($this->cupDistribution as $memberId => $cups) {
+                if (! in_array((int) $memberId, $validMemberIds, true)) {
+                    continue;
+                }
+
+                MatchMemberCup::create([
+                    'match_id' => $match->id,
+                    'team_member_id' => (int) $memberId,
+                    'cups_hit' => max(0, (int) $cups),
+                ]);
+            }
+        });
+
+        Flux::modal('distribute-cups')->close();
+        Flux::toast(variant: 'success', text: __('Becher verteilt.'));
     }
 }; ?>
 
@@ -537,5 +620,50 @@ new #[Title('Match')] class extends Component {
             <flux:icon.arrow-left class="size-4" />
             Zurück zur Match-Liste
         </a>
+    @endif
+
+    {{-- Cup-king rule: distribute the scored cups across each team's players. --}}
+    @if ($match->tournament->determine_cup_king ?? false)
+        <flux:modal name="distribute-cups" class="max-w-2xl">
+            <div class="space-y-6">
+                <div>
+                    <flux:heading size="lg">{{ __('Getroffene Becher verteilen') }}</flux:heading>
+                    <flux:text class="mt-2">{{ __('Verteile die getroffenen Becher dieses Spiels auf die Spieler. Strafbecher müssen nicht aufgehen.') }}</flux:text>
+                </div>
+
+                <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+                    @foreach ($this->distributionTeams as $team)
+                        <div class="space-y-3 rounded-md bg-stage-surface px-4 py-3">
+                            <div class="flex items-center gap-2">
+                                @if ($team->color)
+                                    <span class="block h-3 w-3 rounded-full" style="background-color: {{ $team->color }}"></span>
+                                @endif
+                                <span class="font-label text-stage-text">{{ $team->name }}</span>
+                            </div>
+                            @forelse ($team->members as $member)
+                                <flux:input
+                                    type="number"
+                                    min="0"
+                                    wire:model="cupDistribution.{{ $member->id }}"
+                                    :label="$member->name"
+                                />
+                            @empty
+                                <p class="text-sm text-stage-text-dim">{{ __('Keine Teammitglieder benannt.') }}</p>
+                            @endforelse
+                        </div>
+                    @endforeach
+                </div>
+
+                <div class="flex gap-2">
+                    <flux:spacer />
+                    <flux:modal.close>
+                        <flux:button variant="ghost">{{ __('Schließen') }}</flux:button>
+                    </flux:modal.close>
+                    <flux:button wire:click="saveCupDistribution" variant="primary" data-test="save-cup-distribution-button">
+                        {{ __('Becher speichern') }}
+                    </flux:button>
+                </div>
+            </div>
+        </flux:modal>
     @endif
 </div>

@@ -66,6 +66,9 @@ if ($stats) {
     if ($stats['schluck_olymp'] ?? null) {
         $tiles[] = ['key' => 'schluck_olymp', 'label' => 'Schluck-Olymp', 'info' => 'Team, das im Turnier am meisten getrunken hat: gegnerische Treffer + eigene Strafbecher + bei Niederlagen die übrigen Becher auf der Gegnerseite (Verlierer-Strafe).', 'value' => $stats['schluck_olymp']['team'], 'sub' => $stats['schluck_olymp']['cups'].' Becher geleert'];
     }
+    if ($stats['cup_king'] ?? null) {
+        $tiles[] = ['key' => 'cup_king', 'label' => 'Wurfkönig', 'info' => 'Einzelspieler mit den meisten getroffenen Bechern über das gesamte Turnier (aus der Becher-Verteilung nach jedem Spiel).', 'value' => $stats['cup_king']['name'], 'sub' => $stats['cup_king']['cups'].' Becher'.($stats['cup_king']['team'] ? ' · '.$stats['cup_king']['team'] : '')];
+    }
 }
 @endphp
 

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\GameMatch;
+use App\Models\MatchMemberCup;
 use App\Models\Tournament;
 use Illuminate\Support\Collection;
 
@@ -19,6 +20,7 @@ class StatisticsService
      *   penalty_magnet: ?array{team:string, penalty_cups:int},
      *   efficiency: ?array{team:string, rate:float},
      *   schluck_olymp: ?array{team:string, cups:int},
+     *   cup_king: ?array{name:string, team:?string, cups:int},
      *   total_cups: int,
      * }
      */
@@ -41,7 +43,35 @@ class StatisticsService
             'penalty_magnet' => $this->penaltyMagnet($finishedMatches),
             'efficiency' => $countThrows ? $this->efficiency($finishedMatches) : null,
             'schluck_olymp' => $this->schluckOlymp($finishedMatches),
+            'cup_king' => $tournament->determine_cup_king ? $this->cupKing($tournament) : null,
             'total_cups' => (int) $finishedMatches->flatMap->stats->sum('cups_scored'),
+        ];
+    }
+
+    /**
+     * Wurfkönig — the individual player who hit the most cups across the
+     * tournament, summed from the per-match cup distributions.
+     */
+    private function cupKing(Tournament $tournament): ?array
+    {
+        $row = MatchMemberCup::query()
+            ->join('team_members', 'team_members.id', '=', 'match_member_cups.team_member_id')
+            ->join('teams', 'teams.id', '=', 'team_members.team_id')
+            ->join('matches', 'matches.id', '=', 'match_member_cups.match_id')
+            ->where('matches.tournament_id', $tournament->id)
+            ->groupBy('team_members.id', 'team_members.name', 'teams.name')
+            ->selectRaw('team_members.name as member_name, teams.name as team_name, SUM(match_member_cups.cups_hit) as total')
+            ->orderByDesc('total')
+            ->first();
+
+        if (! $row || (int) $row->total === 0) {
+            return null;
+        }
+
+        return [
+            'name' => $row->member_name,
+            'team' => $row->team_name,
+            'cups' => (int) $row->total,
         ];
     }
 
