@@ -1,9 +1,11 @@
 <?php
 
 use App\Models\Tournament;
+use App\Models\User;
 use Database\Seeders\DatabaseSeeder;
 use Database\Seeders\GroupPhaseSeeder;
 use Database\Seeders\KOPhaseSeeder;
+use Illuminate\Support\Facades\Hash;
 
 function currentTournament(): Tournament
 {
@@ -29,6 +31,36 @@ it('seeds an archived tournament that is fully played out', function () {
     $final = $archive->matches()->where('phase', 'ko')->where('ko_round', 1)->sole();
     expect($final->status)->toBe('finished')
         ->and($final->winner_team_id)->not->toBeNull();
+});
+
+it('resolves the current tournament (not the finished archive) as the latest', function (string $seeder, string $expectedStatus) {
+    $this->seed($seeder);
+
+    $latest = Tournament::query()->latest()->first();
+
+    expect($latest->name)->toBe('Bierpong WM '.now()->year)
+        ->and($latest->status)->toBe($expectedStatus);
+})->with([
+    'setup' => [DatabaseSeeder::class, 'setup'],
+    'group phase' => [GroupPhaseSeeder::class, 'group'],
+    'ko phase' => [KOPhaseSeeder::class, 'ko'],
+]);
+
+it('seeds four referee accounts named schiri1.. with the password schiri', function () {
+    $this->seed(DatabaseSeeder::class);
+
+    $referees = User::where('role', 'referee')->orderBy('name')->get();
+
+    expect($referees)->toHaveCount(4)
+        ->and($referees->pluck('name')->all())->toBe(['schiri1', 'schiri2', 'schiri3', 'schiri4'])
+        ->and($referees->every(fn ($referee) => Hash::check('schiri', $referee->password)))->toBeTrue();
+});
+
+it('does not duplicate referees when seeded twice', function () {
+    $this->seed(DatabaseSeeder::class);
+    $this->seed(DatabaseSeeder::class);
+
+    expect(User::where('role', 'referee')->count())->toBe(4);
 });
 
 it('seeds the current tournament in setup with teams but no groups', function () {

@@ -13,6 +13,8 @@ class KOPhaseSeeder extends TournamentSeeder
 {
     public function run(): void
     {
+        $this->seedReferees(4);
+
         $this->seedArchivedTournament();
 
         $tournament = $this->createTournament('Bierpong WM '.now()->year);

@@ -111,6 +111,12 @@ auf sie verteilt. Die Statistik kürt daraus den **Wurfkönig** — den
 Einzelspieler mit den meisten getroffenen Bechern über das ganze
 Turnier.
 
+> [!TIP]
+> Diese Statisktik bedeutet einen Mehraufwand für den Schiri und ist daher standardmäßig aus
+> Die Würfe pro Spieler können erst am Ende der Runde eingetragen werden und müssen zwischendurch auf Papier mitgezählt werden.
+> Wenn die Schiris eh schon viel zu tun haben (und daher vielleicht auch "Würfe zählen" abgeschaltet wurde) ist diese Regel nicht 
+> empfehlenswert.
+
 Der Ablauf:
 
 1. **Teammitglieder benennen.** Direkt unter dem Schalter erscheint —

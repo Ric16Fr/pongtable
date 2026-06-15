@@ -6,6 +6,7 @@ use App\Models\GameMatch;
 use App\Models\Table;
 use App\Models\Team;
 use App\Models\Tournament;
+use App\Models\User;
 use App\Services\GroupGeneratorService;
 use App\Services\KoBracketService;
 use App\Services\MatchResultService;
@@ -55,6 +56,23 @@ abstract class TournamentSeeder extends Seeder
     protected array $tableNames = ['Tisch Rot', 'Tisch Blau', 'Tisch Grün', 'Tisch Gelb'];
 
     /**
+     * Create the requested number of referee accounts named "schiri1",
+     * "schiri2", … all sharing the password "schiri" (idempotent).
+     */
+    protected function seedReferees(int $count): void
+    {
+        for ($i = 1; $i <= $count; $i++) {
+            User::firstOrCreate(
+                ['name' => 'schiri'.$i],
+                [
+                    'password' => 'schiri',
+                    'role' => 'referee',
+                ],
+            );
+        }
+    }
+
+    /**
      * Find or create a tournament shell in "setup" status.
      */
     protected function createTournament(string $name): Tournament
@@ -102,6 +120,11 @@ abstract class TournamentSeeder extends Seeder
         if ($tournament->isFinished()) {
             return $tournament;
         }
+
+        // Backdate last year's tournament so it sorts before the current one:
+        // both are seeded within the same second, and the app picks the
+        // "current" tournament via latest() (ordered by created_at).
+        $tournament->forceFill(['created_at' => now()->subYear()])->save();
 
         $this->seedTablesAndTeams($tournament);
 
