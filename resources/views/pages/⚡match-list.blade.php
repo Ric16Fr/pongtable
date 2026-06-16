@@ -98,6 +98,7 @@ new #[Title('Matches')] class extends Component {
                         </button>
                     @endforeach
                 </div>
+                <flux:separator vertical />
             @endif
             <div class="flex flex-wrap gap-1 rounded-lg bg-stage-surface p-1">
                 @foreach ([
