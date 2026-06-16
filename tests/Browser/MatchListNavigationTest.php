@@ -64,6 +64,26 @@ it('filters down to live matches when the Live button is pressed', function () {
         ->assertNoJavascriptErrors();
 });
 
+it('filters down to a single table when its button is pressed', function () {
+    $this->actingAs(User::factory()->referee()->create());
+
+    $tournament = Tournament::factory()->create();
+    $tableOne = Table::factory()->create(['tournament_id' => $tournament->id, 'name' => 'Tisch 1']);
+    $tableTwo = Table::factory()->create(['tournament_id' => $tournament->id, 'name' => 'Tisch 2']);
+    $a = Team::factory()->create(['tournament_id' => $tournament->id, 'name' => 'Team Tisch1']);
+    $b = Team::factory()->create(['tournament_id' => $tournament->id, 'name' => 'Team Tisch2']);
+    $c = Team::factory()->create(['tournament_id' => $tournament->id, 'name' => 'Team Gegner']);
+
+    browserMatch($tournament, $tableOne, $a, $c, 'pending');
+    browserMatch($tournament, $tableTwo, $b, $c, 'pending');
+
+    visit('/matches')
+        ->press('Tisch 1')
+        ->assertSee('Team Tisch1')
+        ->assertDontSee('Team Tisch2')
+        ->assertNoJavascriptErrors();
+});
+
 it('renders the "Sieger Vorrunde" placeholder for KO matches without teams yet', function () {
     $this->actingAs(User::factory()->referee()->create());
 

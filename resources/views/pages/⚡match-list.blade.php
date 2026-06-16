@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\GameMatch;
+use App\Models\Table;
 use App\Models\Tournament;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Title;
@@ -11,9 +12,24 @@ new #[Title('Matches')] class extends Component {
 
     public string $filter = 'all';
 
+    public string $tableFilter = 'all';
+
     public function mount(): void
     {
         $this->tournamentId = Tournament::query()->latest()->value('id');
+    }
+
+    #[Computed]
+    public function tables()
+    {
+        if (! $this->tournamentId) {
+            return collect();
+        }
+
+        return Table::query()
+            ->where('tournament_id', $this->tournamentId)
+            ->orderBy('name')
+            ->get();
     }
 
     #[Computed]
@@ -35,6 +51,10 @@ new #[Title('Matches')] class extends Component {
             $query->where('status', 'finished');
         }
 
+        if ($this->tableFilter !== 'all') {
+            $query->where('table_id', $this->tableFilter);
+        }
+
         return $query
             ->orderByRaw("CASE status
                 WHEN 'active' THEN 1
@@ -54,23 +74,49 @@ new #[Title('Matches')] class extends Component {
             <h1 class="font-display text-3xl text-stage-text lg:text-4xl">Matches</h1>
             <p class="font-label mt-2 text-stage-text-dim">{{ $this->matches->count() }} {{ Str::plural('Spiel', $this->matches->count()) }} · sortiert nach Status</p>
         </div>
-        <div class="flex flex-wrap gap-1 rounded-lg bg-stage-surface p-1">
-            @foreach ([
-                'all' => 'Alle',
-                'live' => 'Live',
-                'open' => 'Offen',
-                'finished' => 'Beendet',
-            ] as $key => $label)
-                <button wire:click="$set('filter', '{{ $key }}')" type="button"
-                        class="rounded-md px-4 py-2 text-sm font-semibold transition
-                               @if($filter === $key)
-                                   bg-stage-text text-stage-bg
-                               @else
-                                   text-stage-text-muted hover:text-stage-text
-                               @endif">
-                    {{ $label }}
-                </button>
-            @endforeach
+        <div class="flex flex-wrap items-center gap-3">
+            @if ($this->tables->isNotEmpty())
+                <div class="flex flex-wrap gap-1 rounded-lg bg-stage-surface p-1">
+                    <button wire:click="$set('tableFilter', 'all')" type="button"
+                            class="rounded-md px-4 py-2 text-sm font-semibold transition
+                                   @if($tableFilter === 'all')
+                                       bg-stage-text text-stage-bg
+                                   @else
+                                       text-stage-text-muted hover:text-stage-text
+                                   @endif">
+                        Alle Tische
+                    </button>
+                    @foreach ($this->tables as $table)
+                        <button wire:click="$set('tableFilter', '{{ $table->id }}')" type="button"
+                                class="rounded-md px-4 py-2 text-sm font-semibold transition
+                                       @if((string) $tableFilter === (string) $table->id)
+                                           bg-stage-text text-stage-bg
+                                       @else
+                                           text-stage-text-muted hover:text-stage-text
+                                       @endif">
+                            {{ $table->name }}
+                        </button>
+                    @endforeach
+                </div>
+            @endif
+            <div class="flex flex-wrap gap-1 rounded-lg bg-stage-surface p-1">
+                @foreach ([
+                    'all' => 'Alle',
+                    'live' => 'Live',
+                    'open' => 'Offen',
+                   /** 'finished' => 'Beendet', (excluded for now, why should I filter for endet matches) **/
+                ] as $key => $label)
+                    <button wire:click="$set('filter', '{{ $key }}')" type="button"
+                            class="rounded-md px-4 py-2 text-sm font-semibold transition
+                                   @if($filter === $key)
+                                       bg-stage-text text-stage-bg
+                                   @else
+                                       text-stage-text-muted hover:text-stage-text
+                                   @endif">
+                        {{ $label }}
+                    </button>
+                @endforeach
+            </div>
         </div>
     </header>
 

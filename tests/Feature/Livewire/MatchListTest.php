@@ -64,3 +64,39 @@ it('shows the empty state when there are no matches', function () {
     Livewire::test('pages::match-list')
         ->assertSee('Keine Matches in dieser Ansicht');
 });
+
+it('filters matches by table', function () {
+    $otherTable = Table::factory()->create(['tournament_id' => $this->tournament->id, 'name' => 'Tisch 2']);
+
+    makeMatch($this->tournament, $this->table, $this->home, $this->away, 'pending');
+    makeMatch($this->tournament, $otherTable, $this->home, $this->third, 'pending');
+
+    Livewire::test('pages::match-list')
+        ->assertSet('tableFilter', 'all')
+        ->set('tableFilter', $this->table->id)
+        ->assertSee('Team Beta')
+        ->assertDontSee('Team Gamma');
+});
+
+it('combines the table filter with the status filter', function () {
+    $otherTable = Table::factory()->create(['tournament_id' => $this->tournament->id, 'name' => 'Tisch 2']);
+
+    makeMatch($this->tournament, $this->table, $this->home, $this->away, 'active');
+    makeMatch($this->tournament, $this->table, $this->home, $this->third, 'finished');
+    makeMatch($this->tournament, $otherTable, $this->away, $this->third, 'active');
+
+    Livewire::test('pages::match-list')
+        ->set('tableFilter', $this->table->id)
+        ->set('filter', 'live')
+        ->assertSee('Team Beta')
+        ->assertDontSee('Team Gamma');
+});
+
+it('renders a button for each table of the tournament', function () {
+    Table::factory()->create(['tournament_id' => $this->tournament->id, 'name' => 'Tisch 2']);
+
+    Livewire::test('pages::match-list')
+        ->assertSee('Alle Tische')
+        ->assertSee($this->table->name)
+        ->assertSee('Tisch 2');
+});
