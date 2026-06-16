@@ -23,7 +23,8 @@ it('starts a fresh tournament and switches the active one to it', function () {
 
     Livewire::test('pages::admin-setup')
         ->call('createNewTournament')
-        ->assertHasNoErrors();
+        ->assertHasNoErrors()
+        ->assertDispatched('modal-close', name: 'create-new-tournament');
 
     expect(Tournament::count())->toBe(2);
 
@@ -76,16 +77,13 @@ it('removes a table during setup phase', function () {
     expect(Table::find($table->id))->toBeNull();
 });
 
-it('adds a new team with color', function () {
+it('adds a new team', function () {
     Livewire::test('pages::admin-setup')
         ->set('newTeamName', 'Team Shotgun')
-        ->set('newTeamColor', '#ff0000')
         ->call('addTeam')
         ->assertHasNoErrors();
 
-    $team = Team::where('name', 'Team Shotgun')->first();
-    expect($team)->not->toBeNull()
-        ->and($team->color)->toBe('#ff0000');
+    expect(Team::where('name', 'Team Shotgun')->first())->not->toBeNull();
 });
 
 it('rejects empty team or table names', function () {

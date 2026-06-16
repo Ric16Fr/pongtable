@@ -310,7 +310,6 @@ new #[Title('Match')] class extends Component {
             <div class="flex flex-col gap-2 text-left">
                 <span class="font-label text-red-corner-bright">Red Corner</span>
                 <span class="team-tag">
-                    <span class="team-dot" @if($home?->color) style="background-color: {{ $home->color }}" @endif></span>
                     @if ($home)
                         <span class="font-display text-stage-text text-[clamp(1.5rem,5vw,2.5rem)]">{{ $home->name }}</span>
                     @else
@@ -327,7 +326,6 @@ new #[Title('Match')] class extends Component {
                     @else
                         <span class="font-display text-stage-text-dim text-[clamp(1.5rem,5vw,2.5rem)]">Sieger Vorrunde</span>
                     @endif
-                    <span class="team-dot" @if($away?->color) style="background-color: {{ $away->color }}" @endif></span>
                 </span>
             </div>
         </div>
@@ -418,7 +416,6 @@ new #[Title('Match')] class extends Component {
                     ])>
                         <div class="flex items-center justify-between gap-3">
                             <span class="font-label text-{{ $cfg['tint'] }}-corner-bright">{{ $cfg['corner'] }} &mdash; {{ $cfg['team']?->name }}</span>
-                            <span class="team-dot" @if($cfg['team']?->color) style="background-color: {{ $cfg['team']->color }}" @endif></span>
                         </div>
 
                         @foreach (array_filter([
@@ -492,7 +489,6 @@ new #[Title('Match')] class extends Component {
                         <div class="flex items-baseline justify-between">
                             <span class="font-label text-{{ $cfg['tint'] }}-corner-bright">{{ $cfg['corner'] }} Corner</span>
                             <span class="team-tag">
-                                <span class="team-dot" @if($cfg['team']?->color) style="background-color: {{ $cfg['team']->color }}" @endif></span>
                                 <span class="font-display text-lg">{{ $cfg['team']?->name }}</span>
                             </span>
                         </div>
@@ -537,7 +533,6 @@ new #[Title('Match')] class extends Component {
                                         'border-stage-line-strong bg-stage-bg/60 hover:border-stage-text' => $suddenDeathWinner !== $cfg['id'],
                                     ])>
                                 <span class="team-tag">
-                                    <span class="team-dot" @if($cfg['team']?->color) style="background-color: {{ $cfg['team']->color }}" @endif></span>
                                     <span class="font-display text-lg text-stage-text">{{ $cfg['team']?->name }}</span>
                                 </span>
                                 @if ($suddenDeathWinner === $cfg['id'])
@@ -635,9 +630,6 @@ new #[Title('Match')] class extends Component {
                     @foreach ($this->distributionTeams as $team)
                         <div class="space-y-3 rounded-md bg-stage-surface px-4 py-3">
                             <div class="flex items-center gap-2">
-                                @if ($team->color)
-                                    <span class="block h-3 w-3 rounded-full" style="background-color: {{ $team->color }}"></span>
-                                @endif
                                 <span class="font-label text-stage-text">{{ $team->name }}</span>
                             </div>
                             @forelse ($team->members as $member)

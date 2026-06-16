@@ -10,12 +10,6 @@ use Illuminate\Support\Facades\DB;
 
 class GroupGeneratorService
 {
-    /** Fallback palette for imported teams (no color in CSV). */
-    private const COLOR_PALETTE = [
-        '#f59e0b', '#3b82f6', '#10b981', '#ef4444',
-        '#a855f7', '#f97316', '#06b6d4', '#ec4899',
-    ];
-
     /**
      * Preview the planned distribution of teams across tables without persisting.
      *
@@ -138,8 +132,6 @@ class GroupGeneratorService
             $tournament->groups()->delete();
             $tournament->teams()->delete();
 
-            $colorIndex = 0;
-
             for ($i = 0; $i < $groupCount; $i++) {
                 $group = Group::create([
                     'tournament_id' => $tournament->id,
@@ -152,9 +144,7 @@ class GroupGeneratorService
                     $team = Team::create([
                         'tournament_id' => $tournament->id,
                         'name' => $teamName,
-                        'color' => self::COLOR_PALETTE[$colorIndex % count(self::COLOR_PALETTE)],
                     ]);
-                    $colorIndex++;
                     $teamIds[] = $team->id;
                 }
 

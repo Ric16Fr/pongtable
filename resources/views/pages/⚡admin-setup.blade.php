@@ -20,9 +20,6 @@ new #[Title('Setup')] class extends Component {
     #[Validate('required|string|max:255')]
     public string $newTeamName = '';
 
-    #[Validate('nullable|string|max:9')]
-    public ?string $newTeamColor = '#f59e0b';
-
     #[Validate('required|string|min:5')]
     public string $csvContent = '';
 
@@ -94,7 +91,6 @@ new #[Title('Setup')] class extends Component {
     {
         $this->addingTeam = true;
         $this->newTeamName = '';
-        $this->newTeamColor = '#f59e0b';
         $this->resetErrorBag('newTeamName');
     }
 
@@ -102,7 +98,6 @@ new #[Title('Setup')] class extends Component {
     {
         $this->addingTeam = false;
         $this->newTeamName = '';
-        $this->newTeamColor = '#f59e0b';
         $this->resetErrorBag('newTeamName');
     }
 
@@ -115,11 +110,9 @@ new #[Title('Setup')] class extends Component {
         Team::create([
             'tournament_id' => $this->tournamentId,
             'name' => $this->newTeamName,
-            'color' => $this->newTeamColor,
         ]);
 
         $this->newTeamName = '';
-        $this->newTeamColor = '#f59e0b';
         unset($this->tournament);
     }
 

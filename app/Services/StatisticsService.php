@@ -11,7 +11,7 @@ class StatisticsService
 {
     /**
      * @return array{
-     *   champion: ?array{name:string, color:?string},
+     *   champion: ?array{name:string},
      *   sharpest_shooter: ?array{team:string, rate:float, scored:int, throws:int},
      *   water_spitter: ?array{team:string, rate:float, scored:int, throws:int},
      *   blitz_win: ?array{team:string, duration:int, opponent:string},
@@ -94,7 +94,6 @@ class StatisticsService
 
         return [
             'name' => $final->winnerTeam->name,
-            'color' => $final->winnerTeam->color,
         ];
     }
 

@@ -24,11 +24,9 @@ it('allows two teams to share the same name', function () {
 
     Livewire::test('pages::admin-setup')
         ->set('newTeamName', 'Team Müller')
-        ->set('newTeamColor', '#ff0000')
         ->call('addTeam')
         ->assertHasNoErrors()
         ->set('newTeamName', 'Team Müller')
-        ->set('newTeamColor', '#00ff00')
         ->call('addTeam')
         ->assertHasNoErrors();
 
@@ -93,28 +91,6 @@ it('keeps tables and teams when resetting an in-progress tournament', function (
         ->and($tournament->teams()->count())->toBe(6)
         ->and($tournament->matches()->count())->toBe(0)
         ->and($tournament->groups()->count())->toBe(0);
-});
-
-it('saves the chosen color when adding a team', function () {
-    Tournament::factory()->create();
-
-    Livewire::test('pages::admin-setup')
-        ->set('newTeamName', 'Team Rainbow')
-        ->set('newTeamColor', '#abcdef')
-        ->call('addTeam')
-        ->assertHasNoErrors();
-
-    expect(Team::where('name', 'Team Rainbow')->value('color'))->toBe('#abcdef');
-});
-
-it('truncates very long color values via the max:9 rule', function () {
-    Tournament::factory()->create();
-
-    Livewire::test('pages::admin-setup')
-        ->set('newTeamName', 'Team Bad Color')
-        ->set('newTeamColor', '#1234567890abcdef')
-        ->call('addTeam')
-        ->assertHasErrors(['newTeamColor']);
 });
 
 it('forbids referees from any setup-page action', function () {

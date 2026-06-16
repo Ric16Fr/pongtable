@@ -12,7 +12,6 @@ return new class extends Migration
             $table->id();
             $table->foreignId('tournament_id')->constrained()->cascadeOnDelete();
             $table->string('name');
-            $table->string('color')->nullable();
             $table->timestamps();
         });
     }

@@ -130,8 +130,6 @@ new class extends Component {
                                 <div class="flex flex-col gap-2 text-left" >
                                     <span class="font-label text-red-corner-bright" >Red Corner</span >
                                     <span class="team-tag" >
-                                        <span class="team-dot"
-                                              @if($home?->color) style="background-color: {{ $home->color }}" @endif></span >
                                         <span class="font-display text-stage-text text-xl lg:text-2xl" >{{ $home?->name }}</span >
                                     </span >
                                 </div >
@@ -140,8 +138,6 @@ new class extends Component {
                                     <span class="font-label text-blue-corner-bright" >Blue Corner</span >
                                     <span class="team-tag justify-end" >
                                         <span class="font-display text-stage-text text-xl lg:text-2xl" >{{ $away?->name }}</span >
-                                        <span class="team-dot"
-                                              @if($away?->color) style="background-color: {{ $away->color }}" @endif></span >
                                     </span >
                                 </div >
                             </div >
@@ -179,8 +175,6 @@ new class extends Component {
                                         <div class="ko-team"
                                              @if($match->winner_team_id) data-winner="{{ $homeWin ? 'true' : 'false' }}" @endif>
                                             <span class="ko-team-name" >
-                                                <span class="team-dot"
-                                                      @if($match->homeTeam?->color) style="background-color: {{ $match->homeTeam->color }}" @endif></span >
                                                 <span >{{ $match->homeTeam?->name ?? '—' }}</span >
                                             </span >
                                             <span class="ko-team-score" >{{ $home?->cups_scored ?? '–' }}</span >
@@ -189,8 +183,6 @@ new class extends Component {
                                         <div class="ko-team"
                                              @if($match->winner_team_id) data-winner="{{ $awayWin ? 'true' : 'false' }}" @endif>
                                             <span class="ko-team-name" >
-                                                <span class="team-dot"
-                                                      @if($match->awayTeam?->color) style="background-color: {{ $match->awayTeam->color }}" @endif></span >
                                                 <span >{{ $match->awayTeam?->name ?? '—' }}</span >
                                             </span >
                                             <span class="ko-team-score" >{{ $away?->cups_scored ?? '–' }}</span >
@@ -238,8 +230,6 @@ new class extends Component {
                                         </td >
                                         <td class="py-2.5 pr-2 font-medium" >
                                                 <span class="team-tag" >
-                                                    <span class="team-dot"
-                                                          @if($team->color) style="background-color: {{ $team->color }}" @endif></span >
                                                     <span >{{ $team->name }}</span >
                                                 </span >
                                         </td >

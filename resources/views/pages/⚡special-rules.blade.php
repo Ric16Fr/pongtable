@@ -262,9 +262,6 @@ new #[Title('Sonderregeln & Einstellungen')] class extends Component {
                 @foreach ($this->teams as $team)
                     <div class="space-y-3 rounded-md bg-stage-surface px-4 py-3">
                         <div class="flex items-center gap-2">
-                            @if ($team->color)
-                                <span class="block h-3 w-3 rounded-full" style="background-color: {{ $team->color }}"></span>
-                            @endif
                             <span class="font-label text-stage-text">{{ $team->name }}</span>
                         </div>
                         <flux:input wire:model="memberNames.{{ $team->id }}.0" :label="__('Spieler 1')" :placeholder="__('Name')" />

@@ -142,7 +142,6 @@
                             <div class="flex flex-col gap-2 text-left">
                                 <span class="font-label text-red-corner-bright">Red Corner</span>
                                 <span class="team-tag">
-                                    <span class="team-dot" @if($home?->color) style="background-color: {{ $home->color }}" @endif></span>
                                     <span class="font-display text-[clamp(1.5rem,4vw,2.75rem)] text-stage-text">{{ $home?->name }}</span>
                                 </span>
                             </div>
@@ -154,7 +153,6 @@
                                 <span class="font-label text-blue-corner-bright">Blue Corner</span>
                                 <span class="team-tag justify-end">
                                     <span class="font-display text-[clamp(1.5rem,4vw,2.75rem)] text-stage-text">{{ $away?->name }}</span>
-                                    <span class="team-dot" @if($away?->color) style="background-color: {{ $away->color }}" @endif></span>
                                 </span>
                             </div>
                         </div>

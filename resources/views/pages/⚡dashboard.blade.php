@@ -125,13 +125,11 @@ new #[Title('Dashboard')] class extends Component {
                         </div>
                         <div class="grid grid-cols-[1fr_auto_1fr] items-center gap-3 px-5 py-5">
                             <div class="flex items-center justify-start gap-2 min-w-0">
-                                <span class="team-dot" @if($home?->color) style="background-color: {{ $home->color }}" @endif></span>
                                 <span class="truncate font-display text-base text-stage-text">{{ $home?->name }}</span>
                             </div>
                             <span class="font-label text-stage-text-dim">vs</span>
                             <div class="flex items-center justify-end gap-2 min-w-0">
                                 <span class="truncate font-display text-base text-stage-text">{{ $away?->name }}</span>
-                                <span class="team-dot" @if($away?->color) style="background-color: {{ $away->color }}" @endif></span>
                             </div>
                         </div>
                     </a>

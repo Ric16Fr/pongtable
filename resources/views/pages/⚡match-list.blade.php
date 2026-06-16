@@ -118,7 +118,6 @@ new #[Title('Matches')] class extends Component {
                     {{-- Two-corner face-off --}}
                     <div class="grid grid-cols-[1fr_auto_1fr] items-center gap-3 min-w-0 lg:gap-5">
                         <div class="flex items-center justify-start gap-2 min-w-0">
-                            <span class="team-dot" @if($match->homeTeam?->color) style="background-color: {{ $match->homeTeam->color }}" @endif></span>
                             <span class="truncate font-display text-base lg:text-lg @if($match->status === 'finished' && $homeWin) text-trophy-gold @elseif($match->status === 'finished') text-stage-text-dim @elseif(! $match->homeTeam) text-stage-text-dim italic @endif">
                                 {{ $match->homeTeam?->name ?? 'Sieger Vorrunde' }}
                             </span>
@@ -138,7 +137,6 @@ new #[Title('Matches')] class extends Component {
                             <span class="truncate font-display text-base lg:text-lg @if($match->status === 'finished' && $awayWin) text-trophy-gold @elseif($match->status === 'finished') text-stage-text-dim @elseif(! $match->awayTeam) text-stage-text-dim italic @endif">
                                 {{ $match->awayTeam?->name ?? 'Sieger Vorrunde' }}
                             </span>
-                            <span class="team-dot" @if($match->awayTeam?->color) style="background-color: {{ $match->awayTeam->color }}" @endif></span>
                         </div>
                     </div>
 

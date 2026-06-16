@@ -340,24 +340,15 @@ select:focus[data-flux-control] {
 }
 
 /* ────────────────────────────────────────────────────────────────────
-   Team color stripe: a thin, deliberate band on the leading edge of a
-   team row, using the team's stored color. Not a side-stripe accent
-   on a card (that's banned); a thin identity bar inside the row.
+   Team tag: the team name as it appears in lists, brackets and
+   standings rows. Identity is carried by the name alone — no color
+   accent, in line with the committed four-role palette.
    ──────────────────────────────────────────────────────────────────── */
 
 .team-tag {
     display: inline-flex;
     align-items: center;
     gap: 0.625rem;
-}
-
-.team-dot {
-    display: inline-block;
-    width: 0.625rem;
-    height: 0.625rem;
-    border-radius: 9999px;
-    flex-shrink: 0;
-    background-color: var(--color-stage-text-dim);
 }
 
 /* ────────────────────────────────────────────────────────────────────

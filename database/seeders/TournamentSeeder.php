@@ -27,25 +27,25 @@ abstract class TournamentSeeder extends Seeder
     /**
      * The 16 teams every seeded tournament uses.
      *
-     * @var array<int, array{0: string, 1: string}>
+     * @var array<int, string>
      */
     protected array $teamData = [
-        ['Team Shotgun', '#f59e0b'],
-        ['Team Bierherz', '#ef4444'],
-        ['Team NullPointer', '#3b82f6'],
-        ['Team 404', '#8b5cf6'],
-        ['Team Overflowz', '#10b981'],
-        ['Team Syntax Error', '#f97316'],
-        ['Team Legacy Code', '#64748b'],
-        ['Team Hot Fix', '#ec4899'],
-        ['Team Segfault', '#06b6d4'],
-        ['Team Kernel Panic', '#a855f7'],
-        ['Team Deadlock', '#14b8a6'],
-        ['Team Race Condition', '#eab308'],
-        ['Team Rubber Duck', '#f43f5e'],
-        ['Team Merge Conflict', '#22c55e'],
-        ['Team Stack Trace', '#0ea5e9'],
-        ['Team Off By One', '#d946ef'],
+        'Team Shotgun',
+        'Team Bierherz',
+        'Team NullPointer',
+        'Team 404',
+        'Team Overflowz',
+        'Team Syntax Error',
+        'Team Legacy Code',
+        'Team Hot Fix',
+        'Team Segfault',
+        'Team Kernel Panic',
+        'Team Deadlock',
+        'Team Race Condition',
+        'Team Rubber Duck',
+        'Team Merge Conflict',
+        'Team Stack Trace',
+        'Team Off By One',
     ];
 
     /**
@@ -99,11 +99,10 @@ abstract class TournamentSeeder extends Seeder
         }
 
         if ($tournament->teams()->doesntExist()) {
-            foreach ($this->teamData as [$name, $color]) {
+            foreach ($this->teamData as $name) {
                 Team::create([
                     'tournament_id' => $tournament->id,
                     'name' => $name,
-                    'color' => $color,
                 ]);
             }
         }

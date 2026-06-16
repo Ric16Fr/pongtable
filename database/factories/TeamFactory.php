@@ -16,7 +16,6 @@ class TeamFactory extends Factory
         return [
             'tournament_id' => Tournament::factory(),
             'name' => 'Team '.fake()->unique()->lastName(),
-            'color' => fake()->hexColor(),
         ];
     }
 }

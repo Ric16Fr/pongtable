@@ -119,7 +119,6 @@ new class extends Component {
                             </td>
                             <td class="py-3 pr-3 font-medium">
                                 <span class="team-tag">
-                                    <span class="team-dot" @if($row['team']->color) style="background-color: {{ $row['team']->color }}" @endif></span>
                                     <span class="@if($rank === 1) font-display text-lg text-trophy-gold @elseif($isPodium) text-stage-text @endif">{{ $row['team']->name }}</span>
                                 </span>
                             </td>
