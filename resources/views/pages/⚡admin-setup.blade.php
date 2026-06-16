@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\GameMatch;
 use App\Models\Table;
 use App\Models\Team;
 use App\Models\Tournament;
@@ -11,7 +12,8 @@ use Livewire\Attributes\Title;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
 
-new #[Title('Setup')] class extends Component {
+new #[Title('Setup')]
+class extends Component {
     public ?int $tournamentId = null;
 
     #[Validate('required|string|max:255')]
@@ -33,9 +35,9 @@ new #[Title('Setup')] class extends Component {
     {
         $tournament = Tournament::query()->latest()->first();
 
-        if (! $tournament) {
+        if (!$tournament) {
             $tournament = Tournament::create([
-                'name' => 'Bierpong Cup '.now()->year,
+                'name' => 'Bierpong Cup ' . now()->year,
                 'group_match_duration_minutes' => 10,
                 'ko_match_duration_minutes' => 15,
             ]);
@@ -165,9 +167,9 @@ new #[Title('Setup')] class extends Component {
         $service->startKoPhase($this->tournament);
         unset($this->tournament);
 
-        Flux::toast(variant: 'success', text: $this->tournament->isPlacementPhase()
+        Flux::toast(text: $this->tournament->isPlacementPhase()
             ? __('Platzierungsspiele gestartet.')
-            : __('KO-Phase gestartet.'));
+            : __('KO-Phase gestartet.'), variant: 'success');
 
         $this->redirectRoute('matches.index', navigate: true);
     }
@@ -176,7 +178,7 @@ new #[Title('Setup')] class extends Component {
     {
         $t = $this->tournament;
 
-        \App\Models\GameMatch::where('tournament_id', $t->id)->delete();
+        GameMatch::where('tournament_id', $t->id)->delete();
         foreach ($t->groups as $g) {
             $g->teams()->detach();
         }
@@ -194,7 +196,7 @@ new #[Title('Setup')] class extends Component {
     public function createNewTournament(): void
     {
         $tournament = Tournament::create([
-            'name' => 'Bierpong Cup '.now()->year,
+            'name' => 'Bierpong Cup ' . now()->year,
             'group_match_duration_minutes' => 10,
             'ko_match_duration_minutes' => 15,
         ]);
@@ -202,6 +204,8 @@ new #[Title('Setup')] class extends Component {
         $this->tournamentId = $tournament->id;
         $this->reset(['newTableName', 'newTeamName', 'csvContent', 'addingTable', 'addingTeam', 'showGroupPreview']);
         unset($this->tournament);
+
+        Flux::modal('create-new-tournament')->close();
 
         Flux::toast(variant: 'success', text: __('Neues Turnier gestartet. Das bisherige liegt jetzt im Archiv.'));
     }
@@ -232,7 +236,7 @@ new #[Title('Setup')] class extends Component {
     }
 }; ?>
 
-<div>
+<div >
     @php
         $t = $this->tournament;
         $phaseLabels = [
@@ -244,63 +248,62 @@ new #[Title('Setup')] class extends Component {
         ];
     @endphp
 
-    <div class="mx-auto w-full max-w-5xl space-y-12 p-4 lg:p-6">
+    <div class="mx-auto w-full max-w-5xl space-y-12 p-4 lg:p-6" >
 
         {{-- Title --}}
-        <header class="flex flex-col gap-4">
-            <div class="font-label flex items-center gap-3 text-trophy-gold">
-                <span class="block h-px w-12 bg-trophy-gold"></span>
-                <span>{{ $phaseLabels[$t->status] ?? $t->status }}</span>
-            </div>
-            <div class="flex flex-wrap items-end justify-between gap-4">
-                <h1 class="font-display text-stage-text text-[clamp(2rem,5vw,3.5rem)]">Turnier-Setup</h1>
-                <div class="flex flex-wrap items-center gap-2">
+        <header class="flex flex-col gap-4" >
+            <div class="font-label flex items-center gap-3 text-trophy-gold" >
+                <span class="block h-px w-12 bg-trophy-gold" ></span >
+                <span >{{ $phaseLabels[$t->status] ?? $t->status }}</span >
+            </div >
+            <div class="flex flex-wrap items-end justify-between gap-4" >
+                <h1 class="font-display text-stage-text text-[clamp(2rem,5vw,3.5rem)]" >Turnier-Setup</h1 >
+                <div class="flex flex-wrap items-center gap-2" >
                     @if ($t->isSetup())
-                        <flux:modal.trigger name="upload-groups">
-                            <flux:button variant="ghost" size="sm" icon="arrow-up-tray" data-test="open-upload-groups">
+                        <flux:modal.trigger name="upload-groups" >
+                            <flux:button variant="ghost" size="sm" icon="arrow-up-tray" data-test="open-upload-groups" >
                                 Gruppen hochladen
-                            </flux:button>
-                        </flux:modal.trigger>
+                            </flux:button >
+                        </flux:modal.trigger >
                     @else
-                        <flux:modal.trigger name="reset-confirm">
-                            <flux:button variant="ghost" size="sm">Turnier zurücksetzen</flux:button>
-                        </flux:modal.trigger>
+                        <flux:modal.trigger name="reset-confirm" >
+                            <flux:button variant="ghost" size="sm" >Turnier zurücksetzen</flux:button >
+                        </flux:modal.trigger >
                     @endif
-                    <flux:button variant="ghost" size="sm" icon="plus"
-                                 wire:click="createNewTournament"
-                                 wire:confirm="Neues Turnier starten? Das aktuelle Turnier wandert unverändert ins Archiv und bleibt dort einsehbar."
-                                 data-test="new-tournament">
-                        Neues Turnier
-                    </flux:button>
-                </div>
-            </div>
-        </header>
+                    <flux:modal.trigger name="create-new-tournament" >
+                        <flux:button variant="ghost" size="sm" icon="plus" >
+                            Neues Turnier
+                        </flux:button >
+                    </flux:modal.trigger >
+                </div >
+            </div >
+        </header >
 
         {{-- Tables --}}
-        <section class="space-y-5">
-            <div class="flex items-baseline justify-between border-b border-stage-line pb-3">
-                <h2 class="font-display text-2xl text-stage-text">Tische</h2>
-                <span class="font-numeric text-2xl font-bold text-stage-text">{{ $t->tables->count() }}</span>
-            </div>
+        <section class="space-y-5" >
+            <div class="flex items-baseline justify-between border-b border-stage-line pb-3" >
+                <h2 class="font-display text-2xl text-stage-text" >Tische</h2 >
+                <span class="font-numeric text-2xl font-bold text-stage-text" >{{ $t->tables->count() }}</span >
+            </div >
 
             @if ($t->tables->isEmpty() && ! $addingTable)
-                <p class="text-sm text-stage-text-dim">Noch keine Tische angelegt.</p>
+                <p class="text-sm text-stage-text-dim" >Noch keine Tische angelegt.</p >
             @else
-                <ul class="grid grid-cols-1 gap-2 md:grid-cols-2">
+                <ul class="grid grid-cols-1 gap-2 md:grid-cols-2" >
                     @foreach ($t->tables as $table)
-                        <li class="group flex items-center justify-between rounded-md bg-stage-surface px-4 py-3">
-                            <span class="font-medium text-stage-text">{{ $table->name }}</span>
+                        <li class="group flex items-center justify-between rounded-md bg-stage-surface px-4 py-3" >
+                            <span class="font-medium text-stage-text" >{{ $table->name }}</span >
                             @if ($t->isSetup())
                                 <button wire:click="removeTable({{ $table->id }})" wire:confirm="Tisch wirklich löschen?"
                                         type="button"
                                         aria-label="Tisch entfernen"
-                                        class="rounded-md p-1 text-stage-text-muted opacity-0 transition group-hover:opacity-100 hover:bg-stage-surface-2 hover:text-status-danger focus:opacity-100 focus:outline-none">
+                                        class="rounded-md p-1 text-stage-text-muted opacity-0 transition group-hover:opacity-100 hover:bg-stage-surface-2 hover:text-status-danger focus:opacity-100 focus:outline-none" >
                                     <flux:icon.x-mark class="size-4" />
-                                </button>
+                                </button >
                             @endif
-                        </li>
+                        </li >
                     @endforeach
-                </ul>
+                </ul >
             @endif
 
             @if ($t->isSetup())
@@ -308,58 +311,94 @@ new #[Title('Setup')] class extends Component {
                     <form wire:submit="addTable"
                           x-data
                           x-init="$nextTick(() => $refs.tableInput.focus())"
-                          class="flex flex-wrap items-end gap-3 rounded-md border border-dashed border-stage-line-strong bg-stage-surface px-4 py-3">
-                        <div class="min-w-[240px] flex-1">
+                          class="flex flex-wrap items-end gap-3 rounded-md border border-dashed border-stage-line-strong bg-stage-surface px-4 py-3" >
+                        <div class="min-w-[240px] flex-1" >
                             <flux:input wire:model="newTableName"
                                         placeholder="z.B. Tisch Kellerbar"
                                         x-ref="tableInput"
                                         x-on:keydown.escape.prevent="$wire.cancelAddingTable()" />
-                        </div>
-                        <flux:button type="submit" variant="primary">Speichern</flux:button>
+                        </div >
+                        <flux:button type="submit" variant="primary" >Speichern</flux:button >
                         <button type="button" wire:click="cancelAddingTable"
                                 aria-label="Abbrechen"
-                                class="rounded-md p-2 text-stage-text-muted hover:bg-stage-surface-2 hover:text-stage-text focus:outline-none">
+                                class="rounded-md p-2 text-stage-text-muted hover:bg-stage-surface-2 hover:text-stage-text focus:outline-none" >
                             <flux:icon.x-mark class="size-5" />
-                        </button>
-                    </form>
+                        </button >
+                    </form >
                 @else
                     <button wire:click="startAddingTable" type="button"
-                            class="inline-flex items-center gap-2 rounded-md border border-dashed border-stage-line-strong px-4 py-2 text-sm font-medium text-stage-text-muted hover:border-stage-text hover:text-stage-text transition">
+                            class="inline-flex items-center gap-2 rounded-md border border-dashed border-stage-line-strong px-4 py-2 text-sm font-medium text-stage-text-muted hover:border-stage-text hover:text-stage-text transition" >
                         <flux:icon.plus class="size-4" />
                         Tisch hinzufügen
-                    </button>
+                    </button >
                 @endif
             @endif
-        </section>
+        </section >
+
+
+        {{-- Start placement round / KO --}}
+        @if ($this->koPhaseReady)
+            <section class="overflow-hidden rounded-lg border border-trophy-gold/30 bg-trophy-gold-soft" >
+                <div class="px-6 py-8 lg:px-10 lg:py-10" >
+                    <div class="font-label flex items-center gap-3 text-trophy-gold" >
+                        <span class="block h-px w-12 bg-trophy-gold" ></span >
+                        <span >{{ $t->isPlacementPhase() ? 'Platzierungsspiele abgeschlossen' : 'Gruppenphase abgeschlossen' }}</span >
+                    </div >
+                    @if ($this->placementRoundNext)
+                        <h2 class="mt-3 font-display text-stage-text text-2xl lg:text-3xl" >Platzierungsspiele starten</h2 >
+                        <p class="mt-3 max-w-lg text-sm text-stage-text-muted" >
+                            Alle Matches der Gruppenphase sind beendet. Die Teams, die es nicht in die KO-Phase
+                            geschafft haben, spielen zuerst ihre Plätze aus — danach startet die KO-Phase.
+                        </p >
+                        <button wire:click="startKoPhase"
+                                class="mt-6 inline-flex items-center gap-2 rounded-md bg-trophy-gold px-6 py-3 text-base font-bold text-stage-bg hover:bg-trophy-gold-deep transition" >
+                            Platzierungsspiele starten →
+                        </button >
+                    @else
+                        <h2 class="mt-3 font-display text-stage-text text-2xl lg:text-3xl" >KO-Phase starten</h2 >
+                        <p class="mt-3 max-w-lg text-sm text-stage-text-muted" >
+                            @if ($t->isPlacementPhase())
+                                Alle Platzierungsspiele sind beendet. Aus den besten Teams jeder Gruppe wird das KO-Bracket gebaut.
+                            @else
+                                Alle Matches der Gruppenphase sind beendet. Aus den besten Teams jeder Gruppe wird das KO-Bracket gebaut.
+                            @endif
+                        </p >
+                        <button wire:click="startKoPhase"
+                                class="mt-6 inline-flex items-center gap-2 rounded-md bg-trophy-gold px-6 py-3 text-base font-bold text-stage-bg hover:bg-trophy-gold-deep transition" >
+                            KO-Phase starten →
+                        </button >
+                    @endif
+                </div >
+            </section >
+        @endif
 
         {{-- Teams --}}
-        <section class="space-y-5">
-            <div class="flex items-baseline justify-between border-b border-stage-line pb-3">
-                <h2 class="font-display text-2xl text-stage-text">Teams</h2>
-                <span class="font-numeric text-2xl font-bold text-stage-text">{{ $t->teams->count() }}</span>
-            </div>
+        <section class="space-y-5" >
+            <div class="flex items-baseline justify-between border-b border-stage-line pb-3" >
+                <h2 class="font-display text-2xl text-stage-text" >Teams</h2 >
+                <span class="font-numeric text-2xl font-bold text-stage-text" >{{ $t->teams->count() }}</span >
+            </div >
 
             @if ($t->teams->isEmpty() && ! $addingTeam)
-                <p class="text-sm text-stage-text-dim">Noch keine Teams angelegt.</p>
+                <p class="text-sm text-stage-text-dim" >Noch keine Teams angelegt.</p >
             @else
-                <ul class="grid grid-cols-1 gap-2 md:grid-cols-2">
+                <ul class="grid grid-cols-1 gap-2 md:grid-cols-2" >
                     @foreach ($t->teams as $team)
-                        <li class="group flex items-center justify-between rounded-md bg-stage-surface px-4 py-3">
-                            <span class="team-tag">
-                                <span class="team-dot" @if($team->color) style="background-color: {{ $team->color }}" @endif></span>
-                                <span class="font-medium text-stage-text">{{ $team->name }}</span>
-                            </span>
+                        <li class="group flex items-center justify-between rounded-md bg-stage-surface px-4 py-3" >
+                            <span class="team-tag" >
+                                <span class="font-medium text-stage-text" >{{ $team->name }}</span >
+                            </span >
                             @if ($t->isSetup())
                                 <button wire:click="removeTeam({{ $team->id }})" wire:confirm="Team wirklich löschen?"
                                         type="button"
                                         aria-label="Team entfernen"
-                                        class="rounded-md p-1 text-stage-text-muted opacity-0 transition group-hover:opacity-100 hover:bg-stage-surface-2 hover:text-status-danger focus:opacity-100 focus:outline-none">
+                                        class="rounded-md p-1 text-stage-text-muted opacity-0 transition group-hover:opacity-100 hover:bg-stage-surface-2 hover:text-status-danger focus:opacity-100 focus:outline-none" >
                                     <flux:icon.x-mark class="size-4" />
-                                </button>
+                                </button >
                             @endif
-                        </li>
+                        </li >
                     @endforeach
-                </ul>
+                </ul >
             @endif
 
             @if ($t->isSetup())
@@ -367,131 +406,95 @@ new #[Title('Setup')] class extends Component {
                     <form wire:submit="addTeam"
                           x-data
                           x-init="$nextTick(() => $refs.teamInput.focus())"
-                          class="flex flex-wrap items-end gap-3 rounded-md border border-dashed border-stage-line-strong bg-stage-surface px-4 py-3">
-                        <div class="min-w-[240px] flex-1">
+                          class="flex flex-wrap items-end gap-3 rounded-md border border-dashed border-stage-line-strong bg-stage-surface px-4 py-3" >
+                        <div class="min-w-[240px] flex-1" >
                             <flux:input wire:model="newTeamName"
                                         placeholder="z.B. Team Shotgun"
                                         x-ref="teamInput"
                                         x-on:keydown.escape.prevent="$wire.cancelAddingTeam()" />
-                        </div>
-                        <div class="w-24">
-                            <flux:input wire:model="newTeamColor" type="color" />
-                        </div>
-                        <flux:button type="submit" variant="primary">Speichern</flux:button>
+                        </div >
+                        <flux:button type="submit" variant="primary" >Speichern</flux:button >
                         <button type="button" wire:click="cancelAddingTeam"
                                 aria-label="Abbrechen"
-                                class="rounded-md p-2 text-stage-text-muted hover:bg-stage-surface-2 hover:text-stage-text focus:outline-none">
+                                class="rounded-md p-2 text-stage-text-muted hover:bg-stage-surface-2 hover:text-stage-text focus:outline-none" >
                             <flux:icon.x-mark class="size-5" />
-                        </button>
-                    </form>
+                        </button >
+                    </form >
                 @else
                     <button wire:click="startAddingTeam" type="button"
-                            class="inline-flex items-center gap-2 rounded-md border border-dashed border-stage-line-strong px-4 py-2 text-sm font-medium text-stage-text-muted hover:border-stage-text hover:text-stage-text transition">
+                            class="inline-flex items-center gap-2 rounded-md border border-dashed border-stage-line-strong px-4 py-2 text-sm font-medium text-stage-text-muted hover:border-stage-text hover:text-stage-text transition" >
                         <flux:icon.plus class="size-4" />
                         Team hinzufügen
-                    </button>
+                    </button >
                 @endif
             @endif
-        </section>
+        </section >
 
-        {{-- Generate groups: the moment-of-go --}}
+        {{-- Generate groups: the moment-of-go, deliberately under the teams (other than KO-Phase) to optimize user flow --}}
         @if ($t->isSetup())
-            <section class="overflow-hidden rounded-lg border border-trophy-gold/30 bg-trophy-gold-soft">
-                <div class="px-6 py-8 lg:px-10 lg:py-10">
-                    <div class="font-label flex items-center gap-3 text-trophy-gold">
-                        <span class="block h-px w-12 bg-trophy-gold"></span>
-                        <span>Bereit zum Auslosen</span>
-                    </div>
-                    <h2 class="mt-3 font-display text-stage-text text-2xl lg:text-3xl">Gruppenphase generieren</h2>
-                    <p class="mt-3 max-w-lg text-sm text-stage-text-muted">
-                        <span class="font-numeric text-stage-text">{{ $t->teams->count() }}</span> Teams werden auf
-                        <span class="font-numeric text-stage-text">{{ $t->tables->count() }}</span> Tische verteilt.
+            <section class="overflow-hidden rounded-lg border border-trophy-gold/30 bg-trophy-gold-soft" >
+                <div class="px-6 py-8 lg:px-10 lg:py-10" >
+                    <div class="font-label flex items-center gap-3 text-trophy-gold" >
+                        <span class="block h-px w-12 bg-trophy-gold" ></span >
+                        <span >Bereit zum Auslosen</span >
+                    </div >
+                    <h2 class="mt-3 font-display text-stage-text text-2xl lg:text-3xl" >Gruppenphase generieren</h2 >
+                    <p class="mt-3 max-w-lg text-sm text-stage-text-muted" >
+                        <span class="font-numeric text-stage-text" >{{ $t->teams->count() }}</span > Teams werden auf
+                        <span class="font-numeric text-stage-text" >{{ $t->tables->count() }}</span > Tische verteilt.
                         Jedes Team spielt in seiner Gruppe gegen jedes andere einmal.
-                    </p>
+                    </p >
                     <button wire:click="showPreview"
                             @disabled($t->teams->count() < 2 || $t->tables->isEmpty())
-                            class="mt-6 inline-flex items-center gap-2 rounded-md bg-trophy-gold px-6 py-3 text-base font-bold text-stage-bg hover:bg-trophy-gold-deep disabled:opacity-40 disabled:cursor-not-allowed transition">
+                            class="mt-6 inline-flex items-center gap-2 rounded-md bg-trophy-gold px-6 py-3 text-base font-bold text-stage-bg hover:bg-trophy-gold-deep disabled:opacity-40 disabled:cursor-not-allowed transition" >
                         Gruppen generieren →
-                    </button>
-                </div>
-            </section>
+                    </button >
+                </div >
+            </section >
         @endif
+    </div >
 
-        {{-- Start placement round / KO --}}
-        @if ($this->koPhaseReady)
-            <section class="overflow-hidden rounded-lg border border-trophy-gold/30 bg-trophy-gold-soft">
-                <div class="px-6 py-8 lg:px-10 lg:py-10">
-                    <div class="font-label flex items-center gap-3 text-trophy-gold">
-                        <span class="block h-px w-12 bg-trophy-gold"></span>
-                        <span>{{ $t->isPlacementPhase() ? 'Platzierungsspiele abgeschlossen' : 'Gruppenphase abgeschlossen' }}</span>
-                    </div>
-                    @if ($this->placementRoundNext)
-                        <h2 class="mt-3 font-display text-stage-text text-2xl lg:text-3xl">Platzierungsspiele starten</h2>
-                        <p class="mt-3 max-w-lg text-sm text-stage-text-muted">
-                            Alle Matches der Gruppenphase sind beendet. Die Teams, die es nicht in die KO-Phase
-                            geschafft haben, spielen zuerst ihre Plätze aus — danach startet die KO-Phase.
-                        </p>
-                        <button wire:click="startKoPhase"
-                                class="mt-6 inline-flex items-center gap-2 rounded-md bg-trophy-gold px-6 py-3 text-base font-bold text-stage-bg hover:bg-trophy-gold-deep transition">
-                            Platzierungsspiele starten →
-                        </button>
-                    @else
-                        <h2 class="mt-3 font-display text-stage-text text-2xl lg:text-3xl">KO-Phase starten</h2>
-                        <p class="mt-3 max-w-lg text-sm text-stage-text-muted">
-                            @if ($t->isPlacementPhase())
-                                Alle Platzierungsspiele sind beendet. Aus den besten Teams jeder Gruppe wird das KO-Bracket gebaut.
-                            @else
-                                Alle Matches der Gruppenphase sind beendet. Aus den besten Teams jeder Gruppe wird das KO-Bracket gebaut.
-                            @endif
-                        </p>
-                        <button wire:click="startKoPhase"
-                                class="mt-6 inline-flex items-center gap-2 rounded-md bg-trophy-gold px-6 py-3 text-base font-bold text-stage-bg hover:bg-trophy-gold-deep transition">
-                            KO-Phase starten →
-                        </button>
-                    @endif
-                </div>
-            </section>
-        @endif
-    </div>
-
-    <flux:modal name="group-preview" wire:model="showGroupPreview" class="max-w-2xl">
-        <div class="space-y-5">
-            <flux:heading size="lg">Vorschau Gruppenverteilung</flux:heading>
-            <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
+    <flux:modal name="group-preview" wire:model="showGroupPreview" class="max-w-2xl" >
+        <div class="space-y-5" >
+            <flux:heading size="lg" >Vorschau Gruppenverteilung</flux:heading >
+            <flux:text class="mt-2" >
+               Dies ist nur eine Vorschau, wie groß die Gruppen werden. Generiert werden sie zufällig nach Klick auf "Bestätigen".
+            </flux:text >
+            <div class="grid grid-cols-1 gap-3 md:grid-cols-2" >
                 @foreach ($this->groupPreview as $bucket)
-                    <div class="rounded-md bg-stage-surface-2 p-4">
-                        <div class="font-label text-stage-text-dim">{{ $bucket['table'] }}</div>
-                        <ul class="mt-2 space-y-1 text-sm text-stage-text">
+                    <div class="rounded-md bg-stage-surface-2 p-4" >
+                        <div class="font-label text-stage-text-dim" >{{ $bucket['table'] }}</div >
+                        <ul class="mt-2 space-y-1 text-sm text-stage-text" >
                             @foreach ($bucket['teams'] as $team)
-                                <li>· {{ $team }}</li>
+                                <li >· {{ $team }}</li >
                             @endforeach
-                        </ul>
-                    </div>
+                        </ul >
+                    </div >
                 @endforeach
-            </div>
-            <div class="flex justify-end gap-2">
-                <flux:button wire:click="cancelPreview" variant="ghost">Abbrechen</flux:button>
+            </div >
+            <div class="flex justify-end gap-2" >
+                <flux:button wire:click="cancelPreview" variant="ghost" >Abbrechen</flux:button >
                 <button wire:click="confirmGenerate"
-                        class="inline-flex items-center gap-2 rounded-md bg-trophy-gold px-5 py-2.5 text-sm font-bold text-stage-bg hover:bg-trophy-gold-deep transition">
+                        class="inline-flex items-center gap-2 rounded-md bg-trophy-gold px-5 py-2.5 text-sm font-bold text-stage-bg hover:bg-trophy-gold-deep transition" >
                     Bestätigen
-                </button>
-            </div>
-        </div>
-    </flux:modal>
+                </button >
+            </div >
+        </div >
+    </flux:modal >
 
-    <flux:modal name="upload-groups" class="max-w-2xl">
-        <form wire:submit="uploadGroups" class="space-y-5">
-            <div>
-                <flux:heading size="lg">Gruppen hochladen</flux:heading>
-                <flux:text class="mt-2">
+    <flux:modal name="upload-groups" class="max-w-2xl" >
+        <form wire:submit="uploadGroups" class="space-y-5" >
+            <div >
+                <flux:heading size="lg" >Gruppen hochladen</flux:heading >
+                <flux:text class="mt-2" >
                     Füge eine semikolon-getrennte CSV ein. Erste Zeile enthält die Gruppennamen
                     (werden ignoriert — wir benennen die Gruppen alphabetisch A, B, C, …),
                     danach folgen die Teams. Die Zellen werden reihum auf die Gruppen verteilt.
-                </flux:text>
-                <flux:text class="mt-2 text-status-danger">
+                </flux:text >
+                <flux:text class="mt-2 text-status-danger" >
                     Vorhandene Teams werden dabei ersetzt.
-                </flux:text>
-            </div>
+                </flux:text >
+            </div >
 
             <flux:textarea
                 wire:model="csvContent"
@@ -499,29 +502,43 @@ new #[Title('Setup')] class extends Component {
                 placeholder="Gruppe A;Gruppe B;Gruppe C;Gruppe D&#10;Team 1;Team 2;Team 3;Team 4&#10;..."
                 data-test="csv-content"
             />
-            @error('csvContent') <p class="text-sm text-status-danger">{{ $message }}</p> @enderror
+            @error('csvContent') <p class="text-sm text-status-danger" >{{ $message }}</p > @enderror
 
-            <div class="flex justify-end gap-2">
-                <flux:modal.close>
-                    <flux:button type="button" variant="ghost">Abbrechen</flux:button>
-                </flux:modal.close>
-                <flux:button type="submit" variant="primary" data-test="upload-groups-button">
+            <div class="flex justify-end gap-2" >
+                <flux:modal.close >
+                    <flux:button type="button" variant="ghost" >Abbrechen</flux:button >
+                </flux:modal.close >
+                <flux:button type="submit" variant="primary" data-test="upload-groups-button" >
                     Übernehmen
-                </flux:button>
-            </div>
-        </form>
-    </flux:modal>
+                </flux:button >
+            </div >
+        </form >
+    </flux:modal >
 
-    <flux:modal name="reset-confirm" class="max-w-md">
-        <div class="space-y-4">
-            <flux:heading size="lg">Turnier zurücksetzen?</flux:heading>
-            <p class="text-sm text-stage-text-muted">Alle Matches, Gruppen und Ergebnisse werden gelöscht. Tische und Teams bleiben erhalten.</p>
-            <div class="flex justify-end gap-2">
-                <flux:modal.close>
-                    <flux:button variant="ghost">Abbrechen</flux:button>
-                </flux:modal.close>
-                <flux:button wire:click="resetTournament" variant="danger">Zurücksetzen</flux:button>
-            </div>
-        </div>
-    </flux:modal>
-</div>
+    <flux:modal name="reset-confirm" class="max-w-md" >
+        <div class="space-y-4" >
+            <flux:heading size="lg" >Turnier zurücksetzen?</flux:heading >
+            <p class="text-sm text-stage-text-muted" >Alle Matches, Gruppen und Ergebnisse werden gelöscht. Tische und Teams bleiben
+                erhalten.</p >
+            <div class="flex justify-end gap-2" >
+                <flux:modal.close >
+                    <flux:button variant="ghost" >Abbrechen</flux:button >
+                </flux:modal.close >
+                <flux:button wire:click="resetTournament" variant="danger" >Zurücksetzen</flux:button >
+            </div >
+        </div >
+    </flux:modal >
+    <flux:modal name="create-new-tournament" class="max-w-md" >
+        <div class="space-y-4" >
+            <flux:heading size="lg" >Neues Turnier starten?</flux:heading >
+            <p class="text-sm text-stage-text-muted" >Neues Turnier starten? Das aktuelle Turnier wandert unverändert ins Archiv und bleibt
+                dort einsehbar.</p >
+            <div class="flex justify-end gap-2" >
+                <flux:modal.close >
+                    <flux:button variant="ghost" >Abbrechen</flux:button >
+                </flux:modal.close >
+                <flux:button data-test="new-tournament" wire:click="createNewTournament" variant="danger" >Neues Turnier</flux:button >
+            </div >
+        </div >
+    </flux:modal >
+</div >
