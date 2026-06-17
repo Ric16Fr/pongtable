@@ -13,6 +13,16 @@
       • Two-corner framing: faint red/blue cup crescents bleeding off the
         left and right edges.
 
+    Typography — the real brand fonts, embedded for dompdf:
+      dompdf cannot read woff2 nor variable fonts, so static TTF instances
+      (resources/fonts/pdf/*.ttf, derived from the same Inter / JetBrains
+      Mono sources the web app ships) are inlined as base64 data URIs. Each
+      weight gets its OWN family name and is always used at font-weight
+      normal — dompdf does not synthesise bold, so a single registered
+      weight per family is the reliable pattern. Inter's display optical
+      size (opsz 32) is baked into the hero weight; numerics are set in
+      JetBrains Mono per DESIGN.md's Tabular-Numeric Rule.
+
     Expected data:
       string $tournamentName
       int    $totalCups
@@ -27,6 +37,15 @@
         3 => '#8A5A12', // warm bronze-gold
     ];
     $neutralPlace = '#3B362E';
+
+    // One dedicated family per static weight (dompdf weight-matching is
+    // unreliable; a unique family + font-weight:normal is bulletproof).
+    $pdfFonts = [
+        'InterBody' => 'fonts/pdf/inter-400.ttf',     // footer / running text
+        'InterLabel' => 'fonts/pdf/inter-600.ttf',    // tracked uppercase labels
+        'InterDisplay' => 'fonts/pdf/inter-800.ttf',  // hero display (opsz 32)
+        'Mono' => 'fonts/pdf/jetbrainsmono-700.ttf',  // numerics
+    ];
 @endphp
 <!DOCTYPE html>
 <html lang="de">
@@ -35,10 +54,19 @@
     <style>
         @page { margin: 0; }
 
+        @foreach ($pdfFonts as $family => $path)
+        @font-face {
+            font-family: '{{ $family }}';
+            font-weight: normal;
+            font-style: normal;
+            src: url(data:font/truetype;base64,{{ base64_encode(file_get_contents(resource_path($path))) }});
+        }
+        @endforeach
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: 'Helvetica', sans-serif; /* Inter proxy in dompdf */
+            font-family: 'InterBody', sans-serif;
             color: #19150F; /* stage-text, deep roast */
         }
 
@@ -82,37 +110,42 @@
         }
 
         .eyebrow {
+            font-family: 'InterLabel';
+            font-weight: normal;
             font-size: 10.5pt;
-            font-weight: bold;
             letter-spacing: 4pt;
             text-transform: uppercase;
             color: #837A6B; /* stage-text-dim */
         }
 
         .tournament {
+            font-family: 'InterDisplay';
+            font-weight: normal;
             font-size: 30pt;
-            font-weight: bold;
             letter-spacing: 1pt;
             color: #C0820C; /* trophy-gold, a touch deepened for paper */
             line-height: 1.1;
         }
 
         .team {
+            font-family: 'InterDisplay';
+            font-weight: normal;
             font-size: 46pt;
-            font-weight: bold;
             letter-spacing: -1pt;
             line-height: 1.0;
             color: #19150F;
         }
 
         .place-num {
+            font-family: 'Mono';
+            font-weight: normal;
             font-size: 92pt;
-            font-weight: bold;
             line-height: 1.0;
         }
         .place-label {
+            font-family: 'InterLabel';
+            font-weight: normal;
             font-size: 13pt;
-            font-weight: bold;
             letter-spacing: 6pt;
             text-transform: uppercase;
             color: #4D473C; /* stage-text-muted */
@@ -133,16 +166,21 @@
         }
         .footer .powered {
             float: left;
+            font-family: 'InterLabel';
             letter-spacing: 1.5pt;
             text-transform: uppercase;
         }
         .footer .powered .wm {
+            font-family: 'InterDisplay';
             text-transform: lowercase;
-            font-weight: bold;
             letter-spacing: 0.5pt;
             color: #4D473C;
         }
         .footer .cups { float: right; }
+        .footer .cups-num {
+            font-family: 'Mono';
+            color: #4D473C;
+        }
     </style>
 </head>
 <body>
@@ -182,7 +220,7 @@
 
             <div class="footer">
                 <span class="powered">powered by <span class="wm">pongtable</span></span>
-                <span class="cups">Die Teams mussten sich durch {{ $totalCups }} Becher kämpfen</span>
+                <span class="cups">Die Teams mussten sich durch <span class="cups-num">{{ $totalCups }}</span> Becher kämpfen</span>
             </div>
         </div>
     @endforeach
