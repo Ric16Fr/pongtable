@@ -194,15 +194,17 @@ class extends Component {
     }
 
     /**
-     * Builds one A4 certificate per team — ordered by their final placement —
-     * and streams the combined PDF as a download.
+     * Builds the certificate PDF — one A4 page per team ordered by final
+     * placement, followed by a page for every special-prize award — and
+     * streams it as a download.
      */
     public function generateCertificates(FinalStandingsService $standings, StatisticsService $statistics): StreamedResponse
     {
         $tournament = $this->tournament();
 
-        $certificates = $standings->standings($tournament)
+        $placementCertificates = $standings->standings($tournament)
             ->map(fn (array $row) => [
+                'type' => 'placement',
                 'team' => $row['team']->name,
                 'rank' => $row['rank'],
             ])
@@ -211,18 +213,44 @@ class extends Component {
         $pdf = Pdf::view('pdf.certificates', [
             'tournamentName' => $tournament->name,
             'totalCups' => $statistics->summary($tournament)['total_cups'],
-            'certificates' => $certificates,
+            'certificates' => array_merge($placementCertificates, $this->specialCertificates($statistics, $tournament)),
         ]);
 
         $filename = 'urkunden_' . str_replace(' ', '_', $tournament->name) . '.pdf';
 
-        Flux::toast(text: __('Download wird gestartet...'), variant: 'success');
+        Flux::toast(text: __('Download der Urkunden wird gestartet...'), variant: 'success');
+
+        // Render eagerly via toResponse() (rather than base64()) so the page
+        // bytes are available to stream and Pdf::fake() can record the view.
+        $content = $pdf->toResponse(request())->getContent();
 
         return response()->streamDownload(
-            fn () => print(base64_decode($pdf->base64())),
+            fn () => print($content),
             $filename,
             ['Content-Type' => 'application/pdf'],
         );
+    }
+
+    /**
+     * One certificate per special-prize subject. The Wurfkönig is a single
+     * player; every other prize honours a team (Marathon / Knapper Krimi
+     * name two).
+     *
+     * @return list<array{type:string, team?:string, player?:string, award?:string}>
+     */
+    private function specialCertificates(StatisticsService $statistics, Tournament $tournament): array
+    {
+        $certificates = [];
+
+        foreach ($statistics->awards($tournament) as $award) {
+            foreach ($award['subjects'] as $subject) {
+                $certificates[] = $award['type'] === 'player'
+                    ? ['type' => 'cup_king', 'player' => $subject]
+                    : ['type' => 'special', 'team' => $subject, 'award' => $award['label']];
+            }
+        }
+
+        return $certificates;
     }
 
     /**

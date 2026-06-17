@@ -1,9 +1,11 @@
 <?php
 
 use App\Models\GameMatch;
+use App\Models\MatchMemberCup;
 use App\Models\MatchStat;
 use App\Models\Table;
 use App\Models\Team;
+use App\Models\TeamMember;
 use App\Models\Tournament;
 use App\Services\StatisticsService;
 
@@ -249,4 +251,68 @@ it('hides throw-based stats when count_throws is disabled', function () {
         ->and($summary['penalty_magnet']['team'])->toBe('Team Bierherz')
         ->and($summary['blitz_win']['team'])->toBe('Team Shotgun')
         ->and($summary['schluck_olymp']['team'])->not->toBeNull();
+});
+
+it('exposes special awards consistent with the summary, excluding champion and totals', function () {
+    makeFinishedMatch($this->tournament, $this->shotgun, $this->bierherz, [
+        'home_cups' => 8, 'away_cups' => 2, 'home_throws' => 10, 'away_throws' => 10,
+        'home_penalty' => 0, 'away_penalty' => 3,
+    ], $this->shotgun->id);
+
+    $service = app(StatisticsService::class);
+    $summary = $service->summary($this->tournament);
+    $awards = $service->awards($this->tournament);
+
+    expect($awards)->not->toBeEmpty();
+
+    foreach ($awards as $award) {
+        expect($summary[$award['key']])->not->toBeNull();
+        expect($award['subjects'])->not->toBeEmpty();
+    }
+
+    $keys = collect($awards)->pluck('key');
+    expect($keys)->not->toContain('champion')
+        ->and($keys)->not->toContain('total_cups');
+
+    // A team prize carries its German label and the team as subject.
+    $shooter = collect($awards)->firstWhere('key', 'sharpest_shooter');
+    expect($shooter['type'])->toBe('team')
+        ->and($shooter['label'])->toBe('Schärfste Schützen')
+        ->and($shooter['subjects'])->toBe(['Team Shotgun']);
+});
+
+it('awards a two-team prize (Knapper Krimi) to both teams', function () {
+    makeFinishedMatch($this->tournament, $this->shotgun, $this->bierherz, [
+        'home_cups' => 6, 'away_cups' => 5, 'home_throws' => 10, 'away_throws' => 10,
+    ], $this->shotgun->id);
+
+    $krimi = collect(app(StatisticsService::class)->awards($this->tournament))
+        ->firstWhere('key', 'nail_biter');
+
+    expect($krimi)->not->toBeNull()
+        ->and($krimi['type'])->toBe('team')
+        ->and($krimi['subjects'])->toHaveCount(2)
+        ->and($krimi['subjects'])->toEqualCanonicalizing(['Team Shotgun', 'Team Bierherz']);
+});
+
+it('awards the Wurfkönig as a player-based prize', function () {
+    $this->tournament->update(['determine_cup_king' => true]);
+
+    $member = TeamMember::factory()->create(['team_id' => $this->shotgun->id, 'name' => 'Zoe Wurf']);
+    $match = makeFinishedMatch($this->tournament, $this->shotgun, $this->bierherz, [
+        'home_cups' => 6, 'away_cups' => 2, 'home_throws' => 8, 'away_throws' => 8,
+    ], $this->shotgun->id);
+    MatchMemberCup::factory()->create([
+        'match_id' => $match->id,
+        'team_member_id' => $member->id,
+        'cups_hit' => 6,
+    ]);
+
+    $king = collect(app(StatisticsService::class)->awards($this->tournament))
+        ->firstWhere('key', 'cup_king');
+
+    expect($king)->not->toBeNull()
+        ->and($king['type'])->toBe('player')
+        ->and($king['label'])->toBe('Wurfkönig')
+        ->and($king['subjects'])->toBe(['Zoe Wurf']);
 });

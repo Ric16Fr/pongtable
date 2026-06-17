@@ -151,6 +151,17 @@
             color: #4D473C; /* stage-text-muted */
         }
 
+        /* The gold hero for special prizes — the prize name (or the
+           Wurfkönig's feat), set like the tournament name. */
+        .award {
+            font-family: 'InterDisplay';
+            font-weight: normal;
+            font-size: 34pt;
+            letter-spacing: 0.5pt;
+            line-height: 1.1;
+            color: #C0820C; /* trophy-gold, deepened for paper */
+        }
+
         /* Vertical rhythm between blocks. */
         .gap-sm { height: 6mm; }
         .gap-md { height: 9mm; }
@@ -185,10 +196,6 @@
 </head>
 <body>
     @foreach ($certificates as $certificate)
-        @php
-            $rank = $certificate['rank'];
-            $placeColor = $goldByRank[$rank] ?? $neutralPlace;
-        @endphp
         <div class="sheet @if (! $loop->last) break @endif">
             <div class="corner corner-blue"></div>
             <div class="corner corner-red"></div>
@@ -203,16 +210,35 @@
 
                 <div class="gap-lg"></div>
 
-                <p class="eyebrow">hat das Team</p>
-                <div class="gap-sm"></div>
-                <h1 class="team">{{ $certificate['team'] }}</h1>
-
-                <div class="gap-lg"></div>
-
-                <p class="eyebrow">den</p>
-                <div class="place-num" style="color: {{ $placeColor }};">{{ $rank }}.</div>
-                <div class="gap-sm"></div>
-                <p class="place-label">Platz erreicht</p>
+                @if ($certificate['type'] === 'cup_king')
+                    <p class="eyebrow">hat</p>
+                    <div class="gap-sm"></div>
+                    <h1 class="team">{{ $certificate['player'] }}</h1>
+                    <div class="gap-lg"></div>
+                    <div class="award">die meisten Becher</div>
+                    <div class="gap-sm"></div>
+                    <p class="place-label">getroffen</p>
+                @elseif ($certificate['type'] === 'special')
+                    <p class="eyebrow">hat das Team</p>
+                    <div class="gap-sm"></div>
+                    <h1 class="team">{{ $certificate['team'] }}</h1>
+                    <div class="gap-lg"></div>
+                    <p class="eyebrow">den Sonderpreis</p>
+                    <div class="gap-sm"></div>
+                    <div class="award">{{ $certificate['award'] }}</div>
+                    <div class="gap-sm"></div>
+                    <p class="place-label">erhalten</p>
+                @else
+                    @php $placeColor = $goldByRank[$certificate['rank']] ?? $neutralPlace; @endphp
+                    <p class="eyebrow">hat das Team</p>
+                    <div class="gap-sm"></div>
+                    <h1 class="team">{{ $certificate['team'] }}</h1>
+                    <div class="gap-lg"></div>
+                    <p class="eyebrow">den</p>
+                    <div class="place-num" style="color: {{ $placeColor }};">{{ $certificate['rank'] }}.</div>
+                    <div class="gap-sm"></div>
+                    <p class="place-label">Platz erreicht</p>
+                @endif
 
                 <div class="gap-md"></div>
                 <div class="rule"></div>

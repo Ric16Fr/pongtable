@@ -49,6 +49,57 @@ class StatisticsService
     }
 
     /**
+     * The special-prize awards derived from the fun-stat summary — every
+     * non-null stat that names a team or player, normalised to a printable
+     * list (used by the certificate PDF). The champion and the total cup
+     * count are intentionally excluded: the champion is already honoured by
+     * the placement certificate, and the cup total is a scalar, not a prize.
+     *
+     * Marathon and Knapper Krimi each name the two teams of a single match;
+     * both teams receive the award. The Wurfkönig is the only player-based
+     * prize and is rendered with its own certificate wording.
+     *
+     * @return list<array{key:string, label:string, type:string, subjects:list<string>}>
+     */
+    public function awards(Tournament $tournament): array
+    {
+        $summary = $this->summary($tournament);
+
+        $definitions = [
+            'sharpest_shooter' => 'Schärfste Schützen',
+            'water_spitter' => 'Wasserspeier',
+            'blitz_win' => 'Blitzsieg',
+            'marathon' => 'Marathonspieler',
+            'nail_biter' => 'Knapper Krimi',
+            'penalty_magnet' => 'Strafbechermagnet',
+            'efficiency' => 'Effizienzrate',
+            'schluck_olymp' => 'Schluck-Olymp',
+            'cup_king' => 'Wurfkönig',
+        ];
+
+        $awards = [];
+
+        foreach ($definitions as $key => $label) {
+            $stat = $summary[$key] ?? null;
+
+            if (! $stat) {
+                continue;
+            }
+
+            if ($key === 'cup_king') {
+                $awards[] = ['key' => $key, 'label' => $label, 'type' => 'player', 'subjects' => [$stat['name']]];
+
+                continue;
+            }
+
+            $subjects = $stat['teams'] ?? [$stat['team']];
+            $awards[] = ['key' => $key, 'label' => $label, 'type' => 'team', 'subjects' => array_values($subjects)];
+        }
+
+        return $awards;
+    }
+
+    /**
      * Wurfkönig — the individual player who hit the most cups across the
      * tournament, summed from the per-match cup distributions.
      */
