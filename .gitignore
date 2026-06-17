@@ -29,3 +29,4 @@ Homestead.json
 .phpactor.json
 auth.json
 tests/Browser/Screenshots
+.DS_Store
