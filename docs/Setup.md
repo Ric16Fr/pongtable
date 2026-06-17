@@ -45,7 +45,7 @@ Wenn noch nie ein Turnier angelegt wurde, erzeugt das Setup beim ersten
 Aufruf automatisch ein Default-Turnier:
 
 ```
-name = "Bierpong Cup <aktuelles Jahr>"
+name = "Bierpong WM <aktuelles Jahr>"
 group_match_duration_minutes = 10
 ko_match_duration_minutes = 15
 status = "setup"

@@ -47,7 +47,7 @@ new #[Title('Sonderregeln & Einstellungen')] class extends Component {
 
         if (! $tournament) {
             $tournament = Tournament::create([
-                'name' => 'Bierpong Cup '.now()->year,
+                'name' => 'Bierpong WM '.now()->year,
                 'group_match_duration_minutes' => 10,
                 'ko_match_duration_minutes' => 15,
             ]);

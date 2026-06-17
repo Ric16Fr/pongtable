@@ -89,6 +89,16 @@ it('imports a CSV via the upload modal and lands on the match list', function ()
         ->and($tournament->groups()->count())->toBe(2);
 });
 
+it('offers a certificate download once the tournament is finished', function () {
+    $this->actingAs(User::factory()->admin()->create());
+    buildFinishedTournament(4);
+
+    visit('/setup')
+        ->assertSee('Urkunden generieren')
+        ->press('Urkunden generieren')
+        ->assertNoJavascriptErrors();
+});
+
 it('shows tables and teams in the setup overview', function () {
     $this->actingAs(User::factory()->admin()->create());
     $tournament = Tournament::factory()->create();

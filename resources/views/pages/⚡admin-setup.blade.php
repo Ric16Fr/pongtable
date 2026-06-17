@@ -4,13 +4,17 @@ use App\Models\GameMatch;
 use App\Models\Table;
 use App\Models\Team;
 use App\Models\Tournament;
+use App\Services\FinalStandingsService;
 use App\Services\GroupGeneratorService;
 use App\Services\KoBracketService;
+use App\Services\StatisticsService;
 use Flux\Flux;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
+use Spatie\LaravelPdf\Facades\Pdf;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 new #[Title('Setup')]
 class extends Component {
@@ -37,7 +41,7 @@ class extends Component {
 
         if (!$tournament) {
             $tournament = Tournament::create([
-                'name' => 'Bierpong Cup ' . now()->year,
+                'name' => 'Bierpong WM ' . now()->year,
                 'group_match_duration_minutes' => 10,
                 'ko_match_duration_minutes' => 15,
             ]);
@@ -190,13 +194,45 @@ class extends Component {
     }
 
     /**
+     * Builds one A4 certificate per team — ordered by their final placement —
+     * and streams the combined PDF as a download.
+     */
+    public function generateCertificates(FinalStandingsService $standings, StatisticsService $statistics): StreamedResponse
+    {
+        $tournament = $this->tournament();
+
+        $certificates = $standings->standings($tournament)
+            ->map(fn (array $row) => [
+                'team' => $row['team']->name,
+                'rank' => $row['rank'],
+            ])
+            ->all();
+
+        $pdf = Pdf::view('pdf.certificates', [
+            'tournamentName' => $tournament->name,
+            'totalCups' => $statistics->summary($tournament)['total_cups'],
+            'certificates' => $certificates,
+        ]);
+
+        $filename = 'urkunden_' . str_replace(' ', '_', $tournament->name) . '.pdf';
+
+        Flux::toast(text: __('Download wird gestartet...'), variant: 'success');
+
+        return response()->streamDownload(
+            fn () => print(base64_decode($pdf->base64())),
+            $filename,
+            ['Content-Type' => 'application/pdf'],
+        );
+    }
+
+    /**
      * Start a fresh tournament. The current one is left untouched and
      * moves into the archive (it is no longer the latest tournament).
      */
     public function createNewTournament(): void
     {
         $tournament = Tournament::create([
-            'name' => 'Bierpong Cup ' . now()->year,
+            'name' => 'Bierpong WM ' . now()->year,
             'group_match_duration_minutes' => 10,
             'ko_match_duration_minutes' => 15,
         ]);
@@ -279,13 +315,18 @@ class extends Component {
             </div >
         </header >
 
-        {{-- Start placement round / KO --}}
-        @if ($this->koPhaseReady)
+        {{-- Start placement round / KO phase or generate certificates--}}
+        @if ($this->koPhaseReady or $this->tournament->isFinished())
             <section class="overflow-hidden rounded-lg border border-trophy-gold/30 bg-trophy-gold-soft" >
                 <div class="px-6 py-8 lg:px-10 lg:py-10" >
                     <div class="font-label flex items-center gap-3 text-trophy-gold" >
                         <span class="block h-px w-12 bg-trophy-gold" ></span >
-                        <span >{{ $t->isPlacementPhase() ? 'Platzierungsspiele abgeschlossen' : 'Gruppenphase abgeschlossen' }}</span >
+                        {{--if tournament is finished, show different badge--}}
+                        @if ($t->isFinished())
+                            <span >Turnier beendet</span >
+                        @else
+                            <span >{{ $t->isPlacementPhase() ? 'Platzierungsspiele abgeschlossen' : 'Gruppenphase abgeschlossen' }}</span >
+                        @endif
                     </div >
                     @if ($this->placementRoundNext)
                         <h2 class="mt-3 font-display text-stage-text text-2xl lg:text-3xl" >Platzierungsspiele starten</h2 >
@@ -297,7 +338,7 @@ class extends Component {
                                 class="mt-6 inline-flex items-center gap-2 rounded-md bg-trophy-gold px-6 py-3 text-base font-bold text-stage-bg hover:bg-trophy-gold-deep transition" >
                             Platzierungsspiele starten →
                         </button >
-                    @else
+                    @elseif (!$this->tournament->isFinished())
                         <h2 class="mt-3 font-display text-stage-text text-2xl lg:text-3xl" >KO-Phase starten</h2 >
                         <p class="mt-3 max-w-lg text-sm text-stage-text-muted" >
                             @if ($t->isPlacementPhase())
@@ -309,6 +350,15 @@ class extends Component {
                         <button wire:click="startKoPhase"
                                 class="mt-6 inline-flex items-center gap-2 rounded-md bg-trophy-gold px-6 py-3 text-base font-bold text-stage-bg hover:bg-trophy-gold-deep transition" >
                             KO-Phase starten →
+                        </button >
+                    @else
+                        <h2 class="mt-3 font-display text-stage-text text-2xl lg:text-3xl" >Urkunden generieren</h2 >
+                        <p class="mt-3 max-w-lg text-sm text-stage-text-muted" >
+                            Die Teams haben sich bis zum Sieg getrunken. Generiere nun die Urkunden, damit sie eine Erinnerung haben.
+                        </p >
+                        <button wire:click="generateCertificates"
+                                class="mt-6 inline-flex items-center gap-2 rounded-md bg-trophy-gold px-6 py-3 text-base font-bold text-stage-bg hover:bg-trophy-gold-deep transition" >
+                            Urkunden generieren
                         </button >
                     @endif
                 </div >
@@ -457,7 +507,7 @@ class extends Component {
         <div class="space-y-5" >
             <flux:heading size="lg" >Vorschau Gruppenverteilung</flux:heading >
             <flux:text class="mt-2" >
-               Dies ist nur eine Vorschau, wie groß die Gruppen werden. Generiert werden sie zufällig nach Klick auf "Bestätigen".
+                Dies ist nur eine Vorschau, wie groß die Gruppen werden. Generiert werden sie zufällig nach Klick auf "Bestätigen".
             </flux:text >
             <div class="grid grid-cols-1 gap-3 md:grid-cols-2" >
                 @foreach ($this->groupPreview as $bucket)

@@ -1,5 +1,12 @@
 <?php
 
+use App\Models\GameMatch;
+use App\Models\Table;
+use App\Models\Team;
+use App\Models\Tournament;
+use App\Services\GroupGeneratorService;
+use App\Services\KoBracketService;
+use App\Services\MatchResultService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -48,7 +55,68 @@ expect()->extend('toBeOne', function () {
 |
 */
 
-function something()
+/**
+ * Finish a single match with an explicit score (home cups : away cups).
+ */
+function finishMatch(GameMatch $match, int $homeCups, int $awayCups): void
 {
-    // ..
+    $service = app(MatchResultService::class);
+    $service->startMatch($match, [
+        'home_throws' => 5,
+        'home_penalty_cups' => 0,
+        'away_throws' => 5,
+        'away_penalty_cups' => 0,
+    ]);
+    $service->endTimer($match->fresh());
+    $service->saveResult($match->fresh(), $homeCups, $awayCups);
+}
+
+function finishGroupPhase(Tournament $tournament): void
+{
+    foreach ($tournament->matches()->where('phase', 'group')->get() as $i => $match) {
+        // Varied scores so there are no draws and cup diffs differ between teams.
+        finishMatch($match, 6, $i % 3);
+    }
+}
+
+/**
+ * Finish every ready KO match repeatedly. Each round's winners are advanced
+ * into a freshly created next round, so we loop until the final flips the
+ * tournament to "finished". Home always wins.
+ */
+function finishKoBracket(Tournament $tournament): void
+{
+    while ($tournament->fresh()->status === 'ko') {
+        $ready = $tournament->fresh()->matches()
+            ->where('phase', 'ko')
+            ->where('status', '!=', 'finished')
+            ->whereNotNull('home_team_id')
+            ->whereNotNull('away_team_id')
+            ->get();
+
+        if ($ready->isEmpty()) {
+            break;
+        }
+
+        foreach ($ready as $match) {
+            finishMatch($match->fresh(), 6, 1);
+        }
+    }
+}
+
+/**
+ * Build a fully played-out, finished tournament: groups → KO bracket.
+ */
+function buildFinishedTournament(int $teamCount, int $tableCount = 2): Tournament
+{
+    $tournament = Tournament::factory()->create();
+    Table::factory()->count($tableCount)->create(['tournament_id' => $tournament->id]);
+    Team::factory()->count($teamCount)->create(['tournament_id' => $tournament->id]);
+
+    app(GroupGeneratorService::class)->generate($tournament->fresh());
+    finishGroupPhase($tournament->fresh());
+    app(KoBracketService::class)->startKoPhase($tournament->fresh());
+    finishKoBracket($tournament->fresh());
+
+    return $tournament->fresh();
 }
