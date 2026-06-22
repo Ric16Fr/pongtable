@@ -46,6 +46,7 @@ Hier mal wieder im Lightmode*
 - Diagramm für die KO Runden
 - Dark und Lightmode
 - Docker-Unterstützung
+- coole Urkunden mit den Platzierungen und den lustigen Statistiken, die nach dem Turnier als PDF generiert werden können
 
 ## Was aktuell nicht geht
 - mehrere getrennte Accounts, dies ist primär ein Tool für den eigenen Gebrauch
@@ -58,7 +59,7 @@ Hier mal wieder im Lightmode*
 - [x] ein Archiv mit vergangenen Turnieren
 - [x] Sonderregeln, etwa wie der Sieger in der KO-Phase bestimmt wird
 - [x] Platzierungsspiele nach Ende der Gruppenphase
-- [ ] Generierung von Zertifikaten (wenn ich mal viel Zeit hab)
+- [x] Generierung von Zertifikaten (wenn ich mal viel Zeit hab)
 - [ ] ggf. Wünsche vom lokalen Studentenclub
 
 ## Doku
