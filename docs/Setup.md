@@ -14,6 +14,36 @@ generiert und die KO-Phase gestartet.
 > nur noch um das einzelne Turnier-Spiel (Tische, Teams, Auslosen,
 > KO-Start, Reset).
 
+## Inhaltsverzeichnis
+
+- [Lebenszyklus eines Turniers](#lebenszyklus-eines-turniers)
+- [Beim Aufruf: Auto-Anlage](#beim-aufruf-auto-anlage)
+- [Tische](#tische)
+  - [Anlegen / Entfernen](#anlegen--entfernen)
+- [Teams](#teams)
+  - [Anlegen / Entfernen](#anlegen--entfernen-1)
+- [Gruppen hochladen (CSV)](#gruppen-hochladen-csv)
+  - [Erwartetes Format](#erwartetes-format)
+  - [Voraussetzungen](#voraussetzungen)
+  - [Was passiert beim Upload?](#was-passiert-beim-upload)
+  - [Wann sinnvoll, wann nicht?](#wann-sinnvoll-wann-nicht)
+- [Gruppen generieren](#gruppen-generieren)
+  - [Vorschau](#vorschau)
+  - [Tatsächliche Generierung](#tatsächliche-generierung)
+  - [Konsequenz](#konsequenz)
+- [Platzierungsspiele](#platzierungsspiele)
+- [KO-Phase](#ko-phase)
+  - [Was passiert beim Start?](#was-passiert-beim-start)
+  - [Bye-Slots](#bye-slots)
+  - [Tiebreaker in der Gruppenphase](#tiebreaker-in-der-gruppenphase)
+  - [KO-Vorwärtsschaltung](#ko-vorwärtsschaltung)
+  - [Unentschieden in der KO-Phase](#unentschieden-in-der-ko-phase)
+- [Urkunden generieren](#urkunden-generieren)
+- [Turnier zurücksetzen](#turnier-zurücksetzen)
+- [Archiv](#archiv)
+- [Schiris anlegen](#schiris-anlegen)
+- [Datenmodell-Querverweis](#datenmodell-querverweis)
+
 ## Lebenszyklus eines Turniers
 
 Ein Turnier durchläuft bis zu fünf Phasen, hinterlegt in
@@ -353,6 +383,22 @@ das siegreiche Team selbst aus (siehe
 [Sonderregeln](Sonderregeln.md#bestimmung-des-siegers-in-der-ko-phase)).
 
 Mehr Details dazu in [Matches – Wertungslogik](Matches.md#wertungslogik-im-detail).
+
+---
+
+## Urkunden generieren
+
+Sobald das Finale gespeichert ist und das Turnier auf `finished` steht,
+erscheint im Setup an derselben Stelle, an der vorher **KO-Phase
+starten** stand, der Button **Urkunden generieren**. Ein Klick rendert
+über `spatie/laravel-pdf` eine PDF-Datei und startet sie direkt als
+Download (`urkunden_<Turniername>.pdf`). Das Dokument enthält eine
+A4-Seite pro Team in der finalen Platzierungsreihenfolge
+(`FinalStandingsService::standings()`), gefolgt von je einer Seite für
+jede vergebene Fun-Stat-Auszeichnung sowie den **Wurfkönig** (falls die
+Sonderregel aktiv war). Die jeweiligen Statistik-Werte stehen mit auf
+den Urkunden. Es wird nichts gespeichert — die Aktion erzeugt das PDF
+nur bei Bedarf neu und lässt sich beliebig oft wiederholen.
 
 ---
 

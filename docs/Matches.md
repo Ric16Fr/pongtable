@@ -10,6 +10,29 @@ aus zwei Seiten:
 Diese Seiten sind für **alle eingeloggten Nutzer** sichtbar, also auch
 für Schiris (im Gegensatz zu Setup und Statistik).
 
+## Inhaltsverzeichnis
+
+- [Die Match-Liste](#die-match-liste)
+  - [Filter](#filter)
+  - [Sortierung](#sortierung)
+  - [Was zeigt jede Zeile?](#was-zeigt-jede-zeile)
+  - [Klickbar oder nicht?](#klickbar-oder-nicht)
+  - [Polling](#polling)
+- [Match-Steuerung](#match-steuerung)
+  - [Phase 1: `pending`](#phase-1-pending)
+  - [Phase 2: `pre_entry`](#phase-2-pre_entry)
+  - [Phase 3: `active` – Live-Spiel](#phase-3-active--live-spiel)
+  - [Phase 4: `scoring`](#phase-4-scoring)
+  - [Phase 5: `finished`](#phase-5-finished)
+  - [Polling](#polling-1)
+- [Wertungslogik im Detail](#wertungslogik-im-detail)
+  - [Sieger bestimmen](#sieger-bestimmen)
+  - [Gruppenphase: Punktevergabe](#gruppenphase-punktevergabe)
+  - [KO-Phase: Bracket-Vorwärtsschaltung](#ko-phase-bracket-vorwärtsschaltung)
+  - [Unentschieden in der KO-Phase](#unentschieden-in-der-ko-phase)
+- [Spezialfälle](#spezialfälle)
+- [Beziehung zu anderen Sidebar-Punkten](#beziehung-zu-anderen-sidebar-punkten)
+
 ---
 
 ## Die Match-Liste

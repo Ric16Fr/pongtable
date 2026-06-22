@@ -34,6 +34,13 @@ new #[Title('Sonderregeln & Einstellungen')] class extends Component {
 
     public bool $determineCupKing = false;
 
+    public bool $hideCertificateCircles = false;
+
+    public bool $showSchedule = false;
+
+    #[Validate('nullable|string|max:5000')]
+    public string $schedule = '';
+
     /**
      * Member names keyed by team id, two slots per team for the naming modal.
      *
@@ -62,6 +69,9 @@ new #[Title('Sonderregeln & Einstellungen')] class extends Component {
         $this->playPlacementMatches = $tournament->play_placement_matches ?? false;
         $this->koWinnerMode = ($tournament->ko_sudden_death ?? false) ? 'sudden_death' : 'auto';
         $this->determineCupKing = $tournament->determine_cup_king ?? false;
+        $this->hideCertificateCircles = $tournament->hide_certificate_circles ?? false;
+        $this->showSchedule = $tournament->show_schedule ?? false;
+        $this->schedule = $tournament->schedule ?? '';
     }
 
     #[Computed]
@@ -88,6 +98,7 @@ new #[Title('Sonderregeln & Einstellungen')] class extends Component {
         $this->validateOnly('groupMinutes');
         $this->validateOnly('koMinutes');
         $this->validateOnly('koWinnerMode');
+        $this->validateOnly('schedule');
 
         $this->tournament->update([
             'name' => $this->tournamentName,
@@ -98,6 +109,9 @@ new #[Title('Sonderregeln & Einstellungen')] class extends Component {
             'play_placement_matches' => $this->playPlacementMatches,
             'ko_sudden_death' => $this->koWinnerMode === 'sudden_death',
             'determine_cup_king' => $this->determineCupKing,
+            'hide_certificate_circles' => $this->hideCertificateCircles,
+            'show_schedule' => $this->showSchedule,
+            'schedule' => $this->schedule,
         ]);
 
         Flux::toast(variant: 'success', text: __('Einstellungen gespeichert.'));
@@ -242,11 +256,61 @@ new #[Title('Sonderregeln & Einstellungen')] class extends Component {
                     </div>
                 @endif
             </div>
-
-            <flux:button wire:click="saveSettings" variant="primary" data-test="save-special-rules-button">
-                {{ __('Speichern') }}
-            </flux:button>
         </section>
+
+        {{-- UI settings (rarely needed, collapsed by default) --}}
+        <section>
+            <details class="group space-y-5" data-test="ui-settings">
+                <summary class="flex cursor-pointer items-baseline justify-between border-b border-stage-line pb-3 [&::-webkit-details-marker]:hidden">
+                    <h2 class="font-display text-2xl text-stage-text">{{ __('UI-Einstellungen') }}</h2>
+                    <span class="font-label flex items-center gap-2 text-stage-text-dim">
+                        {{ __('Selten benötigt') }}
+                        <flux:icon.chevron-down class="size-4 transition-transform group-open:rotate-180" />
+                    </span>
+                </summary>
+
+                <div class="space-y-5 pt-5">
+                    <p class="text-sm text-stage-text-dim">
+                        {{ __('Diese Sektion enthält selten genutzte UI Einstellungen') }}
+                    </p>
+
+                    <div class="rounded-md bg-stage-surface px-5 py-4">
+                        <flux:switch
+                            wire:model="hideCertificateCircles"
+                            :label="__('Farbige Kreise in den Urkunden ausblenden')"
+                            :description="__('Blendet die dekorativen roten und blauen Kreise aus, die auf Urkunden dargestellt werden. Sinnvoll, wenn auf marmoriertem oder farbigem Papier gedruckt werden soll.')"
+                        />
+                    </div>
+
+                    <div class="rounded-md bg-stage-surface px-5 py-4">
+                        <flux:switch
+                            wire:model.live="showSchedule"
+                            :label="__('Turnierplan anzeigen')"
+                            :description="__('Zeigt öffentlich einen Tab „Turnierplan“ neben „Regeln“ mit der geplanten Spielreihenfolge. Rein informativ — die Match-Liste und der Spielablauf werden dadurch nicht verändert; Schiris können weiterhin jedes Spiel jederzeit starten.')"
+                        />
+
+                        @if ($showSchedule)
+                            <div class="mt-4 border-t border-stage-line pt-4">
+                                <flux:textarea
+                                    wire:model="schedule"
+                                    rows="8"
+                                    :label="__('Spielreihenfolge')"
+                                    :description="__('Eine Zeile pro Spiel, Teams mit Semikolon getrennt — z. B. „Team 1;Team 2“. Der Tab zeigt eine Zeile je Eintrag. Der Tab erscheint erst, sobald hier etwas eingetragen und gespeichert wurde.')"
+                                    placeholder="Team 1;Team 2&#10;Team 3;Team 4"
+                                    data-test="schedule-input"
+                                />
+                            </div>
+                        @endif
+                    </div>
+
+                </div>
+            </details>
+        </section>
+
+        {{-- Single save button for all settings above --}}
+        <flux:button wire:click="saveSettings" variant="primary" data-test="save-special-rules-button">
+            {{ __('Speichern') }}
+        </flux:button>
     </div>
 
     {{-- Member naming modal --}}

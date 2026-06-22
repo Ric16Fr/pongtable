@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\PublicTournamentController;
+use App\Models\Tournament;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -10,6 +11,14 @@ Route::get('/', function () {
 Route::get('/t/{token}', PublicTournamentController::class)->name('tournament.public');
 
 Route::view('/regeln', 'rules', ['title' => 'Spielregeln'])->name('rules');
+
+Route::get('/turnierplan', function () {
+    $tournament = Tournament::query()->latest()->first();
+
+    abort_unless($tournament && $tournament->hasPublicSchedule(), 404);
+
+    return view('schedule', ['tournament' => $tournament, 'title' => 'Turnierplan']);
+})->name('schedule');
 
 Route::middleware('auth')->group(function () {
     Route::livewire('/dashboard', 'pages::dashboard')->name('dashboard');

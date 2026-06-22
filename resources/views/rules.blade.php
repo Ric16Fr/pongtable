@@ -25,6 +25,12 @@
                               class="rounded-md bg-stage-surface-2 px-4 py-2 font-medium text-stage-text">
                             {{ __('Regeln') }}
                         </span>
+                        @if (\App\Models\Tournament::publicScheduleVisible())
+                            <a href="{{ route('schedule') }}"
+                               class="rounded-md px-4 py-2 font-medium text-stage-text-muted hover:text-stage-text hover:bg-stage-surface transition">
+                                {{ __('Turnierplan') }}
+                            </a>
+                        @endif
                     </nav>
                 </div>
             </header>

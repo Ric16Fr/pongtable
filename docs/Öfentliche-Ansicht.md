@@ -12,6 +12,16 @@ URL:
 Sie ist die Bühne fürs Publikum: kein Login, kein Schiri-Tool, sondern
 eine reine Anzeige.
 
+## Inhaltsverzeichnis
+
+- [Was zeigt sie?](#was-zeigt-sie)
+- [Polling](#polling)
+- [Der `public_token`](#der-public_token)
+- [Status-bedingte Sichtbarkeit](#status-bedingte-sichtbarkeit)
+- [Login-Eingang](#login-eingang)
+- [Vergleich zur Schiri-Seite](#vergleich-zur-schiri-seite)
+- [Was tun, wenn die Seite leer aussieht?](#was-tun-wenn-die-seite-leer-aussieht)
+
 ## Was zeigt sie?
 
 Die View wird vom `PublicTournamentController` gerendert. Sichtbar
@@ -74,6 +84,13 @@ Zugangsvoraussetzung. Aktuelle Eigenschaften:
 Im Header der öffentlichen Seite steht oben rechts ein **Schiri-Login**-
 Button (bzw. **Dashboard**, falls die Person ohnehin schon eingeloggt
 ist). Wer das Turnier nur ansehen will, ignoriert ihn einfach.
+
+Daneben liegen die Info-Tabs **Regeln** und — sofern aktiviert — der
+**Turnierplan** (`/turnierplan`). Letzterer erscheint nur, wenn in den
+[Sonderregeln](Sonderregeln.md#turnierplan-anzeigen) die Option
+„Turnierplan anzeigen" eingeschaltet und eine Spielreihenfolge
+hinterlegt wurde. Er ist rein informativ und ändert weder Match-Liste
+noch Spielablauf.
 
 ## Vergleich zur Schiri-Seite
 

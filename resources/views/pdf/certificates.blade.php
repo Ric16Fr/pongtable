@@ -27,6 +27,8 @@
       string $tournamentName
       int    $totalCups
       array  $certificates  list of ['team' => string, 'rank' => int]
+      bool   $hideCircles    when true, the decorative red/blue corner crescents
+                             are omitted (for marbled or coloured paper stock)
 --}}
 @php
     // Gold ladder for the podium (rank → colour). Outside the top 3 the place
@@ -197,8 +199,10 @@
 <body>
     @foreach ($certificates as $certificate)
         <div class="sheet @if (! $loop->last) break @endif">
-            <div class="corner corner-blue"></div>
-            <div class="corner corner-red"></div>
+            @unless ($hideCircles ?? false)
+                <div class="corner corner-blue"></div>
+                <div class="corner corner-red"></div>
+            @endunless
 
             <div class="content">
                 <div class="rule"></div>
@@ -217,7 +221,7 @@
                     <div class="gap-lg"></div>
                     <div class="award">die meisten Becher</div>
                     <div class="gap-sm"></div>
-                    <p class="place-label">getroffen</p>
+                    <p class="place-label">abgeräumt</p>
                 @elseif ($certificate['type'] === 'special')
                     <p class="eyebrow">hat das Team</p>
                     <div class="gap-sm"></div>

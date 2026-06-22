@@ -146,6 +146,82 @@ it('rejects an invalid KO winner mode', function () {
         ->assertHasErrors(['koWinnerMode']);
 });
 
+it('defaults the "Farbige Kreise ausblenden" switch to off', function () {
+    Tournament::factory()->create();
+
+    Livewire::test('pages::special-rules')
+        ->assertSet('hideCertificateCircles', false);
+});
+
+it('persists the hide_certificate_circles toggle to the tournament', function () {
+    $tournament = Tournament::factory()->create();
+
+    Livewire::test('pages::special-rules')
+        ->set('hideCertificateCircles', true)
+        ->call('saveSettings')
+        ->assertHasNoErrors();
+
+    expect($tournament->fresh()->hide_certificate_circles)->toBeTrue();
+
+    Livewire::test('pages::special-rules')
+        ->set('hideCertificateCircles', false)
+        ->call('saveSettings');
+
+    expect($tournament->fresh()->hide_certificate_circles)->toBeFalse();
+});
+
+it('defaults the "Turnierplan anzeigen" switch to off', function () {
+    Tournament::factory()->create();
+
+    Livewire::test('pages::special-rules')
+        ->assertSet('showSchedule', false);
+});
+
+it('persists the schedule toggle and text to the tournament', function () {
+    $tournament = Tournament::factory()->create();
+
+    Livewire::test('pages::special-rules')
+        ->set('showSchedule', true)
+        ->set('schedule', "Team 1;Team 2\nTeam 3;Team 4")
+        ->call('saveSettings')
+        ->assertHasNoErrors();
+
+    $tournament->refresh();
+    expect($tournament->show_schedule)->toBeTrue()
+        ->and($tournament->schedule)->toBe("Team 1;Team 2\nTeam 3;Team 4");
+});
+
+it('keeps the schedule text on save so it can be edited later', function () {
+    $tournament = Tournament::factory()->create(['show_schedule' => true, 'schedule' => 'A;B']);
+
+    Livewire::test('pages::special-rules')
+        ->assertSet('schedule', 'A;B')
+        ->set('schedule', "A;B\nC;D")
+        ->call('saveSettings');
+
+    expect($tournament->fresh()->schedule)->toBe("A;B\nC;D");
+});
+
+it('only renders the schedule textarea when the option is on', function () {
+    Tournament::factory()->create();
+
+    Livewire::test('pages::special-rules')
+        ->assertDontSee('Eine Zeile pro Spiel')
+        ->set('showSchedule', true)
+        ->assertSee('Eine Zeile pro Spiel')
+        ->set('showSchedule', false)
+        ->assertDontSee('Eine Zeile pro Spiel');
+});
+
+it('rejects an overly long schedule on save', function () {
+    Tournament::factory()->create();
+
+    Livewire::test('pages::special-rules')
+        ->set('schedule', str_repeat('x', 5001))
+        ->call('saveSettings')
+        ->assertHasErrors(['schedule']);
+});
+
 it('persists the count_throws toggle to the tournament', function () {
     $tournament = Tournament::factory()->create();
 

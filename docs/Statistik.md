@@ -10,6 +10,24 @@ auch eine Reihe „Fun-Stats" über das ganze Turnier.
 > (siehe [Öffentliche-Ansicht.md](Öfentliche-Ansicht.md)) erscheinen
 > die gleichen Stats nach Turnierende.
 
+## Inhaltsverzeichnis
+
+- [Polling](#polling)
+- [Champion](#champion)
+- [Fun-Stats](#fun-stats)
+  - [Schärfste Schützen](#schärfste-schützen)
+  - [Wasserspeier](#wasserspeier)
+  - [Blitzsieg](#blitzsieg)
+  - [Marathonspieler](#marathonspieler)
+  - [Knapper Krimi](#knapper-krimi)
+  - [Strafbechermagnet](#strafbechermagnet)
+  - [Effizienzrate](#effizienzrate)
+  - [Schluck-Olymp](#schluck-olymp)
+  - [Wurfkönig](#wurfkönig)
+- [Cups gesamt](#cups-gesamt)
+- [Wenn alles leer ist](#wenn-alles-leer-ist)
+- [Beziehung zu anderen Sidebar-Punkten](#beziehung-zu-anderen-sidebar-punkten)
+
 ## Polling
 
 Die Seite pollt alle **30 Sekunden** neu (`wire:poll.30s`). Das reicht,

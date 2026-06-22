@@ -214,6 +214,7 @@ class extends Component {
             'tournamentName' => $tournament->name,
             'totalCups' => $statistics->summary($tournament)['total_cups'],
             'certificates' => array_merge($placementCertificates, $this->specialCertificates($statistics, $tournament)),
+            'hideCircles' => $tournament->hide_certificate_circles,
         ]);
 
         $filename = 'urkunden_' . str_replace(' ', '_', $tournament->name) . '.pdf';

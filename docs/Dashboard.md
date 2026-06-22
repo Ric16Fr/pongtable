@@ -4,6 +4,17 @@ Das Dashboard ist die Startseite nach dem Login (`/dashboard`). Es zeigt
 auf einen Blick, in welcher Phase sich das laufende Turnier befindet, was
 gerade an den Tischen passiert und wie weit der Spielplan abgearbeitet ist.
 
+## Inhaltsverzeichnis
+
+- [Was wird angezeigt?](#was-wird-angezeigt)
+  - [Kopfbereich](#kopfbereich)
+  - [Live-Sektion](#live-sektion)
+  - [Leaderboard](#leaderboard)
+- [Aktualisierung](#aktualisierung)
+- [Sichtbarkeit für Rollen](#sichtbarkeit-für-rollen)
+- [Was tun, wenn nichts angezeigt wird?](#was-tun-wenn-nichts-angezeigt-wird)
+- [Datenquellen (kurz)](#datenquellen-kurz)
+
 ## Was wird angezeigt?
 
 ### Kopfbereich

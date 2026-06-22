@@ -16,7 +16,7 @@ Create a PDF from a Blade view:
 ```php
 use Spatie\LaravelPdf\Facades\Pdf;
 
-Pdf::view('pdf.certificate', ['invoice' => $invoice])
+Pdf::view('pdf.invoice', ['invoice' => $invoice])
     ->save('/some/directory/invoice.pdf');
 ```
 
@@ -38,7 +38,7 @@ class DownloadInvoiceController
     public function __invoke(Invoice $invoice)
     {
         return pdf()
-            ->view('pdf.certificate', compact('invoice'))
+            ->view('pdf.invoice', compact('invoice'))
             ->name('invoice.pdf');
     }
 }
@@ -60,7 +60,7 @@ return pdf()
 ```php
 use Spatie\LaravelPdf\Enums\Format;
 
-Pdf::view('pdf.certificate', $data)
+Pdf::view('pdf.invoice', $data)
     ->format(Format::A4)
     ->save('invoice.pdf');
 ```
@@ -68,7 +68,7 @@ Pdf::view('pdf.certificate', $data)
 ### Orientation
 
 ```php
-Pdf::view('pdf.certificate', $data)
+Pdf::view('pdf.invoice', $data)
     ->landscape()
     ->save('invoice.pdf');
 ```
@@ -76,7 +76,7 @@ Pdf::view('pdf.certificate', $data)
 ### Margins
 
 ```php
-Pdf::view('pdf.certificate', $data)
+Pdf::view('pdf.invoice', $data)
     ->margins(top: 15, right: 10, bottom: 15, left: 10, unit: 'mm')
     ->save('invoice.pdf');
 ```
@@ -92,7 +92,7 @@ Pdf::view('pdf.receipt', $data)
 ### Headers and footers
 
 ```php
-Pdf::view('pdf.certificate', $data)
+Pdf::view('pdf.invoice', $data)
     ->headerView('pdf.header', ['company' => $company])
     ->footerView('pdf.footer')
     ->save('invoice.pdf');
@@ -101,7 +101,7 @@ Pdf::view('pdf.certificate', $data)
 Or with raw HTML:
 
 ```php
-Pdf::view('pdf.certificate', $data)
+Pdf::view('pdf.invoice', $data)
     ->headerHtml('<div>Header</div>')
     ->footerHtml('<div>Footer</div>')
     ->save('invoice.pdf');
@@ -112,7 +112,7 @@ Inside footer/header views, use `@pageNumber` and `@totalPages` Blade directives
 ### Conditional formatting
 
 ```php
-Pdf::view('pdf.certificate', $data)
+Pdf::view('pdf.invoice', $data)
     ->format('a4')
     ->when($invoice->isLandscape(), fn ($pdf) => $pdf->landscape())
     ->save('invoice.pdf');
@@ -129,7 +129,7 @@ Pdf::view('invoice')
 ## Base64
 
 ```php
-$base64 = Pdf::view('pdf.certificate', $data)->base64();
+$base64 = Pdf::view('pdf.invoice', $data)->base64();
 ```
 
 ## Setting defaults
@@ -164,7 +164,7 @@ Customize the Browsershot instance per PDF:
 ```php
 use Spatie\Browsershot\Browsershot;
 
-Pdf::view('pdf.certificate', $data)
+Pdf::view('pdf.invoice', $data)
     ->withBrowsershot(function (Browsershot $browsershot) {
         $browsershot->scale(0.5);
     })
@@ -200,7 +200,7 @@ DOMPDF supports CSS 2.1 and some CSS 3, but not flexbox or grid. Headers/footers
 Switch driver per PDF:
 
 ```php
-Pdf::view('pdf.certificate', $data)
+Pdf::view('pdf.invoice', $data)
     ->driver('dompdf')
     ->save('invoice.pdf');
 ```
@@ -224,7 +224,7 @@ The Chrome driver does not support `tagged`, `withBrowsershot()`, `onLambda()`, 
 Dispatch PDF generation to a background queue:
 
 ```php
-Pdf::view('pdf.certificate', $data)
+Pdf::view('pdf.invoice', $data)
     ->saveQueued('invoice.pdf')
     ->then(fn (string $path, ?string $diskName) => Mail::to($user)->send(new InvoiceMail($path)))
     ->catch(fn (Throwable $e) => Log::error($e->getMessage()));
@@ -235,11 +235,11 @@ The `then` callback receives the path and the disk name (`null` for local saves)
 Configure queue and connection:
 
 ```php
-Pdf::view('pdf.certificate', $data)
+Pdf::view('pdf.invoice', $data)
     ->saveQueued('invoice.pdf', connection: 'redis', queue: 'pdfs');
 
 // Or chain methods:
-Pdf::view('pdf.certificate', $data)
+Pdf::view('pdf.invoice', $data)
     ->saveQueued('invoice.pdf')
     ->onQueue('pdfs')
     ->onConnection('redis')
@@ -249,7 +249,7 @@ Pdf::view('pdf.certificate', $data)
 With disk:
 
 ```php
-Pdf::view('pdf.certificate', $data)
+Pdf::view('pdf.invoice', $data)
     ->disk('s3')
     ->saveQueued('invoices/invoice.pdf');
 ```
@@ -297,7 +297,7 @@ Pdf::assertNotQueued();
 Simple assertions:
 
 ```php
-Pdf::assertViewIs('pdf.certificate');
+Pdf::assertViewIs('pdf.invoice');
 Pdf::assertSee('Your total is $10.00');
 Pdf::assertViewHas('invoice', $invoice);
 Pdf::assertSaved(storage_path('invoices/invoice.pdf'));

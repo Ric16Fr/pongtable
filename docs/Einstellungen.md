@@ -5,6 +5,21 @@ links in der Sidebar erreichbar — _nicht_ über einen eigenen Sidebar-
 Eintrag. Sie ist für alle eingeloggten Rollen sichtbar, hat aber je
 nach Rolle unterschiedlichen Funktionsumfang.
 
+## Inhaltsverzeichnis
+
+- [Eigenes Passwort ändern (alle Rollen)](#eigenes-passwort-ändern-alle-rollen)
+- [Theme](#theme)
+- [Sprache](#sprache)
+- [Schiris anlegen und verwalten (Admin)](#schiris-anlegen-und-verwalten-admin)
+  - [Schiri anlegen](#schiri-anlegen)
+  - [Schiri-Liste](#schiri-liste)
+- [Rollen-Modell](#rollen-modell)
+  - [Initialer Admin](#initialer-admin)
+  - [Weitere Admins anlegen](#weitere-admins-anlegen)
+- [Rate-Limit beim Login](#rate-limit-beim-login)
+- [Logout](#logout)
+- [Was hier _nicht_ konfigurierbar ist](#was-hier-nicht-konfigurierbar-ist)
+
 ## Eigenes Passwort ändern (alle Rollen)
 
 Drei Felder:
