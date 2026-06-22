@@ -21,13 +21,13 @@ it('skips blank lines and lines without any team', function () {
 });
 
 it('returns an empty list for null or blank schedules', function () {
-    expect((new Tournament(['schedule' => null]))->scheduleEntries())->toBe([])
-        ->and((new Tournament(['schedule' => "  \n ; "]))->scheduleEntries())->toBe([]);
+    expect(new Tournament(['schedule' => null])->scheduleEntries())->toBe([])
+        ->and(new Tournament(['schedule' => "  \n ; "])->scheduleEntries())->toBe([]);
 });
 
 it('is only publicly visible when the option is on and a valid entry exists', function () {
-    expect((new Tournament(['show_schedule' => false, 'schedule' => 'A;B']))->hasPublicSchedule())->toBeFalse()
-        ->and((new Tournament(['show_schedule' => true, 'schedule' => '']))->hasPublicSchedule())->toBeFalse()
-        ->and((new Tournament(['show_schedule' => true, 'schedule' => " ; \n "]))->hasPublicSchedule())->toBeFalse()
-        ->and((new Tournament(['show_schedule' => true, 'schedule' => 'A;B']))->hasPublicSchedule())->toBeTrue();
+    expect(new Tournament(['show_schedule' => false, 'schedule' => 'A;B'])->hasPublicSchedule())->toBeFalse()
+        ->and(new Tournament(['show_schedule' => true, 'schedule' => ''])->hasPublicSchedule())->toBeFalse()
+        ->and(new Tournament(['show_schedule' => true, 'schedule' => " ; \n "])->hasPublicSchedule())->toBeFalse()
+        ->and(new Tournament(['show_schedule' => true, 'schedule' => 'A;B'])->hasPublicSchedule())->toBeTrue();
 });

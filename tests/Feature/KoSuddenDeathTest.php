@@ -90,7 +90,7 @@ it('falls back to the automatic tiebreaker when no winner is selected', function
     $svc->endTimer($match->fresh());
 
     // Tied, rule on, but no referee pick → fewer throws (AWAY) wins.
-    $svc->saveResult($match->fresh(), 6, 6, null);
+    $svc->saveResult($match->fresh(), 6, 6);
 
     expect($match->fresh()->winner_team_id)->toBe($match->away_team_id);
 });

@@ -129,7 +129,7 @@ Str::lower('MÜNCHEN');        // 'münchen'
 
 ## Use `defer()` for Post-Response Work
 
-For lightweight tasks that don't need to survive a crash (logging, analytics, cleanup), use `defer()` instead of dispatching a job. The callback runs after the HTTP response is sent — no queue overhead.
+For lightweight tasks that don't need to survive a crash (logging, analytics, clean-up), use `defer()` instead of dispatching a job. The callback runs after the HTTP response is sent — no queue overhead.
 
 Incorrect (job overhead for trivial work):
 ```php

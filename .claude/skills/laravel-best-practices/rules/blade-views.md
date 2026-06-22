@@ -20,7 +20,7 @@ If a component renders inside a `@foreach`, `@push` inserts the script N times. 
 
 ## Use View Composers for Shared View Data
 
-If every controller rendering a sidebar must pass `$categories`, that's duplicated code. A View Composer centralizes it.
+If every controller rendering a sidebar must pass `$categories`, that's duplicated code. A View Composer centralises it.
 
 ## Use Blade Fragments for Partial Re-Renders (htmx/Turbo)
 

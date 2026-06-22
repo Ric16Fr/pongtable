@@ -61,9 +61,9 @@ class GroupCsvParser
      */
     private function splitRow(string $row): array
     {
-        return array_values(array_filter(
-            array_map('trim', explode(';', $row)),
-            fn (string $cell): bool => $cell !== '',
-        ));
+        return explode(';', $row)
+                |> (fn ($x) => array_map('trim', $x))
+                |> (fn ($x) => array_filter($x, fn (string $cell): bool => $cell !== ''))
+                |> array_values(...);
     }
 }

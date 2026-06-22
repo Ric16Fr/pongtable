@@ -16,7 +16,7 @@ class Tournament extends Model
     /**
      * Default hero description shown when no custom description has been set.
      */
-    public const DEFAULT_DESCRIPTION = 'Selbst gehostete Bierpong-Turnierverwaltung. Gruppen, KO-Bracket, Live-Timer und eine Bracket-Ansicht für die Großleinwand.';
+    public const string DEFAULT_DESCRIPTION = 'Selbst gehostete Bierpong-Turnierverwaltung. Gruppen, KO-Bracket, Live-Timer und eine Bracket-Ansicht für die Großleinwand.';
 
     protected function casts(): array
     {

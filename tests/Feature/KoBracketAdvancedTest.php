@@ -9,6 +9,9 @@ use App\Services\KoBracketService;
 use App\Services\MatchResultService;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
+/**
+ * @throws Throwable
+ */
 function finishAllGroupMatchesCleanly(Tournament $tournament): void
 {
     $svc = app(MatchResultService::class);
@@ -22,7 +25,9 @@ function finishAllGroupMatchesCleanly(Tournament $tournament): void
     }
 }
 
-it('builds an 8-team KO bracket out of a 4-group qualifier', function () {
+it(/**
+ * @throws Throwable
+ */ 'builds an 8-team KO bracket out of a 4-group qualifier', function () {
     $tournament = Tournament::factory()->create();
     Table::factory()->count(4)->create(['tournament_id' => $tournament->id]);
     Team::factory()->count(8)->create(['tournament_id' => $tournament->id]);
@@ -36,8 +41,8 @@ it('builds an 8-team KO bracket out of a 4-group qualifier', function () {
 
     // 4 group winners + 4 runners-up = 8 → quarterfinals (ko_round = 4)
     $quarters = $tournament->matches()->where('phase', 'ko')->get();
-    expect($quarters->count())->toBe(4);
-    expect($quarters->pluck('ko_round')->unique()->all())->toBe([4]);
+    expect($quarters->count())->toBe(4)
+        ->and($quarters->pluck('ko_round')->unique()->all())->toBe([4]);
 });
 
 it('cross-pairs winners with runners-up from the opposite bracket end', function () {
@@ -180,9 +185,9 @@ it('refuses to start the KO phase while group matches are still open', function 
 
     // Don't finish any matches.
     expect(fn () => app(KoBracketService::class)->startKoPhase($tournament->fresh()))
-        ->toThrow(HttpException::class);
+        ->toThrow(HttpException::class)
+        ->and($tournament->fresh()->status)->toBe('group');
 
-    expect($tournament->fresh()->status)->toBe('group');
 });
 
 it('does nothing when startKoPhase is called outside group status', function () {

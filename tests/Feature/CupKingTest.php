@@ -44,13 +44,13 @@ it('saves the named team members, trimming blanks', function () {
     $teamB = Team::factory()->create(['tournament_id' => $tournament->id, 'name' => 'Team B']);
 
     Livewire::test('pages::special-rules')
-        ->set("memberNames.{$teamA->id}", ['Paul', 'Tom'])
-        ->set("memberNames.{$teamB->id}", ['Heinz', '   '])
+        ->set("memberNames.$teamA->id", ['Paul', 'Tom'])
+        ->set("memberNames.$teamB->id", ['Heinz', '   '])
         ->call('saveMembers')
         ->assertHasNoErrors();
 
-    expect($teamA->members()->pluck('name')->all())->toBe(['Paul', 'Tom']);
-    expect($teamB->members()->pluck('name')->all())->toBe(['Heinz']);
+    expect($teamA->members()->pluck('name')->all())->toBe(['Paul', 'Tom'])
+        ->and($teamB->members()->pluck('name')->all())->toBe(['Heinz']);
 });
 
 it('replaces existing members when saving again', function () {
@@ -59,7 +59,7 @@ it('replaces existing members when saving again', function () {
     TeamMember::factory()->create(['team_id' => $team->id, 'name' => 'Alt']);
 
     Livewire::test('pages::special-rules')
-        ->set("memberNames.{$team->id}", ['Neu1', 'Neu2'])
+        ->set("memberNames.$team->id", ['Neu1', 'Neu2'])
         ->call('saveMembers');
 
     expect($team->members()->pluck('name')->all())->toBe(['Neu1', 'Neu2']);
@@ -78,8 +78,8 @@ it('stores and replaces the cup distribution for a match', function () {
         ->call('saveCupDistribution')
         ->assertHasNoErrors();
 
-    expect(MatchMemberCup::where('match_id', $match->id)->count())->toBe(4);
-    expect(MatchMemberCup::where('team_member_id', $members['paul']->id)->value('cups_hit'))->toBe(5);
+    expect(MatchMemberCup::where('match_id', $match->id)->count())->toBe(4)
+        ->and(MatchMemberCup::where('team_member_id', $members['paul']->id)->value('cups_hit'))->toBe(5);
 
     // Saving again replaces the prior distribution rather than duplicating it.
     Livewire::test('pages::match-score', ['match' => $match])
@@ -98,8 +98,8 @@ it('ignores member ids that do not belong to the match teams', function () {
         ->set('cupDistribution', [$members['paul']->id => 4, $foreign->id => 9])
         ->call('saveCupDistribution');
 
-    expect(MatchMemberCup::where('match_id', $match->id)->count())->toBe(1);
-    expect(MatchMemberCup::where('team_member_id', $foreign->id)->exists())->toBeFalse();
+    expect(MatchMemberCup::where('match_id', $match->id)->count())->toBe(1)
+        ->and(MatchMemberCup::where('team_member_id', $foreign->id)->exists())->toBeFalse();
 });
 
 it('crowns the player with the most cups across the tournament as Wurfkönig', function () {

@@ -66,7 +66,7 @@ Innerhalb gleicher Status-Stufen wird nach `id` aufsteigend sortiert
 - **Face-Off** – beide Teams mit Farbpunkten. Bei `finished` steht in
   der Mitte das Endergebnis (Sieger in Gold), sonst nur `vs`.
 - **Action** – Pfeil nach rechts, wenn die Zeile klickbar ist. Sonst
-  steht da „wartet" (siehe unten).
+  steht da „wartet“ (siehe unten).
 
 ### Klickbar oder nicht?
 
@@ -86,7 +86,7 @@ dargestellt:
 - **Offene KO-Spiele ohne Teams** warten auf den Sieger der Vorrunde.
   Im KO-Bracket werden Folge-Matches erzeugt, sobald die erste Runde
   beendet ist; bis dahin steht statt eines Teamnamens
-  „Sieger Vorrunde" (siehe [Setup – KO-Phase](Setup.md#ko-phase)).
+  „Sieger Vorrunde“ (siehe [Setup – KO-Phase](Setup.md#ko-phase)).
 
 ### Polling
 
@@ -118,19 +118,19 @@ gar nicht in dieser Phase: Beim ersten Aufruf wird automatisch
 springt also sofort auf `pre_entry`.
 
 Ausnahme: KO-Spiele, deren Vorrunde noch läuft. Hier ist mindestens ein
-Team-Slot leer und der Schiri sieht „Wartet auf Vorrunde". Die Steuerung
+Team-Slot leer und der Schiri sieht „Wartet auf Vorrunde“. Die Steuerung
 ist gesperrt, bis der Sieger des Vorrunden-Matches feststeht
 (KO-Vorwärtsschaltung passiert in
 `KoBracketService::advanceKoWinner()`).
 
 ### Phase 2: `pre_entry`
 
-Bereitmach-Phase. Im UI steht „Teams an den Tisch" und ein großer
+Bereitmach-Phase. Im UI steht „Teams an den Tisch“ und ein großer
 Button **Spiel starten**.
 
 Wichtig: In dieser Phase werden **keine Eingaben gemacht**. Es dient nur der Anzeige, dass es gleich losgeht. Denn, logischerweise, werden
 Würfe und
-Strafbecher  _live_ während des Spiels gezählt, nicht vorab.
+Strafbecher _live_ während des Spiels gezählt, nicht vorab.
 
 Sobald der Schiri auf **Spiel starten** klickt:
 
@@ -273,7 +273,7 @@ Sobald ein KO-Match auf `finished` geht, ruft
     - ungerade `ko_position` → Auswärtsseite (`away_team_id`).
 
 Das nächste Bracket-Spiel wird _erst dann_ spielbar, wenn beide Teams
-fest stehen. Bis dahin steht in der Liste „Sieger Vorrunde" und die
+fest stehen. Bis dahin steht in der Liste „Sieger Vorrunde“ und die
 Zeile ist nicht anklickbar.
 
 ### Unentschieden in der KO-Phase
@@ -290,7 +290,7 @@ Was bei **Becher-Gleichstand** passiert, hängt von der Sonderregel
   einen Sudden-Death-Block ein (`needsSuddenDeath`), in dem der Schiri
   das siegreiche Team auswählt. Ohne Auswahl schlägt das Speichern mit
   einem Validierungsfehler fehl. Das Finished-Banner vermerkt dann
-  „Entschieden im Sudden Death".
+  „Entschieden im Sudden Death“.
 
 Beide Wege liefern garantiert einen Sieger — eine frei spielbare
 Verlängerung mit eigenem Timer gibt es nicht.
@@ -308,14 +308,14 @@ eingebaut.
 ## Spezialfälle
 
 - **Status zurückspulen.** Es gibt keine UI dafür. Wenn ein Schiri zu
-  früh auf „Runde beenden" geklickt hat, kann er sofort die
+  früh auf „Runde beenden“ geklickt hat, kann er sofort die
   Becher-Werte korrekt eintragen und speichern — beendete Matches
   lassen sich danach jedoch nicht mehr editieren.
 - **Match-Steuerung ohne Teams.** Solange `home_team_id` oder
   `away_team_id` `null` ist, lässt sich `pre_entry`/`active` nicht
   starten — der Service erkennt das und schickt den Aufruf ohne
   Statuswechsel zurück (`return` ohne Fehler). Im UI sieht der Schiri
-  „Wartet auf Vorrunde".
+  „Wartet auf Vorrunde“.
 - **Mehrere Schiris an einem Match.** Funktioniert, weil alle
   Schreibvorgänge über die Live-Felder direkt auf
   `match_stats.updateOrCreate` gehen. Wer zuletzt klickt, gewinnt.

@@ -38,7 +38,7 @@ function freshMatch(string $status = 'pending'): GameMatch
 }
 
 it('mounting a pending match advances it to pre_entry', function () {
-    $match = freshMatch('pending');
+    $match = freshMatch();
 
     Livewire::test('pages::match-score', ['match' => $match]);
 
@@ -148,7 +148,7 @@ it('persists throws and penalties when adjusted via +/- during active phase', fu
 });
 
 it('does not auto-advance KO matches with an unresolved opponent', function () {
-    $match = freshMatch('pending');
+    $match = freshMatch();
     $match->update(['away_team_id' => null, 'phase' => 'ko', 'ko_round' => 2]);
 
     Livewire::test('pages::match-score', ['match' => $match])

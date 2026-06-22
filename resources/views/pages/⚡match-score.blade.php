@@ -3,15 +3,18 @@
 use App\Models\GameMatch;
 use App\Models\MatchMemberCup;
 use App\Models\MatchStat;
+use App\Models\Team;
 use App\Models\TeamMember;
 use App\Services\MatchResultService;
 use Flux\Flux;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
-new #[Title('Match')] class extends Component {
+new #[Title('Match')]
+class extends Component {
     public int $matchId;
 
     public int $homeThrows = 0;
@@ -96,19 +99,34 @@ new #[Title('Match')] class extends Component {
         $this->persistFromField($field);
     }
 
-    public function updatedHomeThrows(): void { $this->persistFromField('homeThrows'); }
-    public function updatedHomePenalty(): void { $this->persistFromField('homePenalty'); }
-    public function updatedAwayThrows(): void { $this->persistFromField('awayThrows'); }
-    public function updatedAwayPenalty(): void { $this->persistFromField('awayPenalty'); }
+    public function updatedHomeThrows(): void
+    {
+        $this->persistFromField('homeThrows');
+    }
+
+    public function updatedHomePenalty(): void
+    {
+        $this->persistFromField('homePenalty');
+    }
+
+    public function updatedAwayThrows(): void
+    {
+        $this->persistFromField('awayThrows');
+    }
+
+    public function updatedAwayPenalty(): void
+    {
+        $this->persistFromField('awayPenalty');
+    }
 
     protected function persistFromField(string $field): void
     {
-        if (! isset(self::LIVE_FIELD_MAP[$field])) {
+        if (!isset(self::LIVE_FIELD_MAP[$field])) {
             return;
         }
 
         [$side, $column] = self::LIVE_FIELD_MAP[$field];
-        $this->persistLiveStat($side, $column, (int) $this->{$field});
+        $this->persistLiveStat($side, $column, (int)$this->{$field});
     }
 
     /**
@@ -169,7 +187,7 @@ new #[Title('Match')] class extends Component {
         if ($this->needsSuddenDeath) {
             $validWinners = array_filter([$this->match->home_team_id, $this->match->away_team_id]);
 
-            if (! in_array($this->suddenDeathWinner, $validWinners, true)) {
+            if (!in_array($this->suddenDeathWinner, $validWinners, true)) {
                 $this->addError('suddenDeathWinner', __('Bitte das siegreiche Team des Sudden Death auswählen.'));
 
                 return;
@@ -198,14 +216,14 @@ new #[Title('Match')] class extends Component {
      * The two teams of this match, each with their named members, for the
      * cup-distribution modal.
      *
-     * @return \Illuminate\Support\Collection<int, \App\Models\Team>
+     * @return Collection<int, Team>
      */
     #[Computed]
-    public function distributionTeams()
+    public function distributionTeams(): Collection
     {
         return collect([$this->match->homeTeam, $this->match->awayTeam])
             ->filter()
-            ->each(fn ($team) => $team->loadMissing('members'))
+            ->each(fn($team) => $team->loadMissing('members'))
             ->values();
     }
 
@@ -222,7 +240,7 @@ new #[Title('Match')] class extends Component {
 
         foreach ($this->distributionTeams as $team) {
             foreach ($team->members as $member) {
-                $this->cupDistribution[$member->id] = (int) ($existing[$member->id] ?? 0);
+                $this->cupDistribution[$member->id] = (int)($existing[$member->id] ?? 0);
             }
         }
     }
@@ -244,14 +262,14 @@ new #[Title('Match')] class extends Component {
             MatchMemberCup::where('match_id', $match->id)->delete();
 
             foreach ($this->cupDistribution as $memberId => $cups) {
-                if (! in_array((int) $memberId, $validMemberIds, true)) {
+                if (!in_array((int)$memberId, $validMemberIds, true)) {
                     continue;
                 }
 
                 MatchMemberCup::create([
                     'match_id' => $match->id,
-                    'team_member_id' => (int) $memberId,
-                    'cups_hit' => max(0, (int) $cups),
+                    'team_member_id' => (int)$memberId,
+                    'cups_hit' => max(0, (int)$cups),
                 ]);
             }
         });
@@ -276,18 +294,18 @@ new #[Title('Match')] class extends Component {
 
     {{-- Back link --}}
     <a href="{{ route('matches.index') }}" wire:navigate
-       class="inline-flex items-center gap-2 text-sm text-stage-text-muted hover:text-stage-text transition">
+       class="inline-flex items-center gap-2 text-sm text-stage-text-muted hover:text-stage-text transition" >
         <flux:icon.arrow-left class="size-4" />
         Zurück zur Match-Liste
-    </a>
+    </a >
 
     {{-- Header: face-off framing --}}
-    <header class="relative overflow-hidden rounded-lg face-off-bg">
-        <div class="flex items-center justify-between gap-3 px-5 pt-4 pb-3 lg:px-6">
-            <div class="font-label flex items-center gap-3 text-stage-text-muted">
-                <span>{{ $match->table?->name }}</span>
-                <span class="text-stage-text-dim">·</span>
-                <span>
+    <header class="relative overflow-hidden rounded-lg face-off-bg" >
+        <div class="flex items-center justify-between gap-3 px-5 pt-4 pb-3 lg:px-6" >
+            <div class="font-label flex items-center gap-3 text-stage-text-muted" >
+                <span >{{ $match->table?->name }}</span >
+                <span class="text-stage-text-dim" >·</span >
+                <span >
                     @if ($match->phase === 'group')
                         Gruppenphase
                     @elseif ($match->phase === 'placement')
@@ -301,35 +319,35 @@ new #[Title('Match')] class extends Component {
                             @default Runde {{ $match->ko_round }}
                         @endswitch
                     @endif
-                </span>
-            </div>
-            <span class="badge badge-{{ str_replace('_', '-', $match->status) }}">{{ $match->status }}</span>
-        </div>
+                </span >
+            </div >
+            <span class="badge badge-{{ str_replace('_', '-', $match->status) }}" >{{ $match->status }}</span >
+        </div >
 
-        <div class="grid grid-cols-[1fr_auto_1fr] items-center gap-4 px-5 py-7 lg:gap-8 lg:px-8 lg:py-10">
-            <div class="flex flex-col gap-2 text-left">
-                <span class="font-label text-red-corner-bright">Red Corner</span>
-                <span class="team-tag">
+        <div class="grid grid-cols-[1fr_auto_1fr] items-center gap-4 px-5 py-7 lg:gap-8 lg:px-8 lg:py-10" >
+            <div class="flex flex-col gap-2 text-left" >
+                <span class="font-label text-red-corner-bright" >Red Corner</span >
+                <span class="team-tag" >
                     @if ($home)
-                        <span class="font-display text-stage-text text-[clamp(1.5rem,5vw,2.5rem)]">{{ $home->name }}</span>
+                        <span class="font-display text-stage-text text-[clamp(1.5rem,5vw,2.5rem)]" >{{ $home->name }}</span >
                     @else
-                        <span class="font-display text-stage-text-dim text-[clamp(1.5rem,5vw,2.5rem)]">Sieger Vorrunde</span>
+                        <span class="font-display text-stage-text-dim text-[clamp(1.5rem,5vw,2.5rem)]" >Sieger Vorrunde</span >
                     @endif
-                </span>
-            </div>
-            <div aria-hidden="true" class="face-off-divider h-20 w-px self-stretch"></div>
-            <div class="flex flex-col gap-2 text-right">
-                <span class="font-label text-blue-corner-bright">Blue Corner</span>
-                <span class="team-tag justify-end">
+                </span >
+            </div >
+            <div aria-hidden="true" class="face-off-divider h-20 w-px self-stretch" ></div >
+            <div class="flex flex-col gap-2 text-right" >
+                <span class="font-label text-blue-corner-bright" >Blue Corner</span >
+                <span class="team-tag justify-end" >
                     @if ($away)
-                        <span class="font-display text-stage-text text-[clamp(1.5rem,5vw,2.5rem)]">{{ $away->name }}</span>
+                        <span class="font-display text-stage-text text-[clamp(1.5rem,5vw,2.5rem)]" >{{ $away->name }}</span >
                     @else
-                        <span class="font-display text-stage-text-dim text-[clamp(1.5rem,5vw,2.5rem)]">Sieger Vorrunde</span>
+                        <span class="font-display text-stage-text-dim text-[clamp(1.5rem,5vw,2.5rem)]" >Sieger Vorrunde</span >
                     @endif
-                </span>
-            </div>
-        </div>
-    </header>
+                </span >
+            </div >
+        </div >
+    </header >
 
     {{-- ───────── PRE_ENTRY ─────────
          No inputs here on purpose — Würfe & Strafe are entered LIVE during
@@ -338,38 +356,38 @@ new #[Title('Match')] class extends Component {
          render a "wartet auf Vorrunde" state instead. --}}
     @if (in_array($match->status, ['pending', 'pre_entry'], true))
         @php $teamsReady = $match->home_team_id !== null && $match->away_team_id !== null; @endphp
-        <section class="space-y-6">
+        <section class="space-y-6" >
             @if ($teamsReady)
-                <div class="rounded-lg face-off-bg px-6 py-10 text-center lg:px-10 lg:py-14">
-                    <span class="font-label text-trophy-gold">Bereitmachen</span>
-                    <h2 class="mt-3 font-display text-stage-text text-[clamp(1.75rem,5vw,2.75rem)]">
+                <div class="rounded-lg face-off-bg px-6 py-10 text-center lg:px-10 lg:py-14" >
+                    <span class="font-label text-trophy-gold" >Bereitmachen</span >
+                    <h2 class="mt-3 font-display text-stage-text text-[clamp(1.75rem,5vw,2.75rem)]" >
                         Teams an den Tisch
-                    </h2>
-                    <p class="mt-3 text-sm text-stage-text-muted lg:text-base">
+                    </h2 >
+                    <p class="mt-3 text-sm text-stage-text-muted lg:text-base" >
                         Würfe und Strafbecher werden während des laufenden Spiels gezählt.
-                    </p>
-                </div>
+                    </p >
+                </div >
 
                 <button wire:click="startMatch"
-                        class="w-full rounded-lg bg-stage-text px-5 py-5 text-lg font-bold tracking-wide text-stage-bg hover:opacity-90 active:scale-[0.99] transition">
+                        class="w-full rounded-lg bg-stage-text px-5 py-5 text-lg font-bold tracking-wide text-stage-bg hover:opacity-90 active:scale-[0.99] transition" >
                     Spiel starten
-                </button>
+                </button >
             @else
-                <div class="rounded-lg border border-stage-line bg-stage-surface px-6 py-10 text-center lg:px-10 lg:py-14">
-                    <span class="font-label text-stage-text-dim">Noch nicht spielbereit</span>
-                    <h2 class="mt-3 font-display text-stage-text text-[clamp(1.5rem,4vw,2.25rem)]">
+                <div class="rounded-lg border border-stage-line bg-stage-surface px-6 py-10 text-center lg:px-10 lg:py-14" >
+                    <span class="font-label text-stage-text-dim" >Noch nicht spielbereit</span >
+                    <h2 class="mt-3 font-display text-stage-text text-[clamp(1.5rem,4vw,2.25rem)]" >
                         Wartet auf Vorrunde
-                    </h2>
-                    <p class="mt-3 max-w-md mx-auto text-sm text-stage-text-muted lg:text-base">
+                    </h2 >
+                    <p class="mt-3 max-w-md mx-auto text-sm text-stage-text-muted lg:text-base" >
                         @if ($match->home_team_id === null && $match->away_team_id === null)
                             Beide Vorrundenspiele müssen noch beendet werden.
                         @else
                             Das Vorrundenspiel der Gegenseite läuft noch. Sobald der Sieger feststeht, kann es hier weitergehen.
                         @endif
-                    </p>
-                </div>
+                    </p >
+                </div >
             @endif
-        </section>
+        </section >
     @endif
 
     {{-- ───────── ACTIVE / TIMER ───────── --}}
@@ -394,18 +412,18 @@ new #[Title('Match')] class extends Component {
                      },
                  }"
                  x-init="tick(); handle = setInterval(() => tick(), 500)"
-                 x-destroy="clearInterval(handle)">
+                 x-destroy="clearInterval(handle)" >
 
-            <div class="flex flex-col items-center gap-3 px-6 pt-12 pb-8 lg:pt-16 lg:pb-12">
-                <span class="live-marker">Live</span>
+            <div class="flex flex-col items-center gap-3 px-6 pt-12 pb-8 lg:pt-16 lg:pb-12" >
+                <span class="live-marker" >Live</span >
                 <div class="font-numeric text-[clamp(5rem,18vw,9rem)] font-bold leading-none tracking-tight"
-                     :class="timerClass">
-                    <span x-text="display"></span>
-                </div>
-                <span class="font-label text-stage-text-dim">Verbleibende Zeit</span>
-            </div>
+                     :class="timerClass" >
+                    <span x-text="display" ></span >
+                </div >
+                <span class="font-label text-stage-text-dim" >Verbleibende Zeit</span >
+            </div >
 
-            <div class="grid grid-cols-1 border-t border-stage-line md:grid-cols-2">
+            <div class="grid grid-cols-1 border-t border-stage-line md:grid-cols-2" >
                 @foreach ([
                     'home' => ['team' => $home, 'throws' => 'homeThrows', 'penalty' => 'homePenalty', 'corner' => 'Red', 'tint' => 'red'],
                     'away' => ['team' => $away, 'throws' => 'awayThrows', 'penalty' => 'awayPenalty', 'corner' => 'Blue', 'tint' => 'blue'],
@@ -414,145 +432,157 @@ new #[Title('Match')] class extends Component {
                         'space-y-4 px-5 py-5 lg:px-7 lg:py-6',
                         'border-t border-stage-line md:border-t-0 md:border-l' => $side === 'away',
                     ])>
-                        <div class="flex items-center justify-between gap-3">
-                            <span class="font-label text-{{ $cfg['tint'] }}-corner-bright">{{ $cfg['corner'] }} &mdash; {{ $cfg['team']?->name }}</span>
-                        </div>
+                        <div class="flex items-center justify-between gap-3" >
+                            <span
+                                class="font-label text-{{ $cfg['tint'] }}-corner-bright" >{{ $cfg['corner'] }} &mdash; {{ $cfg['team']?->name }}</span >
+                        </div >
 
                         @foreach (array_filter([
                             $countThrows ? ['label' => 'Würfe', 'field' => $cfg['throws']] : null,
                             ['label' => 'Strafe', 'field' => $cfg['penalty']],
                         ]) as $row)
-                            <div class="flex items-center justify-between gap-3">
-                                <label class="font-label text-stage-text-dim">{{ $row['label'] }}</label>
-                                <div class="flex items-center gap-2">
+                            <div class="flex items-center justify-between gap-3" >
+                                <label class="font-label text-stage-text-dim" >{{ $row['label'] }}</label >
+                                <div class="flex items-center gap-2" >
                                     <button wire:click="adjust('{{ $row['field'] }}', -1)" type="button"
-                                            class="h-11 w-11 rounded-md bg-stage-bg/60 text-xl font-semibold text-stage-text hover:bg-stage-surface-2 active:scale-95 transition">&minus;</button>
-                                    <input wire:model.live="{{ $row['field'] }}" name="{{ $row['field'] }}" type="number" min="0" inputmode="numeric"
-                                           class="h-11 w-16 rounded-md border border-stage-line bg-stage-bg/60 text-center font-numeric text-lg font-semibold text-stage-text focus:border-stage-line-strong">
+                                            class="h-11 w-11 rounded-md bg-stage-bg/60 text-xl font-semibold text-stage-text hover:bg-stage-surface-2 active:scale-95 transition" >
+                                        &minus;
+                                    </button >
+                                    <input wire:model.live="{{ $row['field'] }}" name="{{ $row['field'] }}" type="number" min="0"
+                                           inputmode="numeric"
+                                           class="h-11 w-16 rounded-md border border-stage-line bg-stage-bg/60 text-center font-numeric text-lg font-semibold text-stage-text focus:border-stage-line-strong" >
                                     <button wire:click="adjust('{{ $row['field'] }}', 1)" type="button"
-                                            class="h-11 w-11 rounded-md bg-stage-bg/60 text-xl font-semibold text-stage-text hover:bg-stage-surface-2 active:scale-95 transition">+</button>
-                                </div>
-                            </div>
+                                            class="h-11 w-11 rounded-md bg-stage-bg/60 text-xl font-semibold text-stage-text hover:bg-stage-surface-2 active:scale-95 transition" >
+                                        +
+                                    </button >
+                                </div >
+                            </div >
                         @endforeach
-                    </div>
+                    </div >
                 @endforeach
-            </div>
-        </section>
+            </div >
+        </section >
 
-        <flux:modal.trigger name="confirm-end-round">
+        <flux:modal.trigger name="confirm-end-round" >
             <button type="button"
-                    class="w-full rounded-lg border border-status-danger bg-status-danger-soft px-5 py-5 text-lg font-bold tracking-wide text-status-danger hover:bg-stage-surface-2 active:scale-[0.99] transition">
+                    class="w-full rounded-lg border border-status-danger bg-status-danger-soft px-5 py-5 text-lg font-bold tracking-wide text-status-danger hover:bg-stage-surface-2 active:scale-[0.99] transition" >
                 Runde beenden
-            </button>
-        </flux:modal.trigger>
+            </button >
+        </flux:modal.trigger >
 
-        <flux:modal name="confirm-end-round" class="md:w-104">
-            <div class="space-y-6">
-                <div>
-                    <flux:heading size="lg">Runde beenden?</flux:heading>
-                    <flux:text class="mt-2">
+        <flux:modal name="confirm-end-round" class="md:w-104" >
+            <div class="space-y-6" >
+                <div >
+                    <flux:heading size="lg" >Runde beenden?</flux:heading >
+                    <flux:text class="mt-2" >
                         @if ($countThrows)
-                            Sobald die Runde endet, geht es weiter zur Becher-Eingabe. Würfe und Strafe lassen sich danach nicht mehr ändern.
+                            Sobald die Runde endet, geht es weiter zur Becher-Eingabe. Würfe und Strafe lassen sich danach nicht mehr
+                            ändern.
                         @else
                             Sobald die Runde endet, geht es weiter zur Becher-Eingabe. Die Strafbecher lassen sich danach nicht mehr ändern.
                         @endif
-                    </flux:text>
-                </div>
-                <div class="flex gap-2">
+                    </flux:text >
+                </div >
+                <div class="flex gap-2" >
                     <flux:spacer />
-                    <flux:modal.close>
-                        <flux:button variant="ghost">Abbrechen</flux:button>
-                    </flux:modal.close>
-                    <flux:button wire:click="endTimer" variant="danger" data-test="confirm-end-round">
+                    <flux:modal.close >
+                        <flux:button variant="ghost" >Abbrechen</flux:button >
+                    </flux:modal.close >
+                    <flux:button wire:click="endTimer" variant="danger" data-test="confirm-end-round" >
                         Ja, Runde beenden
-                    </flux:button>
-                </div>
-            </div>
-        </flux:modal>
+                    </flux:button >
+                </div >
+            </div >
+        </flux:modal >
     @endif
 
     {{-- ───────── SCORING ───────── --}}
     @if ($match->status === 'scoring')
-        <section class="space-y-6">
-            <div class="flex items-baseline justify-between">
-                <h2 class="font-label text-stage-text-muted">Getroffene Becher eintragen</h2>
-                <span class="text-xs text-stage-text-dim">Hauptmetrik · entscheidet Sieg</span>
-            </div>
+        <section class="space-y-6" >
+            <div class="flex items-baseline justify-between" >
+                <h2 class="font-label text-stage-text-muted" >Getroffene Becher eintragen</h2 >
+                <span class="text-xs text-stage-text-dim" >Hauptmetrik · entscheidet Sieg</span >
+            </div >
 
-            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2" >
                 @foreach ([
                     'home' => ['team' => $home, 'field' => 'homeCups', 'corner' => 'Red', 'tint' => 'red'],
                     'away' => ['team' => $away, 'field' => 'awayCups', 'corner' => 'Blue', 'tint' => 'blue'],
                 ] as $side => $cfg)
                     <div class="space-y-4 rounded-lg p-6"
-                         style="background: linear-gradient(180deg, var(--color-{{ $cfg['tint'] }}-corner-soft) 0%, transparent 100%), var(--color-stage-surface);">
-                        <div class="flex items-baseline justify-between">
-                            <span class="font-label text-{{ $cfg['tint'] }}-corner-bright">{{ $cfg['corner'] }} Corner</span>
-                            <span class="team-tag">
-                                <span class="font-display text-lg">{{ $cfg['team']?->name }}</span>
-                            </span>
-                        </div>
+                         style="background: linear-gradient(180deg, var(--color-{{ $cfg['tint'] }}-corner-soft) 0%, transparent 100%), var(--color-stage-surface);" >
+                        <div class="flex items-baseline justify-between" >
+                            <span class="font-label text-{{ $cfg['tint'] }}-corner-bright" >{{ $cfg['corner'] }} Corner</span >
+                            <span class="team-tag" >
+                                <span class="font-display text-lg" >{{ $cfg['team']?->name }}</span >
+                            </span >
+                        </div >
 
-                        <div class="flex items-center justify-center gap-4 pt-2">
+                        <div class="flex items-center justify-center gap-4 pt-2" >
                             <button wire:click="adjust('{{ $cfg['field'] }}', -1)" type="button"
-                                    class="h-16 w-16 rounded-lg bg-stage-bg text-3xl font-semibold text-stage-text hover:bg-stage-surface-2 active:scale-95 transition">&minus;</button>
-                            <input wire:model.live="{{ $cfg['field'] }}" name="{{ $cfg['field'] }}" type="number" min="0" max="30" inputmode="numeric"
-                                   class="h-24 w-28 rounded-lg border border-stage-line bg-stage-bg text-center font-numeric text-5xl font-bold text-stage-text focus:border-stage-line-strong">
+                                    class="h-16 w-16 rounded-lg bg-stage-bg text-3xl font-semibold text-stage-text hover:bg-stage-surface-2 active:scale-95 transition" >
+                                &minus;
+                            </button >
+                            <input wire:model.live="{{ $cfg['field'] }}" name="{{ $cfg['field'] }}" type="number" min="0" max="30"
+                                   inputmode="numeric"
+                                   class="h-24 w-28 rounded-lg border border-stage-line bg-stage-bg text-center font-numeric text-5xl font-bold text-stage-text focus:border-stage-line-strong" >
                             <button wire:click="adjust('{{ $cfg['field'] }}', 1)" type="button"
-                                    class="h-16 w-16 rounded-lg bg-stage-bg text-3xl font-semibold text-stage-text hover:bg-stage-surface-2 active:scale-95 transition">+</button>
-                        </div>
-                    </div>
+                                    class="h-16 w-16 rounded-lg bg-stage-bg text-3xl font-semibold text-stage-text hover:bg-stage-surface-2 active:scale-95 transition" >
+                                +
+                            </button >
+                        </div >
+                    </div >
                 @endforeach
-            </div>
+            </div >
 
-            @error('homeCups') <p class="text-sm text-status-danger">{{ $message }}</p> @enderror
-            @error('awayCups') <p class="text-sm text-status-danger">{{ $message }}</p> @enderror
+            @error('homeCups') <p class="text-sm text-status-danger" >{{ $message }}</p > @enderror
+            @error('awayCups') <p class="text-sm text-status-danger" >{{ $message }}</p > @enderror
 
             {{-- Sudden Death: tied KO match, referee picks the shoot-out winner. --}}
             @if ($this->needsSuddenDeath)
-                <div class="rounded-lg border border-trophy-gold/40 bg-trophy-gold-soft p-6">
-                    <div class="font-label flex items-center gap-3 text-trophy-gold">
-                        <span class="block h-px w-12 bg-trophy-gold"></span>
-                        <span>Sudden Death</span>
-                    </div>
-                    <h3 class="mt-3 font-display text-xl text-stage-text lg:text-2xl">Gleichstand — wer gewinnt das Stechen?</h3>
-                    <p class="mt-2 text-sm text-stage-text-muted">
+                <div class="rounded-lg border border-trophy-gold/40 bg-trophy-gold-soft p-6" >
+                    <div class="font-label flex items-center gap-3 text-trophy-gold" >
+                        <span class="block h-px w-12 bg-trophy-gold" ></span >
+                        <span >Sudden Death</span >
+                    </div >
+                    <h3 class="mt-3 font-display text-xl text-stage-text lg:text-2xl" >Gleichstand — wer gewinnt das Stechen?</h3 >
+                    <p class="mt-2 text-sm text-stage-text-muted" >
                         Schere, Stein, Papier um den Anwurf, kein Nachwurf — der erste Treffer gewinnt. Trage hier das siegreiche Team ein.
-                    </p>
+                    </p >
 
-                    <div class="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <div class="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2" >
                         @foreach ([
                             ['team' => $home, 'id' => $match->home_team_id, 'corner' => 'Red', 'tint' => 'red'],
                             ['team' => $away, 'id' => $match->away_team_id, 'corner' => 'Blue', 'tint' => 'blue'],
                         ] as $cfg)
                             <button type="button"
                                     wire:click="$set('suddenDeathWinner', {{ $cfg['id'] }})"
-                                    @class([
-                                        'flex items-center justify-between gap-3 rounded-lg border px-5 py-4 text-left transition',
-                                        'border-trophy-gold bg-stage-bg' => $suddenDeathWinner === $cfg['id'],
-                                        'border-stage-line-strong bg-stage-bg/60 hover:border-stage-text' => $suddenDeathWinner !== $cfg['id'],
-                                    ])>
-                                <span class="team-tag">
-                                    <span class="font-display text-lg text-stage-text">{{ $cfg['team']?->name }}</span>
-                                </span>
+                                @class([
+                                    'flex items-center justify-between gap-3 rounded-lg border px-5 py-4 text-left transition',
+                                    'border-trophy-gold bg-stage-bg' => $suddenDeathWinner === $cfg['id'],
+                                    'border-stage-line-strong bg-stage-bg/60 hover:border-stage-text' => $suddenDeathWinner !== $cfg['id'],
+                                ])>
+                                <span class="team-tag" >
+                                    <span class="font-display text-lg text-stage-text" >{{ $cfg['team']?->name }}</span >
+                                </span >
                                 @if ($suddenDeathWinner === $cfg['id'])
                                     <flux:icon.check-circle class="size-6 text-trophy-gold" />
                                 @else
-                                    <span class="font-label text-{{ $cfg['tint'] }}-corner-bright">{{ $cfg['corner'] }}</span>
+                                    <span class="font-label text-{{ $cfg['tint'] }}-corner-bright" >{{ $cfg['corner'] }}</span >
                                 @endif
-                            </button>
+                            </button >
                         @endforeach
-                    </div>
+                    </div >
 
-                    @error('suddenDeathWinner') <p class="mt-3 text-sm text-status-danger">{{ $message }}</p> @enderror
-                </div>
+                    @error('suddenDeathWinner') <p class="mt-3 text-sm text-status-danger" >{{ $message }}</p > @enderror
+                </div >
             @endif
 
             <button wire:click="saveResult"
-                    class="w-full rounded-lg bg-stage-text px-5 py-5 text-lg font-bold tracking-wide text-stage-bg hover:opacity-90 active:scale-[0.99] transition">
+                    class="w-full rounded-lg bg-stage-text px-5 py-5 text-lg font-bold tracking-wide text-stage-bg hover:opacity-90 active:scale-[0.99] transition" >
                 Ergebnis speichern
-            </button>
-        </section>
+            </button >
+        </section >
     @endif
 
     {{-- ───────── FINISHED ───────── --}}
@@ -567,71 +597,76 @@ new #[Title('Match')] class extends Component {
                 && ($match->tournament->ko_sudden_death ?? false)
                 && ($homeStat?->cups_scored ?? 0) === ($awayStat?->cups_scored ?? 0);
         @endphp
-        <section class="overflow-hidden rounded-lg border border-trophy-gold/40 bg-trophy-gold-soft">
-            <div class="px-6 py-10 lg:px-10 lg:py-14">
-                <div class="font-label flex items-center gap-3 text-trophy-gold">
-                    <span class="block h-px w-12 bg-trophy-gold"></span>
-                    <span>Sieger</span>
-                </div>
-                <h2 class="mt-4 font-display text-trophy-gold text-[clamp(2rem,7vw,4rem)]">
+        <section class="overflow-hidden rounded-lg border border-trophy-gold/40 bg-trophy-gold-soft" >
+            <div class="px-6 py-10 lg:px-10 lg:py-14" >
+                <div class="font-label flex items-center gap-3 text-trophy-gold" >
+                    <span class="block h-px w-12 bg-trophy-gold" ></span >
+                    <span >Sieger</span >
+                </div >
+                <h2 class="mt-4 font-display text-trophy-gold text-[clamp(2rem,7vw,4rem)]" >
                     {{ $winner?->name }}
-                </h2>
-                <p class="mt-6 font-numeric text-[clamp(2rem,6vw,3.5rem)] font-bold text-stage-text">
-                    <span class="@if($homeWin) text-trophy-gold @else text-stage-text-muted @endif">{{ $homeStat?->cups_scored ?? 0 }}</span>
-                    <span class="mx-3 text-stage-text-dim">:</span>
-                    <span class="@if(! $homeWin) text-trophy-gold @else text-stage-text-muted @endif">{{ $awayStat?->cups_scored ?? 0 }}</span>
-                </p>
+                </h2 >
+                <p class="mt-6 font-numeric text-[clamp(2rem,6vw,3.5rem)] font-bold text-stage-text" >
+                    <span
+                        class="@if($homeWin) text-trophy-gold @else text-stage-text-muted @endif" >{{ $homeStat?->cups_scored ?? 0 }}</span >
+                    <span class="mx-3 text-stage-text-dim" >:</span >
+                    <span
+                        class="@if(! $homeWin) text-trophy-gold @else text-stage-text-muted @endif" >{{ $awayStat?->cups_scored ?? 0 }}</span >
+                </p >
                 @if ($decidedBySuddenDeath)
-                    <p class="mt-4 font-label text-stage-text-dim">Entschieden im Sudden Death</p>
+                    <p class="mt-4 font-label text-stage-text-dim" >Entschieden im Sudden Death</p >
                 @endif
-            </div>
+            </div >
 
             <dl @class([
                 'grid border-t border-trophy-gold/30',
                 'grid-cols-3' => $countThrows,
                 'grid-cols-2' => ! $countThrows,
             ])>
-                <div class="border-r border-trophy-gold/30 px-5 py-4 text-center lg:py-5">
-                    <dt class="font-label text-stage-text-dim">Dauer</dt>
-                    <dd class="mt-1 font-numeric text-lg font-semibold text-stage-text">
+                <div class="border-r border-trophy-gold/30 px-5 py-4 text-center lg:py-5" >
+                    <dt class="font-label text-stage-text-dim" >Dauer</dt >
+                    <dd class="mt-1 font-numeric text-lg font-semibold text-stage-text" >
                         {{ $duration ? sprintf('%02d:%02d', intdiv($duration, 60), $duration % 60) : '—' }}
-                    </dd>
-                </div>
+                    </dd >
+                </div >
                 @if ($countThrows)
-                    <div class="border-r border-trophy-gold/30 px-5 py-4 text-center lg:py-5">
-                        <dt class="font-label text-stage-text-dim">Würfe</dt>
-                        <dd class="mt-1 font-numeric text-lg font-semibold text-stage-text">{{ $homeStat?->throws ?? 0 }} : {{ $awayStat?->throws ?? 0 }}</dd>
-                    </div>
+                    <div class="border-r border-trophy-gold/30 px-5 py-4 text-center lg:py-5" >
+                        <dt class="font-label text-stage-text-dim" >Würfe</dt >
+                        <dd class="mt-1 font-numeric text-lg font-semibold text-stage-text" >{{ $homeStat?->throws ?? 0 }}
+                            : {{ $awayStat?->throws ?? 0 }}</dd >
+                    </div >
                 @endif
-                <div class="px-5 py-4 text-center lg:py-5">
-                    <dt class="font-label text-stage-text-dim">Strafe</dt>
-                    <dd class="mt-1 font-numeric text-lg font-semibold text-stage-text">{{ $homeStat?->penalty_cups ?? 0 }} : {{ $awayStat?->penalty_cups ?? 0 }}</dd>
-                </div>
-            </dl>
-        </section>
+                <div class="px-5 py-4 text-center lg:py-5" >
+                    <dt class="font-label text-stage-text-dim" >Strafe</dt >
+                    <dd class="mt-1 font-numeric text-lg font-semibold text-stage-text" >{{ $homeStat?->penalty_cups ?? 0 }}
+                        : {{ $awayStat?->penalty_cups ?? 0 }}</dd >
+                </div >
+            </dl >
+        </section >
 
         <a href="{{ route('matches.index') }}" wire:navigate
-           class="inline-flex items-center gap-2 rounded-md border border-stage-line-strong px-5 py-3 text-sm font-medium text-stage-text hover:bg-stage-surface transition">
+           class="inline-flex items-center gap-2 rounded-md border border-stage-line-strong px-5 py-3 text-sm font-medium text-stage-text hover:bg-stage-surface transition" >
             <flux:icon.arrow-left class="size-4" />
             Zurück zur Match-Liste
-        </a>
+        </a >
     @endif
 
     {{-- Cup-king rule: distribute the scored cups across each team's players. --}}
     @if ($match->tournament->determine_cup_king ?? false)
-        <flux:modal name="distribute-cups" class="max-w-2xl">
-            <div class="space-y-6">
-                <div>
-                    <flux:heading size="lg">{{ __('Getroffene Becher verteilen') }}</flux:heading>
-                    <flux:text class="mt-2">{{ __('Verteile die getroffenen Becher dieses Spiels auf die Spieler. Strafbecher müssen nicht aufgehen.') }}</flux:text>
-                </div>
+        <flux:modal name="distribute-cups" class="max-w-2xl" >
+            <div class="space-y-6" >
+                <div >
+                    <flux:heading size="lg" >{{ __('Getroffene Becher verteilen') }}</flux:heading >
+                    <flux:text
+                        class="mt-2" >{{ __('Verteile die getroffenen Becher dieses Spiels auf die Spieler. Strafbecher müssen nicht aufgehen.') }}</flux:text >
+                </div >
 
-                <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+                <div class="grid grid-cols-1 gap-5 md:grid-cols-2" >
                     @foreach ($this->distributionTeams as $team)
-                        <div class="space-y-3 rounded-md bg-stage-surface px-4 py-3">
-                            <div class="flex items-center gap-2">
-                                <span class="font-label text-stage-text">{{ $team->name }}</span>
-                            </div>
+                        <div class="space-y-3 rounded-md bg-stage-surface px-4 py-3" >
+                            <div class="flex items-center gap-2" >
+                                <span class="font-label text-stage-text" >{{ $team->name }}</span >
+                            </div >
                             @forelse ($team->members as $member)
                                 <flux:input
                                     type="number"
@@ -640,22 +675,22 @@ new #[Title('Match')] class extends Component {
                                     :label="$member->name"
                                 />
                             @empty
-                                <p class="text-sm text-stage-text-dim">{{ __('Keine Teammitglieder benannt.') }}</p>
+                                <p class="text-sm text-stage-text-dim" >{{ __('Keine Teammitglieder benannt.') }}</p >
                             @endforelse
-                        </div>
+                        </div >
                     @endforeach
-                </div>
+                </div >
 
-                <div class="flex gap-2">
+                <div class="flex gap-2" >
                     <flux:spacer />
-                    <flux:modal.close>
-                        <flux:button variant="ghost">{{ __('Schließen') }}</flux:button>
-                    </flux:modal.close>
-                    <flux:button wire:click="saveCupDistribution" variant="primary" data-test="save-cup-distribution-button">
+                    <flux:modal.close >
+                        <flux:button variant="ghost" >{{ __('Schließen') }}</flux:button >
+                    </flux:modal.close >
+                    <flux:button wire:click="saveCupDistribution" variant="primary" data-test="save-cup-distribution-button" >
                         {{ __('Becher speichern') }}
-                    </flux:button>
-                </div>
-            </div>
-        </flux:modal>
+                    </flux:button >
+                </div >
+            </div >
+        </flux:modal >
     @endif
-</div>
+</div >

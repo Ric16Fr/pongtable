@@ -11,6 +11,7 @@ use App\Services\GroupGeneratorService;
 use App\Services\KoBracketService;
 use App\Services\MatchResultService;
 use Illuminate\Database\Seeder;
+use Random\RandomException;
 
 /**
  * Shared building blocks for the tournament seeders. Each concrete seeder
@@ -214,6 +215,8 @@ abstract class TournamentSeeder extends Seeder
 
     /**
      * Generate a plausible result for a single match and finalize it.
+     *
+     * @throws RandomException
      */
     protected function playMatch(GameMatch $match, string $phase): void
     {

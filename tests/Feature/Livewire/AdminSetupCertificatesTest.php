@@ -104,7 +104,9 @@ it('passes the hide-circles flag from the tournament to the PDF view', function 
     Pdf::assertRespondedWithPdf(fn ($pdf) => $pdf->viewData['hideCircles'] === true);
 });
 
-it('renders the decorative corner circles by default', function () {
+it(/**
+ * @throws Throwable
+ */ 'renders the decorative corner circles by default', function () {
     $html = view('pdf.certificates', [
         'tournamentName' => 'Test Cup',
         'totalCups' => 100,
@@ -115,17 +117,20 @@ it('renders the decorative corner circles by default', function () {
         ->and($html)->toContain('class="corner corner-red"');
 });
 
-it('omits the decorative corner circles when hideCircles is set', function () {
-    $html = view('pdf.certificates', [
-        'tournamentName' => 'Test Cup',
-        'totalCups' => 100,
-        'certificates' => [['type' => 'placement', 'team' => 'Die Bierhäscher', 'rank' => 1]],
-        'hideCircles' => true,
-    ])->render();
+it(
+    /**
+     * @throws Throwable
+     */ 'omits the decorative corner circles when hideCircles is set', function () {
+        $html = view('pdf.certificates', [
+            'tournamentName' => 'Test Cup',
+            'totalCups' => 100,
+            'certificates' => [['type' => 'placement', 'team' => 'Die Bierhäscher', 'rank' => 1]],
+            'hideCircles' => true,
+        ])->render();
 
-    expect($html)->not->toContain('class="corner corner-blue"')
-        ->and($html)->not->toContain('class="corner corner-red"');
-});
+        expect($html)->not->toContain('class="corner corner-blue"')
+            ->and($html)->not->toContain('class="corner corner-red"');
+    });
 
 it('renders every certificate type into a valid multi-page PDF', function () {
     $pdf = Pdf::view('pdf.certificates', [

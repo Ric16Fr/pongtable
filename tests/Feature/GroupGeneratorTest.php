@@ -21,8 +21,8 @@ it('distributes teams evenly across tables and creates round-robin matches', fun
         ->and($tournament->groups()->count())->toBe(2);
 
     foreach ($tournament->groups as $group) {
-        expect($group->teams()->count())->toBe(4);
-        expect($group->matches()->count())->toBe(6);
+        expect($group->teams()->count())->toBe(4)
+            ->and($group->matches()->count())->toBe(6);
     }
 
     expect($tournament->matches()->count())->toBe(12);
@@ -47,8 +47,8 @@ it('produces a preview without persisting groups or matches', function () {
     $preview = app(GroupGeneratorService::class)->preview($this->tournament);
 
     expect($preview)->toHaveCount(2)
-        ->and(collect($preview)->pluck('teams')->flatten())->toHaveCount(8);
-
-    expect($this->tournament->groups()->count())->toBe(0)
+        ->and(collect($preview)->pluck('teams')->flatten())->toHaveCount(8)
+        ->and($this->tournament->groups()->count())->toBe(0)
         ->and($this->tournament->matches()->count())->toBe(0);
+
 });

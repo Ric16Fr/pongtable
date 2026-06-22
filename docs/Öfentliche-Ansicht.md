@@ -29,13 +29,13 @@ sind, in dieser Reihenfolge:
 
 1. **Header** – Phase (`Vorbereitung` / `Gruppenphase` /
    `Platzierungsspiele` / `KO-Phase` / `Beendet`), Turniername, ein
-   Lauf-Counter („Läuft seit …") und
-   eine Fortschrittsleiste in Gold („X / Y Matches gespielt").
+   Lauf-Counter („Läuft seit …“) und
+   eine Fortschrittsleiste in Gold („X / Y Matches gespielt“).
 2. **Champion-Banner** – nur nach Turnierende. Großer Sieger-Name in
-   Gold, dazu ein Satz „Hat sich durch X Matches nach oben getrunken".
+   Gold, dazu ein Satz „Hat sich durch X Matches nach oben getrunken“.
 3. **Live-Matches & Bracket** – embedded via
    `livewire:pages::tournament-bracket`. Diese Komponente zeigt:
-    - laufende Spiele als „Red Corner vs Blue Corner"-Karten,
+    - laufende Spiele als „Red Corner vs Blue Corner“-Karten,
     - Gruppenphase-Tabellen pro Tisch (Top 2 = farbig, Rest gedimmt),
     - KO-Bracket mit Verbindern.
 4. **Leaderboard** – turnierweit, gleiche Sortierung wie auf dem
@@ -88,7 +88,7 @@ ist). Wer das Turnier nur ansehen will, ignoriert ihn einfach.
 Daneben liegen die Info-Tabs **Regeln** und — sofern aktiviert — der
 **Turnierplan** (`/turnierplan`). Letzterer erscheint nur, wenn in den
 [Sonderregeln](Sonderregeln.md#turnierplan-anzeigen) die Option
-„Turnierplan anzeigen" eingeschaltet und eine Spielreihenfolge
+„Turnierplan anzeigen“ eingeschaltet und eine Spielreihenfolge
 hinterlegt wurde. Er ist rein informativ und ändert weder Match-Liste
 noch Spielablauf.
 
@@ -109,7 +109,7 @@ noch Spielablauf.
   ausgelost. Das Publikum muss noch warten.
 - **`Tournament not found` / 404** – Token in der URL ist falsch
   oder das Turnier wurde gelöscht (passiert nur manuell in der DB,
-  *nicht* durch „Turnier zurücksetzen" — das behält das Turnier mit
+  *nicht* durch „Turnier zurücksetzen“ — das behält das Turnier mit
   demselben Token).
 - **Leaderboard leer trotz Gruppenphase** – kein Match ist
   abgeschlossen. Sobald das erste fertig ist, befüllt sich die Tabelle

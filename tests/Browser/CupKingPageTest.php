@@ -29,16 +29,16 @@ it('lets an admin name team members once the groups are drawn', function () {
         ->click('@name-members-button')
         ->assertSee('Team Alpha')
         ->assertSee('Team Beta')
-        ->fill("memberNames.{$teamA->id}.0", 'Paul')
-        ->fill("memberNames.{$teamA->id}.1", 'Tom')
-        ->fill("memberNames.{$teamB->id}.0", 'Heinz')
-        ->fill("memberNames.{$teamB->id}.1", 'Karl')
+        ->fill("memberNames.$teamA->id.0", 'Paul')
+        ->fill("memberNames.$teamA->id.1", 'Tom')
+        ->fill("memberNames.$teamB->id.0", 'Heinz')
+        ->fill("memberNames.$teamB->id.1", 'Karl')
         ->click('@save-members-button')
         ->assertSee('Teammitglieder gespeichert.')
         ->assertNoJavascriptErrors();
 
-    expect($teamA->members()->pluck('name')->all())->toBe(['Paul', 'Tom']);
-    expect($teamB->members()->pluck('name')->all())->toBe(['Heinz', 'Karl']);
+    expect($teamA->members()->pluck('name')->all())->toBe(['Paul', 'Tom'])
+        ->and($teamB->members()->pluck('name')->all())->toBe(['Heinz', 'Karl']);
 });
 
 it('opens the cup-distribution modal after saving a match result', function () {
@@ -75,16 +75,16 @@ it('opens the cup-distribution modal after saving a match result', function () {
     // Winner box AND the bonus modal both appear.
     $page->assertSee('Sieger')
         ->assertSee('Getroffene Becher verteilen')
-        ->fill("cupDistribution.{$paul->id}", '6')
-        ->fill("cupDistribution.{$tom->id}", '4')
-        ->fill("cupDistribution.{$heinz->id}", '4')
-        ->fill("cupDistribution.{$karl->id}", '2')
+        ->fill("cupDistribution.$paul->id", '6')
+        ->fill("cupDistribution.$tom->id", '4')
+        ->fill("cupDistribution.$heinz->id", '4')
+        ->fill("cupDistribution.$karl->id", '2')
         ->click('@save-cup-distribution-button')
         ->assertSee('Becher verteilt.')
         ->assertNoJavascriptErrors();
 
-    expect(MatchMemberCup::where('match_id', $match->id)->count())->toBe(4);
-    expect(MatchMemberCup::where('team_member_id', $paul->id)->value('cups_hit'))->toBe(6);
+    expect(MatchMemberCup::where('match_id', $match->id)->count())->toBe(4)
+        ->and(MatchMemberCup::where('team_member_id', $paul->id)->value('cups_hit'))->toBe(6);
 });
 
 it('shows the Wurfkönig tile on the statistics page when the rule is on', function () {

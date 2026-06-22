@@ -8,7 +8,7 @@ generiert und die KO-Phase gestartet.
 > Schiedsrichter sehen den Setup-Eintrag in der Sidebar nicht.
 
 > Hinweis: Die turnierweiten Einstellungen (Name, Match-Dauer) und
-> die Sonderregeln (z. B. „Würfe zählen") sind aus dem Setup
+> die Sonderregeln (z. B. „Würfe zählen“) sind aus dem Setup
 > ausgelagert und liegen jetzt unter
 > [Sonderregeln & Einstellungen](Sonderregeln.md). Im Setup geht es
 > nur noch um das einzelne Turnier-Spiel (Tische, Teams, Auslosen,
@@ -86,7 +86,7 @@ kann direkt anfangen, Tische und Teams einzutragen.
 
 Existiert bereits ein Turnier, lädt das Setup immer das _zuletzt
 angelegte_ (`Tournament::latest()`). Es ist also immer genau ein
-Turnier „aktiv". Wer ein neues Turnier starten will, nutzt im
+Turnier „aktiv“. Wer ein neues Turnier starten will, nutzt im
 Setup-Header **Neues Turnier** (mit Bestätigung): Das legt ein
 frisches Turnier im Status `setup` an, das damit zum aktiven wird.
 Das bisherige Turnier bleibt unangetastet in der Datenbank und ist ab
@@ -98,7 +98,7 @@ dann über den Menüpunkt **Archiv** schreibgeschützt einsehbar
 ## Tische
 
 Tische repräsentieren parallel laufende Spielflächen (z. B.
-„Tisch Kellerbar", „Tisch Wohnzimmer"). Sie haben direkt zwei Funktionen:
+„Tisch Kellerbar„, ‚Tisch Wohnzimmer‘). Sie haben direkt zwei Funktionen:
 
 1. **Gruppen-Container.** Beim Generieren der Gruppenphase entsteht
    genau _eine Gruppe pro Tisch_. Wer zwei Gruppen pro Tisch will,
@@ -165,7 +165,7 @@ Felix & Lude;Mörre & Gussi;John & Ede;Marvin & Luki
 
 Wird die CSV als _eine einzige Zeile_ ohne Zeilenumbrüche gepastet,
 erkennt der Parser die Gruppen automatisch an den führenden Zellen,
-die mit "Gruppe " beginnen, und verteilt die restlichen Zellen
+die mit "Gruppe" beginnen, und verteilt die restlichen Zellen
 reihum (modulo Spaltenanzahl) auf die Buckets.
 
 ### Voraussetzungen
@@ -226,7 +226,7 @@ unten der goldene Bereich **Bereit zum Auslosen** aktiv.
 Ein Klick auf **Gruppen generieren →** öffnet zuerst eine
 _Vorschau-Modal_. Sie zeigt die geplante Verteilung **deterministisch
 in `id`-Reihenfolge** — diese Vorschau dient also nur dazu, das
-Konzept zu zeigen („so viele Teams pro Tisch"), nicht die spätere
+Konzept zu zeigen („so viele Teams pro Tisch“), nicht die spätere
 echte Verteilung. Die tatsächliche Generierung weiter unten verteilt
 die Teams mit `inRandomOrder()`.
 
@@ -305,7 +305,7 @@ sichtbar, wenn:
 3. Die KO-Runden-Größe wird auf die nächste Zweierpotenz aufgerundet:
    `roundSize = 2^ceil(log2(max(participants, 2)))`.
    So entsteht ein normales Tournament-Bracket; ungerade
-   Teilnehmerzahlen führen zu Freilosen (siehe „Bye-Slots" unten).
+   Teilnehmerzahlen führen zu Freilosen (siehe „Bye-Slots“ unten).
 4. Die erste Runde wird **cross-bracket** gepaart: Gruppensieger `i`
    gegen Gruppen-Zweiten `(count - 1 - i)`. Damit treffen
    z. B. Sieger A auf Zweiter D und nicht direkt auf Zweiter A.
@@ -339,13 +339,13 @@ Welches Team Top 1 / Top 2 einer Gruppe ist, entscheidet
 1. **Punkte** – aus dem Pivot, 3 pro Sieg.
 2. **Direkter Vergleich** – Punkte aus Spielen, an denen _alle_
    gleichplatzierten Teams beteiligt sind. Bei einem 2-er-Patt also
-   schlicht „wer hat das direkte Match gewonnen". Bei 3-er-Patt wird
+   schlicht „wer hat das direkte Match gewonnen“. Bei 3-er-Patt wird
    eine Mini-Tabelle nur über die direkten Spiele dieser drei Teams
    gerechnet.
 3. **Cup-Differenz** – `cups_scored_total − cups_conceded_total`.
 4. **Getroffene Cups** – `cups_scored_total`.
 5. **Fallback** – stabile Sortierung nach `team.id`. Eigentlich sehen
-   die offiziellen Bierpong-Regeln hier ein „Entscheidungsspiel" vor;
+   die offiziellen Bierpong-Regeln hier ein „Entscheidungsspiel“ vor;
    weil das eine manuelle Aktion ist und die App keine
    Verlängerungs-UI hat, behalten wir uns hier eine deterministische
    Reihenfolge vor.
@@ -435,7 +435,7 @@ Das **Archiv** (`/archiv`, nur Admin) macht vergangene Turniere wieder
 einsehbar. Der Sidebar-Eintrag erscheint erst, **sobald mehr als ein
 Turnier existiert** (sonst gibt es nichts zu archivieren).
 
-- **Was zählt als „vergangen"?** Alle Turniere _außer_ dem aktuellen
+- **Was zählt als „vergangen“?** Alle Turniere _außer_ dem aktuellen
   (= dem zuletzt angelegten). Das aktive Turnier bleibt über die
   normale App erreichbar und taucht im Archiv daher nicht auf.
 - **Übersicht.** Ein Klick auf **Archiv** öffnet die Liste der

@@ -1,8 +1,11 @@
 <?php
 
+use App\Models\GameMatch;
 use App\Models\Tournament;
 use App\Services\KoBracketService;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Pluralizer;
+use LaravelIdea\Helper\App\Models\_IH_GameMatch_C;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 
@@ -85,13 +88,13 @@ new class extends Component {
     }
 
     #[Computed]
-    public function activeMatches()
+    public function activeMatches(): Collection|array|\Illuminate\Support\Collection|_IH_GameMatch_C
     {
         if (!$this->tournamentId) {
             return collect();
         }
 
-        return \App\Models\GameMatch::where('tournament_id', $this->tournamentId)
+        return GameMatch::where('tournament_id', $this->tournamentId)
             ->whereIn('status', ['active', 'pre_entry', 'scoring'])
             ->with(['homeTeam', 'awayTeam', 'table'])
             ->get();

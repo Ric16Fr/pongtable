@@ -5,10 +5,11 @@ namespace App\Services;
 use App\Models\GameMatch;
 use App\Models\MatchStat;
 use Illuminate\Support\Facades\DB;
+use Throwable;
 
 class MatchResultService
 {
-    public function __construct(private KoBracketService $koBracketService) {}
+    public function __construct(private readonly KoBracketService $koBracketService) {}
 
     /**
      * Move match from "pending" to "pre_entry".
@@ -30,6 +31,8 @@ class MatchResultService
      * Save pre-match data and start the active timer.
      *
      * @param  array{home_throws:int, home_penalty_cups:int, away_throws:int, away_penalty_cups:int}  $data
+     *
+     * @throws Throwable
      */
     public function startMatch(GameMatch $match, array $data): void
     {
@@ -61,6 +64,8 @@ class MatchResultService
 
     /**
      * End the timer; move to "scoring".
+     *
+     * @throws Throwable
      */
     public function endTimer(GameMatch $match): void
     {
@@ -86,10 +91,12 @@ class MatchResultService
     }
 
     /**
-     * Save cups scored and finalize the result.
+     * Save cups scored and finalise the result.
      *
      * @param  int|null  $suddenDeathWinnerId  When the KO sudden-death rule is active and the
      *                                         cups are tied, the referee-selected winning team.
+     *
+     * @throws Throwable
      */
     public function saveResult(GameMatch $match, int $homeCups, int $awayCups, ?int $suddenDeathWinnerId = null): void
     {

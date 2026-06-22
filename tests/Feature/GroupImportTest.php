@@ -31,10 +31,10 @@ CSV;
     $groupA = $tournament->groups()->where('name', 'Gruppe A')->with('teams')->first();
     expect($groupA->teams->pluck('name')->all())->toBe([
         'Renx & Philipp', 'Dennis & Yves H.', 'Kevin & Grodon', 'Felix & Lude',
-    ]);
+    ])
+        ->and($tournament->matches()->count())->toBe(24);
 
     // 4 teams per group → 6 round-robin matches per group → 24 total.
-    expect($tournament->matches()->count())->toBe(24);
 });
 
 it('imports a flat single-line CSV using the "Gruppe " prefix as header marker', function () {
@@ -74,9 +74,9 @@ it('refuses to import when the table count does not match the group count', func
     $csv = "Gruppe A;Gruppe B\nT1;T2\nT3;T4";
 
     expect(fn () => app(GroupGeneratorService::class)->importFromCsv($this->tournament, $csv))
-        ->toThrow(HttpException::class);
+        ->toThrow(HttpException::class)
+        ->and($this->tournament->fresh()->groups()->count())->toBe(0);
 
-    expect($this->tournament->fresh()->groups()->count())->toBe(0);
 });
 
 it('refuses to import a tournament that has already left setup', function () {

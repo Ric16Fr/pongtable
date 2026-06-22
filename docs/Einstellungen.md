@@ -73,7 +73,7 @@ Formular mit zwei Feldern:
   nicht, das ist das primäre Identifikationsmerkmal.
 - **Passwort** – `Password::min(8)`. Der Admin denkt sich eines aus
   und gibt es dem Schiri persönlich weiter; danach kann der Schiri es
-  selbst über *„Passwort ändern"* erneuern.
+  selbst über *„Passwort ändern“* erneuern.
 
 Bei Erfolg wird ein `users`-Eintrag mit `role = referee` angelegt.
 
@@ -90,13 +90,13 @@ wie bei Anlage: mindestens 8 Zeichen). Beim Bestätigen wird das
 Passwort des ausgewählten Schiris überschrieben.
 
 > Sicherheitshalber lehnt der Server ein Reset auf Admin-Accounts ab
-> (`abort_if($user->isAdmin(), 422)`). Das gilt auch für „selbst", weil
+> (`abort_if($user->isAdmin(), 422)`). Das gilt auch für „selbst“, weil
 > Admin-Accounts hier gar nicht erst in der Liste auftauchen.
 
 #### Entfernen
 
 Löscht den Schiri komplett aus `users`. Vorher gibt es einen
-`wire:confirm`-Dialog mit „Schiri wirklich löschen?".
+`wire:confirm`-Dialog mit „Schiri wirklich löschen?“.
 
 > Auch hier blockiert der Server das Löschen von Admins (`isAdmin()`
 > → `abort_if(..., 422)`). Damit ist insbesondere der initiale

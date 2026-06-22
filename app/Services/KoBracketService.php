@@ -7,6 +7,7 @@ use App\Models\Team;
 use App\Models\Tournament;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Throwable;
 
 class KoBracketService
 {
@@ -66,6 +67,8 @@ class KoBracketService
 
     /**
      * Generate first KO round + flip the tournament to "ko" status.
+     *
+     * @throws Throwable
      */
     private function generateKoBracket(Tournament $tournament): void
     {
@@ -91,7 +94,10 @@ class KoBracketService
             $runners = $ranked->where('rank', 2)->values();
 
             $participantCount = $winners->count() + $runners->count();
-            $roundSize = (int) pow(2, ceil(log(max($participantCount, 2), 2)));
+            $roundSize = (int) max($participantCount, 2)
+                    |> (fn ($x) => log($x, 2))
+                    |> ceil(...)
+                    |> (fn ($x) => pow(2, $x));
             $koRound = (int) ($roundSize / 2);
 
             $tables = $tournament->tables()->orderBy('id')->get();
@@ -129,6 +135,8 @@ class KoBracketService
      * play for the last two places, the next two above them for the next
      * two places, and so on. With an odd team count the best non-qualified
      * team has no opponent and simply keeps its place.
+     *
+     * @throws Throwable
      */
     private function startPlacementRound(Tournament $tournament): void
     {
@@ -168,6 +176,7 @@ class KoBracketService
         $remaining = collect();
 
         foreach ($tournament->groups()->get() as $group) {
+            /** @noinspection PhpParamsInspection */
             $remaining = $remaining->concat($this->groupStandings($group)->slice(2)->values());
         }
 

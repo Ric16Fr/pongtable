@@ -266,8 +266,8 @@ it('exposes special awards consistent with the summary, excluding champion and t
     expect($awards)->not->toBeEmpty();
 
     foreach ($awards as $award) {
-        expect($summary[$award['key']])->not->toBeNull();
-        expect($award['subjects'])->not->toBeEmpty();
+        expect($summary[$award['key']])->not->toBeNull()
+            ->and($award['subjects'])->not->toBeEmpty();
     }
 
     $keys = collect($awards)->pluck('key');

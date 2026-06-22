@@ -62,9 +62,9 @@ return new class extends Migration
     private function replaceCheck(string $table, string $column, array $values): void
     {
         $constraint = "{$table}_{$column}_check";
-        $allowed = collect($values)->map(fn (string $value): string => "'{$value}'")->implode(', ');
+        $allowed = collect($values)->map(fn (string $value): string => "'$value'")->implode(', ');
 
-        DB::statement("ALTER TABLE {$table} DROP CONSTRAINT IF EXISTS {$constraint}");
-        DB::statement("ALTER TABLE {$table} ADD CONSTRAINT {$constraint} CHECK ({$column}::text IN ({$allowed}))");
+        DB::statement("ALTER TABLE $table DROP CONSTRAINT IF EXISTS $constraint");
+        DB::statement("ALTER TABLE $table ADD CONSTRAINT {$constraint} CHECK ($column::text IN ($allowed))");
     }
 };

@@ -252,8 +252,8 @@ class StatisticsService
                         $winnerIsHome ? $match->awayTeam?->name : $match->homeTeam?->name,
                     ]),
                     'score' => $winnerIsHome
-                        ? "{$home->cups_scored}:{$away->cups_scored}"
-                        : "{$away->cups_scored}:{$home->cups_scored}",
+                        ? "$home->cups_scored:$away->cups_scored"
+                        : "$away->cups_scored:$home->cups_scored",
                     'diff' => $diff,
                     'total' => $total,
                 ];

@@ -3,7 +3,7 @@
 Die Statistik-Seite (`/statistics`) wertet das aktuelle Turnier aus.
 Sie wird aus `App\Services\StatisticsService::summary()` gespeist und
 zeigt sowohl den Champion-Banner (wenn das Turnier beendet ist) als
-auch eine Reihe „Fun-Stats" über das ganze Turnier.
+auch eine Reihe „Fun-Stats“ über das ganze Turnier.
 
 > 🔒 Sichtbar nur für Admins — der Sidebar-Eintrag steht hinter
 > `middleware('role:admin')`. Auf der öffentlichen Turnier-Seite
@@ -74,7 +74,7 @@ damit Schiris im Live-Modus die Bedeutung ablesen können.
 
 ### Wasserspeier
 
-Spiegelbild von „Schärfste Schützen": Team mit der **niedrigsten**
+Spiegelbild von „Schärfste Schützen“: Team mit der **niedrigsten**
 Quote, gleicher Filter `throws > 0`. Anzeige nur als Prozentwert.
 
 ### Blitzsieg
@@ -110,9 +110,9 @@ und ein direkter Vergleich verzerrt wäre.
 - Bei Gleichstand der Differenz gewinnt das Match mit der höchsten
   Cup-Summe — Begründung: mehr Cups = mehr Action.
 - Anzeige: Sieger zuerst, dann Verlierer, Ergebnis aus Sicht des
-  Siegers, plus Differenz oder „Patt" falls 0.
+  Siegers, plus Differenz oder „Patt“ falls 0.
 
-> Hinweis: „Patt" als Anzeige erscheint nur in dem extrem seltenen Fall,
+> Hinweis: „Patt“ als Anzeige erscheint nur in dem extrem seltenen Fall,
 > dass beide Teams gleiche Cups haben — der eigentliche Sieger wurde
 > dann über Würfe → Strafe → Heim-Fallback bestimmt
 > ([Matches – Wertungslogik](Matches.md#wertungslogik-im-detail)).
@@ -133,8 +133,8 @@ und ein direkter Vergleich verzerrt wäre.
 - Wer einen Becher trifft, sich aber gleichzeitig einen Strafbecher
   einhandelt (z. B. weil der eigene Ball den Strafbecher des Gegners
   trifft), wird hier neutralisiert. Die Kachel honoriert also nicht
-  nur Trefferquote, sondern „saubere" Treffer.
-- Aggregiert wie „Schärfste Schützen", gleicher Filter `throws > 0`.
+  nur Trefferquote, sondern „saubere“ Treffer.
+- Aggregiert wie „Schärfste Schützen“, gleicher Filter `throws > 0`.
 - Anzeige: höchste Effizienz mit Prozentwert.
 
 ### Schluck-Olymp
@@ -158,9 +158,9 @@ Pro Match wird für jedes Team gezählt:
 
 Erscheint nur, wenn ein Team echte Becher gesammelt hat (`cups > 0`).
 
-> Diese Berechnung kommt ohne explizite „Cup-pro-Seite"-Konfiguration
+> Diese Berechnung kommt ohne explizite „Cup-pro-Seite„-Konfiguration
 > aus: die Verlierer-Strafe wird über die _tatsächliche_ Differenz
-> abgeleitet, nicht über eine fixe Annahme „immer 10 Cups". Wenn ihr an
+> abgeleitet, nicht über eine fixe Annahme ‚immer 10 Cups‘. Wenn ihr an
 > einigen Tischen mit 6 statt 10 Bechern spielt, bleibt das korrekt.
 
 ### Wurfkönig
@@ -168,7 +168,7 @@ Erscheint nur, wenn ein Team echte Becher gesammelt hat (`cups > 0`).
 > Einzelspieler mit den meisten getroffenen Bechern über das gesamte
 > Turnier.
 
-- **Nur sichtbar, wenn die Sonderregel „Wurfkönig ermitteln" an ist**
+- **Nur sichtbar, wenn die Sonderregel „Wurfkönig ermitteln“ an ist**
   (`tournaments.determine_cup_king`). Ist sie aus, wird die Kachel — wie
   die zugrunde liegende Tabelle — gar nicht angefasst.
 - Quelle: `match_member_cups`, gefüllt über das Modal **Getroffene

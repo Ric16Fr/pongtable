@@ -146,7 +146,7 @@ class extends Component {
         $this->showGroupPreview = false;
         unset($this->tournament);
 
-        Flux::toast(variant: 'success', text: __('Gruppenphase generiert.'));
+        Flux::toast(text: __('Gruppenphase generiert.'), variant: 'success');
 
         $this->redirectRoute('matches.index', navigate: true);
     }
@@ -161,7 +161,7 @@ class extends Component {
         unset($this->tournament);
         Flux::modal('upload-groups')->close();
 
-        Flux::toast(variant: 'success', text: __('Gruppen aus CSV übernommen.'));
+        Flux::toast(text: __('Gruppen aus CSV übernommen.'), variant: 'success');
 
         $this->redirectRoute('matches.index', navigate: true);
     }
@@ -190,7 +190,7 @@ class extends Component {
         $t->update(['status' => 'setup']);
         unset($this->tournament);
 
-        Flux::toast(variant: 'success', text: __('Turnier zurückgesetzt.'));
+        Flux::toast(text: __('Turnier zurückgesetzt.'), variant: 'success');
     }
 
     /**
@@ -272,7 +272,7 @@ class extends Component {
 
         Flux::modal('create-new-tournament')->close();
 
-        Flux::toast(variant: 'success', text: __('Neues Turnier gestartet. Das bisherige liegt jetzt im Archiv.'));
+        Flux::toast(text: __('Neues Turnier gestartet. Das bisherige liegt jetzt im Archiv.'), variant: 'success');
     }
 
     #[Computed]

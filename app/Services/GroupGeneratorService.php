@@ -7,6 +7,7 @@ use App\Models\Group;
 use App\Models\Team;
 use App\Models\Tournament;
 use Illuminate\Support\Facades\DB;
+use Throwable;
 
 class GroupGeneratorService
 {
@@ -39,6 +40,8 @@ class GroupGeneratorService
 
     /**
      * Generate groups + group matches and flip the tournament to "group" phase.
+     *
+     * @throws Throwable
      */
     public function generate(Tournament $tournament): void
     {
@@ -100,6 +103,8 @@ class GroupGeneratorService
      * Accepts either multi-line CSV (header row + N team rows) or a flat
      * single-line variant where the leading "Gruppe X" cells mark how many
      * groups there are. Existing teams + groups + matches get replaced.
+     *
+     * @throws Throwable
      */
     public function importFromCsv(Tournament $tournament, string $csv): void
     {

@@ -29,10 +29,10 @@ it('starts a fresh tournament and switches the active one to it', function () {
     expect(Tournament::count())->toBe(2);
 
     $latest = Tournament::query()->latest()->first();
-    expect($latest->id)->not->toBe($old->id);
-    expect($latest->status)->toBe('setup');
+    expect($latest->id)->not->toBe($old->id)
+        ->and($latest->status)->toBe('setup')
+        ->and($old->fresh()->status)->toBe('finished');
     // The old tournament is left completely untouched.
-    expect($old->fresh()->status)->toBe('finished');
 });
 
 it('adds a new table during setup phase', function () {
@@ -154,9 +154,9 @@ it('resets a running tournament back to setup', function () {
 
     expect($tournament->fresh()->status)->toBe('setup')
         ->and($tournament->fresh()->matches()->count())->toBe(0)
-        ->and($tournament->fresh()->groups()->count())->toBe(0);
+        ->and($tournament->fresh()->groups()->count())->toBe(0)
+        ->and($tournament->fresh()->tables()->count())->toBe(2)
+        ->and($tournament->fresh()->teams()->count())->toBe(4);
 
     // Tables + teams survive a reset.
-    expect($tournament->fresh()->tables()->count())->toBe(2)
-        ->and($tournament->fresh()->teams()->count())->toBe(4);
 });

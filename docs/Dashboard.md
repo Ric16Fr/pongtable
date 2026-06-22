@@ -40,7 +40,7 @@ gerade an den Tischen passiert und wie weit der Spielplan abgearbeitet ist.
 ### Live-Sektion
 
 Sobald mindestens ein Match nicht `pending` und nicht `finished` ist,
-erscheint die Sektion *„Live · jetzt am Tisch"*. Jede Karte zeigt:
+erscheint die Sektion *„Live · jetzt am Tisch“*. Jede Karte zeigt:
 
 - den Tischnamen,
 - den aktuellen Status als Badge (`pre_entry`, `active`, `scoring`),
@@ -68,7 +68,7 @@ die Werte werden bei jedem Match-Abschluss in
 
 > ⚠️ Achtung: Das Dashboard-Leaderboard sortiert _global_ nach den
 > hinterlegten Punkten/Cup-Differenz. Die Tiebreaker-Reihenfolge
-> _innerhalb einer Gruppe_ („direkter Vergleich" usw.) wird hier nicht
+> _innerhalb einer Gruppe_ („direkter Vergleich“ usw.) wird hier nicht
 > angewendet, weil sich der Direkte-Vergleich konzeptionell nur
 > innerhalb einer Gruppe definieren lässt. Für die KO-Setzung gilt die
 > volle Tiebreaker-Logik aus `KoBracketService::groupStandings()` —
@@ -96,12 +96,12 @@ ein Turnier existiert.
 
 ## Was tun, wenn nichts angezeigt wird?
 
-- **„Kein Turnier vorhanden"** – noch nie ein Turnier angelegt. Als
+- **„Kein Turnier vorhanden“** – noch nie ein Turnier angelegt. Als
   Admin im **Setup** ein Turnier erstellen
   (siehe [Setup.md](Setup.md)). Schiris müssen warten, bis der Admin
   Tische und Teams angelegt und die Gruppen generiert hat.
-- **„Live: 0"** – keine Spiele laufen. Gehe in **Matches** und starte
-  ein Spiel über *„Spiel starten"* (siehe [Matches.md](Matches.md)).
+- **„Live: 0“** – keine Spiele laufen. Gehe in **Matches** und starte
+  ein Spiel über *„Spiel starten“* (siehe [Matches.md](Matches.md)).
 - **Leaderboard leer** – noch keine Gruppenphase generiert oder noch
   kein Spiel mit Ergebnis. Sobald das erste Match auf `finished` geht,
   füllt sich die Tabelle automatisch beim nächsten Poll.

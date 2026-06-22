@@ -209,7 +209,7 @@ Spielreihenfolge anzeigt.
 **Eingabeformat:** eine Zeile pro Spiel, Teams mit **Semikolon**
 getrennt — z. B. `Team 1;Team 2`. Auf der öffentlichen Seite wird pro
 nicht-leerer Zeile eine nummerierte Zeile erzeugt; mehrere Teams einer
-Zeile werden mit „vs" verbunden. Leere Zeilen und Zeilen ohne Inhalt
+Zeile werden mit „vs“ verbunden. Leere Zeilen und Zeilen ohne Inhalt
 werden ignoriert (`Tournament::scheduleEntries()`).
 
 > **Rein informativ.** Der Turnierplan beeinflusst die Match-Liste und

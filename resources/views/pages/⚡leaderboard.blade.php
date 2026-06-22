@@ -2,6 +2,7 @@
 
 use App\Models\Tournament;
 use App\Services\KoBracketService;
+use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 
@@ -26,7 +27,7 @@ new class extends Component {
     public function rows(): array
     {
         $tournament = $this->tournament;
-        if (! $tournament) {
+        if (!$tournament) {
             return [];
         }
 
@@ -49,7 +50,7 @@ new class extends Component {
         }
 
         $rows = $combined
-            ->sortByDesc(fn ($r) => $r['points'] * 100000 + $r['cup_diff'] * 100 + $r['cups_scored'])
+            ->sortByDesc(fn($r) => $r['points'] * 100000 + $r['cup_diff'] * 100 + $r['cups_scored'])
             ->values();
 
         return $this->applyPlacementResults($tournament, $rows)->all();
@@ -59,8 +60,8 @@ new class extends Component {
      * Finished placement matches override the group-phase order: each
      * winner takes the better of the two slots its pairing occupies.
      *
-     * @param  \Illuminate\Support\Collection<int, array<string, mixed>>  $rows
-     * @return \Illuminate\Support\Collection<int, array<string, mixed>>
+     * @param Collection<int, array<string, mixed>> $rows
+     * @return Collection<int, array<string, mixed>>
      */
     private function applyPlacementResults(Tournament $tournament, $rows)
     {
@@ -75,8 +76,8 @@ new class extends Component {
                 ? $match->away_team_id
                 : $match->home_team_id;
 
-            $winnerIndex = $rows->search(fn ($r) => $r['team']->id === $match->winner_team_id);
-            $loserIndex = $rows->search(fn ($r) => $r['team']->id === $loserId);
+            $winnerIndex = $rows->search(fn($r) => $r['team']->id === $match->winner_team_id);
+            $loserIndex = $rows->search(fn($r) => $r['team']->id === $loserId);
 
             if ($winnerIndex !== false && $loserIndex !== false && $loserIndex < $winnerIndex) {
                 $winnerRow = $rows[$winnerIndex];
@@ -91,59 +92,62 @@ new class extends Component {
 
 <div @if($poll) wire:poll.15s @endif>
     @if (empty($this->rows))
-        <p class="text-sm text-stage-text-dim">Noch ruhig hier. Sobald der erste Becher fällt, sortiert sich's sofort.</p>
+        <p class="text-sm text-stage-text-dim" >Noch ruhig hier. Sobald der erste Becher fällt, sortiert sich's sofort.</p >
     @else
-        <div class="overflow-x-auto">
-            <table class="w-full text-sm">
-                <thead>
-                    <tr class="font-label text-stage-text-dim">
-                        <th class="py-2 pr-3 text-left font-semibold">#</th>
-                        <th class="py-2 pr-3 text-left font-semibold">Team</th>
-                        <th class="py-2 pr-3 text-left font-semibold">Gruppe</th>
-                        <th class="py-2 pr-3 text-right font-semibold">Pkt</th>
-                        <th class="py-2 pr-3 text-right font-semibold">W</th>
-                        <th class="py-2 pr-3 text-right font-semibold">L</th>
-                        <th class="py-2 pr-3 text-right font-semibold">Cups</th>
-                        <th class="py-2 pr-3 text-right font-semibold">+/&minus;</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($this->rows as $i => $row)
-                        @php
-                            $rank = $i + 1;
-                            $isPodium = $rank <= 3;
-                        @endphp
-                        <tr class="border-t border-stage-line @if(! $isPodium && $rank > 6) text-stage-text-dim @elseif(! $isPodium) text-stage-text-muted @endif">
-                            <td class="py-3 pr-3">
-                                <span class="rank-chip" data-rank="{{ $rank }}">{{ $rank }}</span>
-                            </td>
-                            <td class="py-3 pr-3 font-medium">
-                                <span class="team-tag">
-                                    <span class="@if($rank === 1) font-display text-lg text-trophy-gold @elseif($isPodium) text-stage-text @endif">{{ $row['team']->name }}</span>
-                                </span>
-                            </td>
-                            <td class="py-3 pr-3 text-stage-text-dim">{{ $row['group'] }}</td>
-                            <td class="py-3 pr-3 text-right">
-                                <span class="font-numeric text-base font-semibold @if($rank === 1) text-trophy-gold @else text-stage-text @endif">{{ $row['points'] }}</span>
-                            </td>
-                            <td class="py-3 pr-3 text-right">
-                                <span class="font-numeric text-xs text-status-success">{{ $row['wins'] }}</span>
-                            </td>
-                            <td class="py-3 pr-3 text-right">
-                                <span class="font-numeric text-xs text-stage-text-dim">{{ $row['losses'] }}</span>
-                            </td>
-                            <td class="py-3 pr-3 text-right">
-                                <span class="font-numeric text-xs">{{ $row['cups_scored'] }}:{{ $row['cups_conceded'] }}</span>
-                            </td>
-                            <td class="py-3 pr-3 text-right">
-                                <span class="font-numeric text-xs @if($row['cup_diff'] > 0) text-status-success @elseif($row['cup_diff'] < 0) text-status-danger @endif">
+        <div class="overflow-x-auto" >
+            <table class="w-full text-sm" >
+                <thead >
+                <tr class="font-label text-stage-text-dim" >
+                    <th class="py-2 pr-3 text-left font-semibold" >#</th >
+                    <th class="py-2 pr-3 text-left font-semibold" >Team</th >
+                    <th class="py-2 pr-3 text-left font-semibold" >Gruppe</th >
+                    <th class="py-2 pr-3 text-right font-semibold" >Pkt</th >
+                    <th class="py-2 pr-3 text-right font-semibold" >W</th >
+                    <th class="py-2 pr-3 text-right font-semibold" >L</th >
+                    <th class="py-2 pr-3 text-right font-semibold" >Cups</th >
+                    <th class="py-2 pr-3 text-right font-semibold" >+/&minus;</th >
+                </tr >
+                </thead >
+                <tbody >
+                @foreach ($this->rows as $i => $row)
+                    @php
+                        $rank = $i + 1;
+                        $isPodium = $rank <= 3;
+                    @endphp
+                    <tr class="border-t border-stage-line @if(! $isPodium && $rank > 6) text-stage-text-dim @elseif(! $isPodium) text-stage-text-muted @endif" >
+                        <td class="py-3 pr-3" >
+                            <span class="rank-chip" data-rank="{{ $rank }}" >{{ $rank }}</span >
+                        </td >
+                        <td class="py-3 pr-3 font-medium" >
+                                <span class="team-tag" >
+                                    <span
+                                        class="@if($rank === 1) font-display text-lg text-trophy-gold @elseif($isPodium) text-stage-text @endif" >{{ $row['team']->name }}</span >
+                                </span >
+                        </td >
+                        <td class="py-3 pr-3 text-stage-text-dim" >{{ $row['group'] }}</td >
+                        <td class="py-3 pr-3 text-right" >
+                            <span
+                                class="font-numeric text-base font-semibold @if($rank === 1) text-trophy-gold @else text-stage-text @endif" >{{ $row['points'] }}</span >
+                        </td >
+                        <td class="py-3 pr-3 text-right" >
+                            <span class="font-numeric text-xs text-status-success" >{{ $row['wins'] }}</span >
+                        </td >
+                        <td class="py-3 pr-3 text-right" >
+                            <span class="font-numeric text-xs text-stage-text-dim" >{{ $row['losses'] }}</span >
+                        </td >
+                        <td class="py-3 pr-3 text-right" >
+                            <span class="font-numeric text-xs" >{{ $row['cups_scored'] }}:{{ $row['cups_conceded'] }}</span >
+                        </td >
+                        <td class="py-3 pr-3 text-right" >
+                                <span
+                                    class="font-numeric text-xs @if($row['cup_diff'] > 0) text-status-success @elseif($row['cup_diff'] < 0) text-status-danger @endif" >
                                     {{ $row['cup_diff'] >= 0 ? '+'.$row['cup_diff'] : $row['cup_diff'] }}
-                                </span>
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
+                                </span >
+                        </td >
+                    </tr >
+                @endforeach
+                </tbody >
+            </table >
+        </div >
     @endif
-</div>
+</div >

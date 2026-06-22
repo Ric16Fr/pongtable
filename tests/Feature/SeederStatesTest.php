@@ -86,12 +86,12 @@ it('seeds the current tournament mid group phase with finished and open matches'
     $groupMatches = $tournament->matches()->where('phase', 'group');
     expect($groupMatches->count())->toBe(24)
         ->and((clone $groupMatches)->where('status', 'finished')->count())->toBe(16)
-        ->and((clone $groupMatches)->where('status', 'pending')->count())->toBe(8);
+        ->and((clone $groupMatches)->where('status', 'pending')->count())->toBe(8)
+        ->and($tournament->groups()->first()->teams()->sum('points'))->toBeGreaterThan(0)
+        ->and(archivedTournament()->status)->toBe('finished');
 
     // Finished matches fed into the group standings.
-    expect($tournament->groups()->first()->teams()->sum('points'))->toBeGreaterThan(0);
 
-    expect(archivedTournament()->status)->toBe('finished');
 });
 
 it('seeds the current tournament mid KO phase with open semi-finals', function () {
@@ -111,7 +111,7 @@ it('seeds the current tournament mid KO phase with open semi-finals', function (
     $semiFinals = $tournament->matches()->where('phase', 'ko')->where('ko_round', 2)->get();
     expect($semiFinals)->toHaveCount(2)
         ->and($semiFinals->every(fn ($match) => $match->status === 'pending'))->toBeTrue()
-        ->and($semiFinals->every(fn ($match) => $match->home_team_id && $match->away_team_id))->toBeTrue();
+        ->and($semiFinals->every(fn ($match) => $match->home_team_id && $match->away_team_id))->toBeTrue()
+        ->and(archivedTournament()->status)->toBe('finished');
 
-    expect(archivedTournament()->status)->toBe('finished');
 });

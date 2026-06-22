@@ -42,10 +42,10 @@ it('ranks the two semifinal losers third and fourth by cup difference', function
     $fourthPlace = $standings[3]['team'];
 
     // Both teams ranked 3rd/4th are exactly the semifinal losers.
-    expect([$thirdPlace->id, $fourthPlace->id])->toEqualCanonicalizing($semiLoserIds);
+    expect([$thirdPlace->id, $fourthPlace->id])->toEqualCanonicalizing($semiLoserIds)
+        ->and(cupDiff($thirdPlace))->toBeGreaterThanOrEqual(cupDiff($fourthPlace));
 
     // The better cup difference takes the higher (3rd) place.
-    expect(cupDiff($thirdPlace))->toBeGreaterThanOrEqual(cupDiff($fourthPlace));
 });
 
 it('assigns every team a unique, gapless rank', function () {
