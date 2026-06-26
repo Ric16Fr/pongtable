@@ -82,6 +82,7 @@ Nun kann das Projekt per `docker compose up -d --build` gestartet werden.
 > - PHP 8.5
 > - [Composer](https://getcomposer.org/download/) 2.10 oder neuer
 > - [bun](https://bun.sh) 1.3.14 oder neuer
+> 
 > Sonst funktionieren die Skripte nicht!
 
 Man kann das Projekt mit Herd lokal laufen lassen (dafür einfach klonen, [Herd installieren](https://herd.laravel.com/docs/windows/getting-started/installation) (die Standardversion reicht völlig) und der [Anleitung von Herd](https://herd.laravel.com/docs/windows/getting-started/sites#linking-an-existing-site) zum verbinden eines existierenden 
