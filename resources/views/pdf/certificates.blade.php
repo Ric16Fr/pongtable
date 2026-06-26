@@ -135,7 +135,7 @@
             font-size: 46pt;
             letter-spacing: -1pt;
             line-height: 1.0;
-            color: #19150F;
+            color: white;
         }
 
         .place-num {
@@ -192,7 +192,7 @@
         .footer .cups { float: right; }
         .footer .cups-num {
             font-family: 'Mono';
-            color: #4D473C;
+            color: white;
         }
     </style>
 </head>
@@ -225,7 +225,7 @@
                 @elseif ($certificate['type'] === 'special')
                     <p class="eyebrow">hat das Team</p>
                     <div class="gap-sm"></div>
-                    <h1 class="team">{{ $certificate['team'] }}</h1>
+                    <h1 class="team">aaaaaa</h1>
                     <div class="gap-lg"></div>
                     <p class="eyebrow">den Sonderpreis</p>
                     <div class="gap-sm"></div>
@@ -236,7 +236,7 @@
                     @php $placeColor = $goldByRank[$certificate['rank']] ?? $neutralPlace; @endphp
                     <p class="eyebrow">hat das Team</p>
                     <div class="gap-sm"></div>
-                    <h1 class="team">{{ $certificate['team'] }}</h1>
+                    <h1 class="team">aaaaa</h1>
                     <div class="gap-lg"></div>
                     <p class="eyebrow">den</p>
                     <div class="place-num" style="color: {{ $placeColor }};">{{ $certificate['rank'] }}.</div>
@@ -250,7 +250,7 @@
 
             <div class="footer">
                 <span class="powered">powered by <span class="wm">pongtable</span></span>
-                <span class="cups">Die Teams mussten sich durch <span class="cups-num">{{ $totalCups }}</span> Becher kämpfen</span>
+                <span class="cups">Die Teams mussten sich durch <span class="cups-num">aaaaaaaaaa</span> Becher kämpfen</span>
             </div>
         </div>
     @endforeach

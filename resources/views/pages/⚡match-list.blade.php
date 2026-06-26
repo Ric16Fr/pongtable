@@ -72,7 +72,11 @@ new #[Title('Matches')] class extends Component {
     <header class="flex flex-wrap items-end justify-between gap-4">
         <div>
             <h1 class="font-display text-3xl text-stage-text lg:text-4xl">Matches</h1>
-            <p class="font-label mt-2 text-stage-text-dim">{{ $this->matches->count() }} {{ Str::plural('Spiel', $this->matches->count()) }} · sortiert nach Status</p>
+            @if($this->matches->count() == 1)
+                <p class="font-label mt-2 text-stage-text-dim">{{ $this->matches->count() }} Spiel · sortiert nach Status</p>
+            @else
+                <p class="font-label mt-2 text-stage-text-dim">{{ $this->matches->count() }} Spiele · sortiert nach Status</p>
+            @endif
         </div>
         <div class="flex flex-wrap items-center gap-3">
             @if ($this->tables->isNotEmpty())

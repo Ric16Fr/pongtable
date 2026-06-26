@@ -4,8 +4,6 @@ use App\Models\GameMatch;
 use App\Models\Tournament;
 use App\Services\KoBracketService;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Pluralizer;
-use LaravelIdea\Helper\App\Models\_IH_GameMatch_C;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 
@@ -83,12 +81,12 @@ new class extends Component {
             2 => 'Halbfinale',
             4 => 'Viertelfinale',
             8 => 'Achtelfinale',
-            default => "Runde {$round}",
+            default => "Runde $round",
         };
     }
 
     #[Computed]
-    public function activeMatches(): Collection|array|\Illuminate\Support\Collection|_IH_GameMatch_C
+    public function activeMatches(): Collection|array|\Illuminate\Support\Collection
     {
         if (!$this->tournamentId) {
             return collect();
